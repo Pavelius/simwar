@@ -1,0 +1,215 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="draw.cpp">
+      <Filter>Графика</Filter>
+    </ClCompile>
+    <ClCompile Include="draw_input.cpp">
+      <Filter>Графика</Filter>
+    </ClCompile>
+    <ClCompile Include="draw_text.cpp">
+      <Filter>Графика</Filter>
+    </ClCompile>
+    <ClCompile Include="draw_textf.cpp">
+      <Filter>Графика</Filter>
+    </ClCompile>
+    <ClCompile Include="archive.cpp">
+      <Filter>Коллекции</Filter>
+    </ClCompile>
+    <ClCompile Include="bsdata.cpp">
+      <Filter>Коллекции</Filter>
+    </ClCompile>
+    <ClCompile Include="bsreq.cpp">
+      <Filter>Коллекции</Filter>
+    </ClCompile>
+    <ClCompile Include="bstream.cpp">
+      <Filter>Поддержка</Filter>
+    </ClCompile>
+    <ClCompile Include="collection.cpp">
+      <Filter>Коллекции</Filter>
+    </ClCompile>
+    <ClCompile Include="color.cpp">
+      <Filter>Поддержка</Filter>
+    </ClCompile>
+    <ClCompile Include="crt.cpp">
+      <Filter>Поддержка</Filter>
+    </ClCompile>
+    <ClCompile Include="grammar.cpp">
+      <Filter>Поддержка</Filter>
+    </ClCompile>
+    <ClCompile Include="io.cpp">
+      <Filter>Поддержка</Filter>
+    </ClCompile>
+    <ClCompile Include="point.cpp">
+      <Filter>Поддержка</Filter>
+    </ClCompile>
+    <ClCompile Include="stringcreator.cpp">
+      <Filter>Поддержка</Filter>
+    </ClCompile>
+    <ClCompile Include="szdup.cpp">
+      <Filter>Поддержка</Filter>
+    </ClCompile>
+    <ClCompile Include="win_draw.cpp">
+      <Filter>Платформа</Filter>
+    </ClCompile>
+    <ClCompile Include="win_io_file.cpp">
+      <Filter>Платформа</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
+    <ClCompile Include="string_value.cpp">
+      <Filter>Поддержка</Filter>
+    </ClCompile>
+    <ClCompile Include="player.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
+    <ClCompile Include="name.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
+    <ClCompile Include="province.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
+    <ClCompile Include="landscape.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
+    <ClCompile Include="game.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
+    <ClCompile Include="bsdata_serial.cpp">
+      <Filter>Коллекции</Filter>
+    </ClCompile>
+    <ClCompile Include="bsreq_req.cpp">
+      <Filter>Коллекции</Filter>
+    </ClCompile>
+    <ClCompile Include="msg.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
+    <ClCompile Include="action.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
+    <ClCompile Include="hero.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
+    <ClCompile Include="troop.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
+    <ClCompile Include="draw_button.cpp">
+      <Filter>Графика</Filter>
+    </ClCompile>
+    <ClCompile Include="surface_serial.cpp">
+      <Filter>Графика</Filter>
+    </ClCompile>
+    <ClCompile Include="png.cpp">
+      <Filter>Графика</Filter>
+    </ClCompile>
+    <ClCompile Include="zip.cpp">
+      <Filter>Поддержка</Filter>
+    </ClCompile>
+    <ClCompile Include="converter.cpp">
+      <Filter>Поддержка</Filter>
+    </ClCompile>
+    <ClCompile Include="bsdata_check.cpp">
+      <Filter>Коллекции</Filter>
+    </ClCompile>
+    <ClCompile Include="trait.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
+    <ClCompile Include="tactic.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
+    <ClCompile Include="unit.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
+    <ClCompile Include="bsdata_log.cpp">
+      <Filter>Коллекции</Filter>
+    </ClCompile>
+    <ClCompile Include="bslog.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="draw.h">
+      <Filter>Графика</Filter>
+    </ClInclude>
+    <ClInclude Include="archive.h">
+      <Filter>Коллекции</Filter>
+    </ClInclude>
+    <ClInclude Include="bsdata.h">
+      <Filter>Коллекции</Filter>
+    </ClInclude>
+    <ClInclude Include="bsreq.h">
+      <Filter>Коллекции</Filter>
+    </ClInclude>
+    <ClInclude Include="bstream.h">
+      <Filter>Поддержка</Filter>
+    </ClInclude>
+    <ClInclude Include="collection.h">
+      <Filter>Коллекции</Filter>
+    </ClInclude>
+    <ClInclude Include="color.h">
+      <Filter>Поддержка</Filter>
+    </ClInclude>
+    <ClInclude Include="crt.h">
+      <Filter>Поддержка</Filter>
+    </ClInclude>
+    <ClInclude Include="grammar.h">
+      <Filter>Поддержка</Filter>
+    </ClInclude>
+    <ClInclude Include="io.h">
+      <Filter>Поддержка</Filter>
+    </ClInclude>
+    <ClInclude Include="point.h">
+      <Filter>Поддержка</Filter>
+    </ClInclude>
+    <ClInclude Include="rect.h">
+      <Filter>Поддержка</Filter>
+    </ClInclude>
+    <ClInclude Include="stringcreator.h">
+      <Filter>Поддержка</Filter>
+    </ClInclude>
+    <ClInclude Include="win.h">
+      <Filter>Платформа</Filter>
+    </ClInclude>
+    <ClInclude Include="main.h">
+      <Filter>Логика</Filter>
+    </ClInclude>
+    <ClInclude Include="initializer_list.h">
+      <Filter>Коллекции</Filter>
+    </ClInclude>
+    <ClInclude Include="converter.h">
+      <Filter>Поддержка</Filter>
+    </ClInclude>
+    <ClInclude Include="bslog.h">
+      <Filter>Коллекции</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Графика">
+      <UniqueIdentifier>{f3e70cd1-4bf9-49c8-b789-4166eb5f3e98}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Коллекции">
+      <UniqueIdentifier>{5c88bca5-eabf-4437-b035-7cb29da806db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Поддержка">
+      <UniqueIdentifier>{97cfa74a-7e20-4e3c-be17-bd87ea93227d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Платформа">
+      <UniqueIdentifier>{3cd1f7d9-6b6e-480b-9801-e1506ec6bacc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Логика">
+      <UniqueIdentifier>{c68a1275-7dbf-400d-ba64-cb16b398c5ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Скрипты">
+      <UniqueIdentifier>{b624f981-bee4-4734-8126-8f5b3062d0c4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\script\msg_ru.txt">
+      <Filter>Скрипты</Filter>
+    </Text>
+    <Text Include="..\script\test.txt">
+      <Filter>Скрипты</Filter>
+    </Text>
+  </ItemGroup>
+</Project>

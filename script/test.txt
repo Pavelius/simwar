@@ -1,0 +1,60 @@
+#gui opacity(220)
+#gui opacity_disabled(50)
+#gui border(8)
+#gui padding(4)
+#gui window_width(400)
+#gui tips_width(200)
+#gui button_width(160)
+#gui hero_width(64)
+#gui button_width(64)
+#gui hero_window_width(200)
+#gui opacity_hilighted(200)
+#gui opacity_hilighted_province(64)
+
+#action raid name("Совершить набег") raid(1) nameact("совершает набег")
+#action attack name("Захватить") attack(1) nameact("пытается захватить")
+#action defend name("Патрулировать") defend(1) nameact("патрулирует окресности")
+#action recruit name("Нанять") recruit(1) nameact("нанимает войска")
+#action quest name("Искать приключений") nameact("ищет приключений")
+
+#province black_wood name("Черный лес") level(1) position(204, 495)
+#province white_harbor name("Белая гавань") level(2) position(616, 616)
+#province sunrise_hills name("Холмы Рассвета") position(476, 400)
+#province deadly_swamp name("Болота погибели") position(509, 276)
+
+#trait general name("Генерал") defend(1)
+#trait diplomat name("Дипломат") defend(1)
+#trait hireling name("Наемник") attack(1)
+#trait carefull name("Осторожный") defend(1)
+#trait bloody name("Кровожадный") attack(1)
+
+#tactic lighting_attack name("Внезапная атака") attack(2) raid(3) defend(2) text("%1 применили внезапную атаку в надежде рассеять противника.")
+#tactic careful_defence name("Тщательная защита") shield(1) text("%1 выстроили защитное построение и приготовились отражать удар.")
+#tactic messy_fighting name("Кровавая баня") sword(1) text("%1 ринулись в бой не щадя себя, чтобы нанести максимальный урон врагу.")
+
+#game map("cradle.png")
+#game casualties(4)
+#game default_action(quest)
+
+#player red name("Имперцы") nameof("имперцев")
+#player green name("Орки") nameof("орков")
+
+#hero gordek name("Гордек") nameof("Гордека") avatar("art/portraits/gordek.bmp") traits(bloody, hireling) player(red)
+#hero mistra name("Мистра") nameof("Мистры") avatar("art/portraits/mistra.bmp") traits(carefull, diplomat) player(red)
+
+#unit spearmans name("копейщики") nameof("копейщиков") attack(1) defend(2) cost(3) income(-1)
+#unit archers name("лучники") nameof("лучников") attack(2) defend(1) cost(3) income(-1)
+#unit swordmans name("мечники") nameof("мечников") attack(2) defend(2) cost(4) income(-2)
+#unit cavalry name("кавалерия") nameof("кавалерии") attack(3) defend(1) cost(5) income(-2)
+
+#troop type(spearmans) player(red) province(black_wood)
+#troop type(spearmans) player(red) province(black_wood)
+#troop type(swordmans) player(red) province(black_wood)
+#troop type(swordmans) player(red) province(sunrise_hills)
+#troop type(spearmans) player(red) province(sunrise_hills)
+
+#troop type(spearmans) player(green) province(black_wood)
+#troop type(spearmans) player(green) province(black_wood)
+
+#province black_wood player(green)
+#province sunrise_hills player(red)
