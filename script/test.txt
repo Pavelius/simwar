@@ -17,8 +17,13 @@
 #action recruit name("Нанять") recruit(1) placeable(1) nameact("нанимает войска")
 #action quest name("Искать приключения") nameact("ищет приключений")
 
-#province elder_mountains name("Древние горы") position(219, 132)
-#province river_dale name("Речная долина") level(2) position(796, 253)
+#landscape plains name("Равнина")
+#landscape mountains name("Горы")
+#landscape swamps name("Болото")
+#landscape hills name("Болото")
+
+#province elder_mountains name("Древние горы") position(219, 132) landscape(mountains)
+#province river_dale name("Речная долина") level(2) landscape(plains) position(796, 253)
 #province river_cross name("Междуречье") position(759, 52)
 #province iron_peaks name("Железные утесы") position(567, 85)
 #province sunrise_hills name("Холмы Рассвета") position(476, 400) neighbors(black_wood)
@@ -45,6 +50,7 @@
 #player green name("Орки") nameof("орков")
 
 #hero gordek name("Гордек") nameof("Гордека") avatar("art/portraits/gordek.bmp") traits(bloody, hireling) player(red)
+#hero antaris name("Антарис") nameof("Антариса") avatar("art/portraits/antaris.bmp") traits(bloody, diplomat) player(green)
 #hero mistra name("Мистра") nameof("Мистры") avatar("art/portraits/mistra.bmp") traits(carefull, diplomat) player(red)
 
 #unit spearmans name("копейщики") nameof("копейщиков") attack(1) defend(2) cost(3) income(-1)

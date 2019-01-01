@@ -229,7 +229,7 @@ static void render_power(int x, int y, const player_info* owner, const province_
 	draw::circle(x, y, 4 * 4, colors::green);
 }
 
-static void render_province(rect rc, point mouse, const player_info* owner, callback_proc proc, province_flag_s province_state) {
+static void render_province_general(rect rc, point mouse, const player_info* player, callback_proc proc, province_flag_s province_state) {
 	char temp[1024];
 	draw::state push;
 	draw::fore = colors::black;
@@ -248,13 +248,13 @@ static void render_province(rect rc, point mouse, const player_info* owner, call
 		auto hilite = false;
 		auto a = AreaNormal;
 		hero_info* hero_array[16];
-		count = player_info::getheroes(hero_array, lenghtof(hero_array), &e);
+		count = player_info::getheroes(hero_array, lenghtof(hero_array), &e, player);
 		if(proc) {
 			hilite = true;
 			if(count > 0)
 				hilite = false;
 			if(hilite) {
-				if(province_state && province_state != e.getstatus(owner))
+				if(province_state && province_state != e.getstatus(player))
 					hilite = false;
 			}
 			if(hilite) {
@@ -329,7 +329,7 @@ static void render_frame(rect rc, const player_info* player, callback_proc proc,
 	if(rc.width() > 0 && rc.height() > 0)
 		blit(*draw::canvas, rc.x1, rc.y1, rc.width(), rc.height(), 0, map, x1, y1);
 	if(player)
-		render_province(last_board, last_mouse, player, proc, province_state);
+		render_province_general(last_board, last_mouse, player, proc, province_state);
 }
 
 static int render_hero(int x, int y, int width, hero_info* e, bool hilite, bool disabled, const char* disable_text, callback_proc proc = 0) {
