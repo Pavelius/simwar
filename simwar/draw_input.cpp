@@ -1,6 +1,7 @@
 #include "main.h"
 
 using namespace draw;
+using namespace draw::controls;
 
 struct focusable_element {
 	int				id;
@@ -28,6 +29,9 @@ const int				map_normal = 1000;
 static int				map_scale = map_normal;
 static player_info*		current_player;
 static province_info*	current_province;
+static control*			current_hilite;
+static control*			current_focus_control;
+static control*			current_execute_control;
 extern rect				sys_static_area;
 int						distance(point p1, point p2);
 
@@ -187,7 +191,48 @@ int draw::getresult() {
 	return break_result;
 }
 
+bool control::ishilited() const {
+	return current_hilite == this;
+}
+
+bool control::isfocused() const {
+	return current_focus_control == this;
+}
+
+void control::view(const rect& rc) {
+	if(isfocusable()) {
+		addelement((int)this, rc);
+		if(!getfocus())
+			setfocus((int)this, true);
+	}
+	if(areb(rc))
+		current_hilite = this;
+	if((control*)getfocus() == this)
+		current_focus_control = this;
+	if(show_background)
+		rectf(rc, colors::window);
+	if(show_border)
+		rectb(rc, colors::border);
+}
+
 static bool control_focus() {
+	if(current_hilite) {
+		switch(hot.key & CommandMask) {
+		case MouseLeft:
+		case MouseRight:
+		case MouseLeftDBL:
+			current_hilite->mouseinput(hot.key, hot.mouse);
+			return true;
+		case MouseWheelDown:
+			current_hilite->mousewheel(hot.key, hot.mouse, 1);
+			return true;
+		case MouseWheelUp:
+			current_hilite->mousewheel(hot.key, hot.mouse, -1);
+			return true;
+		}
+	}
+	if(current_focus_control)
+		return current_focus_control->keyinput(hot.key);
 	int id;
 	switch(hot.key) {
 	case 0:
@@ -210,6 +255,8 @@ static void before_render() {
 	hot.hilite.clear();
 	render_control = elements;
 	current_execute = 0;
+	current_hilite = 0;
+	current_focus_control = 0;
 	if(hot.mouse.x < 0 || hot.mouse.y < 0)
 		sys_static_area.clear();
 	else
@@ -229,6 +276,28 @@ static void render_power(int x, int y, const player_info* owner, const province_
 	draw::circle(x, y, 4 * 4, colors::green);
 }
 
+static void choose_current_province() {
+	current_province = (province_info*)hot.param;
+}
+
+static point getscreen(const rect& rc, point pt) {
+	auto x = pt.x - camera.x + rc.x1;
+	auto y = pt.y - camera.y + rc.y1;
+	return {(short)x, (short)y};
+}
+
+void province_info::render_neighbors(const rect& rc) const {
+	draw::state push;
+	draw::fore = colors::red;
+	point center = getscreen(rc, getposition());
+	for(auto p : neighbors) {
+		if(!p)
+			break;
+		auto pt = getscreen(rc, p->getposition());
+		line(center.x, center.y, pt.x, pt.y);
+	}
+}
+
 static void render_province_general(rect rc, point mouse, const player_info* player, callback_proc proc, province_flag_s province_state) {
 	char temp[1024];
 	draw::state push;
@@ -237,39 +306,37 @@ static void render_province_general(rect rc, point mouse, const player_info* pla
 	if(!draw::font)
 		return;
 	unsigned count;
+	auto choose_mode = proc != 0;
 	for(auto& e : province_data) {
 		if(!e)
 			continue;
 		draw::font = metrics::h1;
-		point real_pos = e.getposition();
-		point pt = {(short)(real_pos.x - rc.x1 - camera.x), (short)(real_pos.y - rc.y1 - camera.y)};
+		auto pt = getscreen(rc, e.getposition());
 		zprint(temp, e.getname());
 		auto text_width = draw::textw(temp);
-		auto hilite = false;
+		auto hilite = choose_mode;
 		auto a = AreaNormal;
 		hero_info* hero_array[16];
 		count = player_info::getheroes(hero_array, lenghtof(hero_array), &e, player);
-		if(proc) {
-			hilite = true;
-			if(count > 0)
+		if(count > 0)
+			hilite = false;
+		if(hilite) {
+			if(province_state && province_state != e.getstatus(player))
 				hilite = false;
-			if(hilite) {
-				if(province_state && province_state != e.getstatus(player))
-					hilite = false;
-			}
-			if(hilite) {
-				rect rc = {pt.x - text_width / 2, pt.y - draw::texth() / 2, pt.x + text_width / 2, pt.y + draw::texth() / 2};
-				a = draw::area(rc);
-				if(a == AreaHilitedPressed)
-					draw::execute(proc, (int)&e);
-			}
+		}
+		if(proc && hilite) {
+			rect rc = {pt.x - text_width / 2, pt.y - draw::texth() / 2, pt.x + text_width / 2, pt.y + draw::texth() / 2};
+			a = draw::area(rc);
+			if(a == AreaHilitedPressed && hot.key == MouseLeft)
+				draw::execute(proc, (int)&e);
 		}
 		//render_power(pt.x, pt.y, owner, &e);
-		draw::fore_stroke = colors::white;
 		if(hilite)
-			draw::fore_stroke = getcolor(province_state);
+			draw::fore_stroke = colors::white.mix(getcolor(e.getstatus(player)), 128);
+		else
+			draw::fore_stroke = colors::white;
 		if(a == AreaHilited || a == AreaHilitedPressed) {
-			draw::fore_stroke = draw::fore_stroke.mix(colors::white);
+			draw::fore_stroke = getcolor(e.getstatus(player));
 			hot.cursor = CursorHand;
 		}
 		draw::text(pt.x - text_width / 2, pt.y - draw::texth() / 2, temp, -1, TextStroke);
@@ -296,7 +363,8 @@ static void render_province_general(rect rc, point mouse, const player_info* pla
 	}
 }
 
-static void render_frame(rect rc, const player_info* player, callback_proc proc, province_flag_s province_state = AnyProvince) {
+static void render_frame(const rect& rco, const player_info* player, callback_proc proc, province_flag_s province_state = AnyProvince) {
+	auto rc = rco;
 	draw::state push;
 	draw::area(rc); // Drag and drop analize this result
 	last_board = rc;
@@ -328,6 +396,8 @@ static void render_frame(rect rc, const player_info* player, callback_proc proc,
 		draw::rectf(last_board, colors::gray);
 	if(rc.width() > 0 && rc.height() > 0)
 		blit(*draw::canvas, rc.x1, rc.y1, rc.width(), rc.height(), 0, map, x1, y1);
+	if(current_province)
+		current_province->render_neighbors(rco);
 	if(player)
 		render_province_general(last_board, last_mouse, player, proc, province_state);
 }
@@ -380,7 +450,7 @@ static int render_hero(int x, int y, int width, hero_info* e, bool hilite, bool 
 			szprint(zend(temp), zendof(temp), "%+2i %1", pn, value);
 		}
 		tooltips(x, y, width, temp);
-		if(hittest == AreaHilitedPressed && hot.key==MouseLeft && proc)
+		if(hittest == AreaHilitedPressed && hot.key == MouseLeft && proc)
 			execute(proc, (int)e);
 	}
 	return height + gui.border * 2;
@@ -397,6 +467,33 @@ static int render_heroes(int x, int y, const player_info* player, callback_proc 
 		y += gui.padding;
 	}
 	return y - y0;
+}
+
+static int render_province(int x, int y, const province_info* province) {
+	char temp[4096];
+	if(!province)
+		return 0;
+	stringcreator sc;
+	stringbuilder sb(sc, temp);
+	sb.addh(province->getname());
+	if(province->text)
+		sb.addn(province->text);
+	if(!temp[0])
+		return 0;
+	draw::state state;
+	draw::fore = colors::text;
+	return draw::window(x, y, gui.window_width, temp) + gui.border * 2 + gui.padding;
+}
+
+static int render_board(const player_info* province_owner, player_info* hero_owner, callback_proc choose_province, callback_proc choose_hero, const province_info* province) {
+	render_frame({0, 0, draw::getwidth(), draw::getheight()}, province_owner, choose_province);
+	auto x = gui.border + gui.border;
+	auto y = gui.padding + gui.border;
+	if(province)
+		y += render_province(x, y, province);
+	x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
+	y = gui.padding + gui.border;
+	return render_heroes(x, y, hero_owner, choose_hero);
 }
 
 static int render_board(const player_info* province_owner, player_info* hero_owner, callback_proc choose_province, callback_proc choose_hero) {
@@ -546,7 +643,7 @@ void draw::initialize() {
 	colors::form = colors::black;
 	colors::h1 = colors::white.mix(colors::form, 128);
 	colors::h2 = colors::white.mix(colors::form, 144);
-	colors::h3 = colors::white.mix(colors::form, 192);
+	colors::h3 = colors::white.mix(colors::form, 196);
 	colors::text = colors::white;
 	draw::font = metrics::font;
 	draw::fore = colors::text;
@@ -631,6 +728,7 @@ static void choose_action() {
 	}
 	hero->setaction(action);
 	hero->setprovince(province);
+	current_province = province;
 }
 
 static void end_turn() {
@@ -639,9 +737,10 @@ static void end_turn() {
 
 void player_info::makemove() {
 	current_player = this;
+	current_province = province_data.data + 0;
 	while(ismodal()) {
 		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
-		auto y = render_board(current_player, current_player, 0, choose_action) + gui.padding * 3;
+		auto y = render_board(current_player, current_player, 0, choose_action, current_province) + gui.padding * 3;
 		button(x, y, gui.hero_window_width, "Закончить ход", cmd(end_turn));
 		domodal();
 		control_standart();

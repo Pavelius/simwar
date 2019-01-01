@@ -133,6 +133,18 @@
     <ClCompile Include="combat_info.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
+    <ClCompile Include="draw_control.cpp">
+      <Filter>Графика</Filter>
+    </ClCompile>
+    <ClCompile Include="draw_list.cpp">
+      <Filter>Графика</Filter>
+    </ClCompile>
+    <ClCompile Include="draw_scroll.cpp">
+      <Filter>Графика</Filter>
+    </ClCompile>
+    <ClCompile Include="bsdata_locale.cpp">
+      <Filter>Коллекции</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="draw.h">
@@ -189,6 +201,9 @@
     <ClInclude Include="bslog.h">
       <Filter>Коллекции</Filter>
     </ClInclude>
+    <ClInclude Include="draw_control.h">
+      <Filter>Графика</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Графика">
@@ -215,6 +230,9 @@
       <Filter>Скрипты</Filter>
     </Text>
     <Text Include="..\script\test.txt">
+      <Filter>Скрипты</Filter>
+    </Text>
+    <Text Include="..\script\test_ru.txt">
       <Filter>Скрипты</Filter>
     </Text>
   </ItemGroup>

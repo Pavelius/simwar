@@ -122,6 +122,7 @@
     <ClCompile Include="archive.cpp" />
     <ClCompile Include="bsdata.cpp" />
     <ClCompile Include="bsdata_check.cpp" />
+    <ClCompile Include="bsdata_locale.cpp" />
     <ClCompile Include="bsdata_log.cpp" />
     <ClCompile Include="bslog.cpp" />
     <ClCompile Include="bsreq_req.cpp" />
@@ -136,7 +137,10 @@
     <ClCompile Include="crt.cpp" />
     <ClCompile Include="draw.cpp" />
     <ClCompile Include="draw_button.cpp" />
+    <ClCompile Include="draw_control.cpp" />
     <ClCompile Include="draw_input.cpp" />
+    <ClCompile Include="draw_list.cpp" />
+    <ClCompile Include="draw_scroll.cpp" />
     <ClCompile Include="draw_text.cpp" />
     <ClCompile Include="draw_textf.cpp" />
     <ClCompile Include="game.cpp" />
@@ -174,6 +178,7 @@
     <ClInclude Include="converter.h" />
     <ClInclude Include="crt.h" />
     <ClInclude Include="draw.h" />
+    <ClInclude Include="draw_control.h" />
     <ClInclude Include="grammar.h" />
     <ClInclude Include="initializer_list.h" />
     <ClInclude Include="io.h" />
@@ -186,6 +191,7 @@
   <ItemGroup>
     <Text Include="..\script\msg_ru.txt" />
     <Text Include="..\script\test.txt" />
+    <Text Include="..\script\test_ru.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

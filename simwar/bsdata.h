@@ -19,7 +19,7 @@ struct bsdata : array {
 		bsdata**		custom;
 		bool			create_record_when_not_found;
 		constexpr parser() : custom(0), create_record_when_not_found(false) {}
-		bool			check_required(const char* url);
+		bool			check_required(const std::initializer_list<const char*> requisits);
 		bool			check_required(const char* url, bsval source);
 		virtual void	error(bsparse_error_s id, const char* url, int line, int column, const char* format_param) {}
 		void			errornp(bsparse_error_s id, const char* url, int line, int column, ...);
@@ -41,6 +41,7 @@ struct bsdata : array {
 	static bsdata*		findbyptr(const void* object);
 	static bsval		findbyid(const char* value);
 	static void			read(const char* url, parser* callback = 0);
+	static bool			readl(const char* url);
 	static void			write(const char* url, const char** baseids, bool(*comparer)(void* object, const bsreq* type) = 0);
 	static void			write(const char* url, const char* baseid);
 	static void			write(const char* url, const array& source, const bsreq* fields);

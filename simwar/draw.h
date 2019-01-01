@@ -329,19 +329,7 @@ bool					addbutton(rect& rc, bool focused, const char* t1, int k1, const char* t
 bool					buttonh(rect rc, bool checked, bool focused, bool disabled, bool border, color value, const char* string, int key, bool press, const char* tips = 0);
 bool					buttonh(rect rc, bool checked, bool focused, bool disabled, bool border, const char* string, int key = 0, bool press = false, const char* tips = 0);
 bool					buttonv(rect rc, bool checked, bool focused, bool disabled, bool border, const char* string, int key = 0, bool press = false);
-int						clipart(int x, int y, int width, unsigned flags, const char* string);
-void					scrollh(int id, const struct rect& scroll, int& origin, int count, int maximum, bool focused);
-void					scrollv(int id, const rect& scroll, int& origin, int count, int maximum, bool focused);
-void					splitv(int x, int y, int& value, int height, int id, int size, int minimum, int maximum, bool right_align);
-void					splith(int x, int y, int width, int& value, int id, int size, int minimum, int maximum, bool down_align);
-void					statusbar(const char* format, ...);
-void					statusbarv(const char* format, const char* format_param);
-int						statusbardw();
-int						sheetline(rect rc, bool background);
-int						tabs(int x, int y, int width, bool show_close, bool right_side, void** data, int start, int count, int current, int* hilite, proctext gtext = 0, rect position = {0, 0, 0, 0});
-int						tabs(rect rc, bool show_close, bool right_side, void** data, int start, int count, int current, int* hilite, proctext gtext, rect position = {0,0,0,0});
-bool					tool(const rect& rc, bool disabled, bool checked, bool press, bool focused = false, int key = 0);
-void					tooltips(const char* format, ...);
+void					scrollh(const struct rect& scroll, int& origin, int count, int maximum, bool focused);
+void					scrollv(const rect& scroll, int& origin, int count, int maximum, bool focused);
 void					tooltips(int x, int y, int width, const char* format, ...);
-void					tooltipsv(int x, int y, int width, const char* format, const char* format_param);
 }

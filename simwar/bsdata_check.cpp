@@ -19,7 +19,15 @@ bool bsdata::parser::check_required(const char* url, bsval source) {
 	return result;
 }
 
-bool bsdata::parser::check_required(const char* url) {
+bool hasvalue(const std::initializer_list<const char*>& values, const char* value) {
+	for(auto p : values) {
+		if(strcmp(p, value) == 0)
+			return true;
+	}
+	return false;
+}
+
+bool bsdata::parser::check_required(const std::initializer_list<const char*> requisits) {
 	auto result = true;
 	for(auto pb = bsdata::first; pb; pb = pb->next) {
 		for(unsigned index = 0; index < pb->getcount(); index++) {
@@ -27,10 +35,12 @@ bool bsdata::parser::check_required(const char* url) {
 			bsval bv = {p, pb->fields};
 			for(auto pf = pb->fields; *pf; pf++) {
 				if(pf->type == text_type) {
+					if(!hasvalue(requisits, pf->id))
+						continue;
 					auto value = pf->get(pf->ptr(p));
 					if(!value) {
-						auto id = bv.getname();
-						errornp(ErrorNotFilled1pIn2pRecord3p, url, 0, 0, pf->id, pb->id, id);
+						auto id = bv.getid();
+						errornp(ErrorNotFilled1p, "localization", 0, 0, id);
 						result = false;
 					}
 				}

@@ -1,7 +1,6 @@
-#include "bsdata.h"
 #include "collection.h"
 #include "crt.h"
-#include "draw.h"
+#include "draw_control.h"
 #include "stringcreator.h"
 
 #pragma once
@@ -71,6 +70,7 @@ struct province_info : name_info {
 	province_flag_s				getstatus(const player_info* player) const;
 	int							getsupport(const player_info* player) const;
 	static bsreq				metadata[];
+	void						render_neighbors(const rect& rc) const;
 	static void					update_status(const player_info* player);
 private:
 	player_info * player;

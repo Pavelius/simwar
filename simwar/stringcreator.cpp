@@ -122,18 +122,19 @@ const char* stringcreator::parseformat(char* dst, const char* result_max, const 
 	return src;
 }
 
-void stringcreator::printv(char* result, const char* result_maximum, const char* src, const char* vl) {
+char* stringcreator::printv(char* result, const char* result_maximum, const char* src, const char* vl) {
 	if(!result)
-		return;
+		return 0;
 	if(!src) {
+		// Error: No source string
 		result[0] = 0;
-		return;
+		return result;
 	}
 	while(true) {
 		switch(*src) {
 		case 0:
 			*result = 0;
-			return;
+			return result;
 		case '%':
 			src = parseformat(result, result_maximum, src + 1, vl);
 			result = zend(result);
@@ -151,6 +152,34 @@ void stringcreator::printv(char* result, const char* result_maximum, const char*
 
 void stringcreator::print(char* result, const char* result_maximum, const char* src, ...) {
 	printv(result, result_maximum, src, xva_start(src));
+}
+
+void stringbuilder::add(const char* format, ...) {
+	p = driver.printv(p, result_maximum, format, xva_start(format));
+}
+
+void stringbuilder::addn(const char* format, ...) {
+	if(p != result)
+		p = driver.printv(p, result_maximum, "\n", 0);
+	p = driver.printv(p, result_maximum, format, xva_start(format));
+}
+
+void stringbuilder::addh(const char* format, ...) {
+	if(p != result)
+		p = driver.printv(p, result_maximum, "\n", 0);
+	p = driver.printv(p, result_maximum, "###", 0);
+	p = driver.printv(p, result_maximum, format, xva_start(format));
+}
+
+void stringbuilder::addv(const char* format, const char* format_param) {
+	p = driver.printv(p, result_maximum, format, format_param);
+}
+
+void stringbuilder::sep(const char* header, const char* p) {
+	if(ispos(p))
+		add(header);
+	else
+		add(", ");
 }
 
 char* szprintvs(char* result, const char* result_maximum, const char* src, const char* vl) {

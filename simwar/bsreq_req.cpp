@@ -15,7 +15,7 @@ static const char* read_string(const char* p, char* ps, const char* pe) {
 	return p;
 }
 
-bool bsreq::read(const char* url, void* object) const {
+bool bsreq::readl(const char* url, void* object) const {
 	auto pb = (const char*)loadt(url);
 	if(!pb)
 		return false;
