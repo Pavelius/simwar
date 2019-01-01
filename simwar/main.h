@@ -6,8 +6,9 @@
 
 #pragma once
 
-enum province_type_s : unsigned char {
-	AnyProvince, HositleProvince, FriendlyProvince
+enum province_flag_s {
+	AnyProvince,
+	HostileProvince, FriendlyProvince,
 };
 
 const int player_max = 8;
@@ -17,7 +18,6 @@ bsreq action_type[];
 bsreq landscape_type[];
 bsreq msg_type[];
 bsreq point_type[];
-bsreq province_type[];
 bsreq tactic_type[];
 bsreq trait_type[];
 bsreq unit_type[];
@@ -57,22 +57,28 @@ struct name_info {
 struct action_info : name_info, combat_info, prof_info {
 	const char*					nameact;
 	char						recruit, support, profit, placeable;
-	province_type_s				getprovince() const;
+	province_flag_s				getprovince() const;
 };
 struct landscape_info : name_info, combat_info, prof_info {
 	int							getprofit(tip_info* ti) const;
 };
 struct province_info : name_info {
-	player_info*				player;
+	bool						battle(char* result, const char* result_max, player_info* attacker_player, player_info* defender_player, const char* attack_skill = 0, const char* defend_skill = 0);
+	void						createwave();
+	player_info*				getplayer() const { return player; }
+	point						getposition() const { return position; }
+	int							getincome(tip_info* ti = 0) const;
+	province_flag_s				getstatus(const player_info* player) const;
+	int							getsupport(const player_info* player) const;
+	static bsreq				metadata[];
+	static void					update_status(const player_info* player);
+private:
+	player_info * player;
 	landscape_info*				landscape;
 	char						level;
 	point						position;
 	short						support[player_max];
-	bool						battle(char* result, const char* result_max, player_info* attacker_player, player_info* defender_player, const char* attack_skill = 0, const char* defend_skill = 0);
-	player_info*				getplayer() const { return player; }
-	point						getposition() const { return position; }
-	int							getincome(tip_info* ti = 0) const;
-	int							getsupport(player_info* player) const;
+	province_info*				neighbors[8];
 };
 struct trait_info : name_info, combat_info {
 };
@@ -129,7 +135,7 @@ struct player_info : name_info {
 	int							getincome(tip_info* ti = 0) const;
 	const char*					getnameof() const { return nameof; }
 	static unsigned				getheroes(hero_info** source, unsigned maximum_count, const province_info* province = 0, const player_info* player = 0);
-	static unsigned				getprovinces(province_info** source, unsigned maximum, const player_info* player = 0);
+	static unsigned				getprovinces(province_info** source, unsigned maximum, const player_info* player = 0, province_flag_s state = AnyProvince);
 	int							getsupport(tip_info* ti = 0) const;
 	static unsigned				gettroops(troop_info** source, unsigned maximum_count, const province_info* province = 0, const player_info* player = 0);
 	void						makemove();
@@ -188,11 +194,13 @@ private:
 	callback_proc				proc;
 	int							param;
 };
+void							addaccept(char* result, const char* result_max);
 void							addbutton(char* result, const char* result_max, const char* name);
 void							avatar(int x, int y, const char* id);
 int								button(int x, int y, int width, const char* label, const runable& e, unsigned key = 0);
 bool							initializemap();
 action_info*					getaction(player_info* player, hero_info* hero);
+color							getcolor(province_flag_s id);
 province_info*					getprovince(player_info* player, hero_info* hero, action_info* action);
 areas							hilite(rect rc);
 void							report(const char* format);

@@ -23,6 +23,7 @@ static bool initialize_map() {
 	auto url_errors = "errors.txt";
 	if(true) {
 		bslog log(url_errors);
+		log.create_record_when_not_found = true;
 		bsdata::read("script/test.txt", &log);
 		result = result && !log.iserrors();
 	}

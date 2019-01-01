@@ -3,7 +3,7 @@
 bsreq troop_info::metadata[] = {
 	BSREQ(troop_info, type, unit_type),
 	BSREQ(troop_info, player, player_info::metadata),
-	BSREQ(troop_info, province, province_type),
+	BSREQ(troop_info, province, province_info::metadata),
 {}};
 adat<troop_info, 256> troop_data;
 bsdata troop_manager("troop", troop_data, troop_info::metadata);

@@ -277,10 +277,13 @@ struct bsdata_serial : bsfile {
 	bool readreq(void* object, const bsreq* req, unsigned index) {
 		if(!skip('('))
 			return false;
+		auto create_record_when_not_found = false;
+		if(parser)
+			create_record_when_not_found = parser->create_record_when_not_found;
 		while(*p) {
 			if(skip(')'))
 				break;
-			readvalue(req ? req->type : 0, false);
+			readvalue(req ? req->type : 0, create_record_when_not_found);
 			storevalue(object, req, index);
 			if(skip(','))
 				index++;

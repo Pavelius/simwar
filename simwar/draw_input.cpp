@@ -27,6 +27,7 @@ static rect				hilite_rect;
 const int				map_normal = 1000;
 static int				map_scale = map_normal;
 static player_info*		current_player;
+static province_info*	current_province;
 extern rect				sys_static_area;
 int						distance(point p1, point p2);
 
@@ -228,7 +229,7 @@ static void render_power(int x, int y, const player_info* owner, const province_
 	draw::circle(x, y, 4 * 4, colors::green);
 }
 
-static void render_province(rect rc, point mouse, const player_info* owner, callback_proc proc, province_type_s province_state) {
+static void render_province(rect rc, point mouse, const player_info* owner, callback_proc proc, province_flag_s province_state) {
 	char temp[1024];
 	draw::state push;
 	draw::fore = colors::black;
@@ -253,16 +254,8 @@ static void render_province(rect rc, point mouse, const player_info* owner, call
 			if(count > 0)
 				hilite = false;
 			if(hilite) {
-				switch(province_state) {
-				case FriendlyProvince:
-					if(e.player != owner)
-						hilite = false;
-					break;
-				case HositleProvince:
-					if(e.player == owner)
-						hilite = false;
-					break;
-				}
+				if(province_state && province_state != e.getstatus(owner))
+					hilite = false;
 			}
 			if(hilite) {
 				rect rc = {pt.x - text_width / 2, pt.y - draw::texth() / 2, pt.x + text_width / 2, pt.y + draw::texth() / 2};
@@ -273,16 +266,8 @@ static void render_province(rect rc, point mouse, const player_info* owner, call
 		}
 		//render_power(pt.x, pt.y, owner, &e);
 		draw::fore_stroke = colors::white;
-		if(hilite) {
-			switch(province_state) {
-			case HositleProvince:
-				draw::fore_stroke = colors::red;
-				break;
-			case FriendlyProvince:
-				draw::fore_stroke = colors::green;
-				break;
-			}
-		}
+		if(hilite)
+			draw::fore_stroke = getcolor(province_state);
 		if(a == AreaHilited || a == AreaHilitedPressed) {
 			draw::fore_stroke = draw::fore_stroke.mix(colors::white);
 			hot.cursor = CursorHand;
@@ -311,7 +296,7 @@ static void render_province(rect rc, point mouse, const player_info* owner, call
 	}
 }
 
-static void render_frame(rect rc, const player_info* player, callback_proc proc, province_type_s province_state = AnyProvince) {
+static void render_frame(rect rc, const player_info* player, callback_proc proc, province_flag_s province_state = AnyProvince) {
 	draw::state push;
 	draw::area(rc); // Drag and drop analize this result
 	last_board = rc;
@@ -395,7 +380,7 @@ static int render_hero(int x, int y, int width, hero_info* e, bool hilite, bool 
 			szprint(zend(temp), zendof(temp), "%+2i %1", pn, value);
 		}
 		tooltips(x, y, width, temp);
-		if(hittest == AreaHilitedPressed && proc)
+		if(hittest == AreaHilitedPressed && hot.key==MouseLeft && proc)
 			execute(proc, (int)e);
 	}
 	return height + gui.border * 2;
@@ -421,6 +406,13 @@ static int render_board(const player_info* province_owner, player_info* hero_own
 	return render_heroes(x, y, hero_owner, choose_hero);
 }
 
+static void mouse_map_info() {
+	auto pt = hot.mouse + camera;
+	char temp[512]; zprint(temp, "Координаты карты: %1i, %2i.", pt.x, pt.y);
+	addaccept(temp, zendof(temp));
+	report(temp);
+}
+
 static bool control_board() {
 	const int step = 32;
 	switch(hot.key) {
@@ -438,6 +430,7 @@ static bool control_board() {
 			}
 		}
 		break;
+	case Ctrl + Alpha + 'M': mouse_map_info(); break;
 	default:
 		if(draw::drag::active(last_board)) {
 			hot.cursor = CursorAll;
@@ -630,8 +623,8 @@ static void choose_action() {
 	auto action = getaction(current_player, hero);
 	if(!action)
 		return;
-	auto choose_mode = action->getprovince();
-	if(choose_mode) {
+	if(action->placeable) {
+		auto choose_mode = action->getprovince();
 		province = getprovince(current_player, hero, action);
 		if(!province)
 			return;
@@ -668,6 +661,10 @@ void draw::avatar(int x, int y, const char* id) {
 	blit(*draw::canvas, x, y, gui.hero_width, gui.hero_width, 0, p->value, 0, 0);
 }
 
+void draw::addaccept(char* result, const char* result_max) {
+	addbutton(result, result_max, "accept");
+}
+
 void draw::addbutton(char* result, const char* result_max, const char* name) {
 	szprint(zend(result), result_max, "\n$(%1)", name);
 }
@@ -679,7 +676,7 @@ int	draw::button(int x, int y, int width, const char* label, const runable& e, u
 TEXTPLUGIN(accept) {
 	if(hot.key == KeyEnter)
 		execute(buttonok);
-	return button(x + width - gui.button_width, y, gui.button_width, msg.accept, cmd(buttonok));
+	return button(x + width - gui.button_width - gui.padding * 2, y + gui.padding + 4, gui.button_width, msg.accept, cmd(buttonok));
 }
 
 TEXTPLUGIN(yesno) {
@@ -710,4 +707,12 @@ void draw::domodal() {
 		hot.key = draw::rawinput();
 	if(!hot.key)
 		exit(0);
+}
+
+color draw::getcolor(province_flag_s id) {
+	switch(id) {
+	case HostileProvince: return colors::red;
+	case FriendlyProvince: return colors::green;
+	default: return colors::gray;
+	}
 }

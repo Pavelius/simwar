@@ -15,9 +15,9 @@ bsreq action_type[] = {
 {}};
 adat<action_info, 32> action_data; BSMETA(action);
 
-province_type_s action_info::getprovince() const {
+province_flag_s action_info::getprovince() const {
 	if(attack > 0 || raid > 0)
-		return HositleProvince;
+		return HostileProvince;
 	else if(defend > 0)
 		return FriendlyProvince;
 	return AnyProvince;

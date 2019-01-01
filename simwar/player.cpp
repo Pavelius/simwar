@@ -66,7 +66,7 @@ unsigned player_info::gettroops(troop_info** source, unsigned maximum_count, con
 	return ps - source;
 }
 
-unsigned player_info::getprovinces(province_info** source, unsigned maximum, const player_info* player) {
+unsigned player_info::getprovinces(province_info** source, unsigned maximum, const player_info* player, province_flag_s state) {
 	auto ps = source;
 	auto pe = ps + maximum;
 	for(auto& e : province_data) {
