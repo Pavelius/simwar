@@ -18,7 +18,7 @@ public:
 				continue;
 			if(e.getplayer() != player)
 				continue;
-			if(e.getprovince() != province)
+			if(e.getprovince(player) != province)
 				continue;
 			units.add(&e);
 		}

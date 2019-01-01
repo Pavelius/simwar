@@ -4,6 +4,7 @@ bsreq troop_info::metadata[] = {
 	BSREQ(troop_info, type, unit_type),
 	BSREQ(troop_info, player, player_info::metadata),
 	BSREQ(troop_info, province, province_info::metadata),
+	BSREQ(troop_info, move, province_info::metadata),
 {}};
 adat<troop_info, 256> troop_data;
 bsdata troop_manager("troop", troop_data, troop_info::metadata);
@@ -42,4 +43,10 @@ const char* troop_info::getpresent(char* result, const char* result_maximum, tro
 		count_in_row = 1;
 	}
 	return result;
+}
+
+province_info* troop_info::getprovince(const player_info* player) const {
+	if(this->player == player && move)
+		return move;
+	return province;
 }

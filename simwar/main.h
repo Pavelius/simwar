@@ -121,11 +121,14 @@ struct troop_info {
 	player_info*				getplayer() const { return player; }
 	static const char*			getpresent(char* result, const char* result_maximum, troop_info** source, unsigned count);
 	province_info*				getprovince() const { return province; }
+	province_info*				getprovince(const player_info* player) const;
+	province_info*				getmove() const { return move; }
 	static bsreq				metadata[];
 	static void					sort(troop_info** source, unsigned count);
 private:
 	unit_info*					type;
 	province_info*				province;
+	province_info*				move;
 	player_info*				player;
 };
 struct player_info : name_info {
