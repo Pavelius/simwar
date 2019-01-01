@@ -130,6 +130,8 @@
     <ClCompile Include="bstream.cpp" />
     <ClCompile Include="collection.cpp" />
     <ClCompile Include="color.cpp" />
+    <ClCompile Include="combat.cpp" />
+    <ClCompile Include="combat_info.cpp" />
     <ClCompile Include="converter.cpp" />
     <ClCompile Include="crt.cpp" />
     <ClCompile Include="draw.cpp" />

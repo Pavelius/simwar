@@ -15,7 +15,7 @@
 #action attack name("Захватить") attack(1) nameact("пытается захватить")
 #action defend name("Патрулировать") defend(1) nameact("патрулирует окресности")
 #action recruit name("Нанять") recruit(1) nameact("нанимает войска")
-#action quest name("Искать приключений") nameact("ищет приключений")
+#action quest name("Искать приключения") nameact("ищет приключений")
 
 #province black_wood name("Черный лес") level(1) position(204, 495)
 #province white_harbor name("Белая гавань") level(2) position(616, 616)

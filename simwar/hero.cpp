@@ -20,3 +20,11 @@ void hero_info::before_turn() {
 	province = 0;
 	action = game.default_action;
 }
+
+int hero_info::get(const char* id) const {
+	return 0;
+}
+
+int hero_info::getbonus(const char* id) const {
+	return 0;
+}

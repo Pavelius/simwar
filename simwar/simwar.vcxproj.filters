@@ -127,6 +127,12 @@
     <ClCompile Include="bslog.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
+    <ClCompile Include="combat.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
+    <ClCompile Include="combat_info.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="draw.h">

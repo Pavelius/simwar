@@ -2,6 +2,14 @@
 
 using namespace draw;
 
+struct focusable_element {
+	int				id;
+	rect			rc;
+	operator bool() const { return id != 0; }
+};
+static focusable_element	elements[96];
+static focusable_element*	render_control;
+static int				current_focus;
 static callback_proc	current_execute;
 static bool				keep_hot;
 static hotinfo			keep_hot_value;
@@ -39,6 +47,116 @@ static bsreq gui_type[] = {
 gui_info gui;
 bsdata gui_manger("gui", gui, gui_type);
 
+static void set_focus_callback() {
+	auto id = getnext(draw::getfocus(), hot.param);
+	if(id)
+		setfocus(id, true);
+}
+
+static void setfocus_callback() {
+	current_focus = hot.param;
+}
+
+static focusable_element* getby(int id) {
+	if(!id)
+		return 0;
+	for(auto& e : elements) {
+		if(!e)
+			return 0;
+		if(e.id == id)
+			return &e;
+	}
+	return 0;
+}
+
+static focusable_element* getfirst() {
+	for(auto& e : elements) {
+		if(!e)
+			return 0;
+		return &e;
+	}
+	return 0;
+}
+
+static focusable_element* getlast() {
+	auto p = elements;
+	for(auto& e : elements) {
+		if(!e)
+			break;
+		p = &e;
+	}
+	return p;
+}
+
+void draw::addelement(int id, const rect& rc) {
+	if(!render_control
+		|| render_control >= elements + sizeof(elements) / sizeof(elements[0]) - 1)
+		render_control = elements;
+	render_control[0].id = id;
+	render_control[0].rc = rc;
+	render_control[1].id = 0;
+	render_control++;
+}
+
+int draw::getnext(int id, int key) {
+	if(!key)
+		return id;
+	auto pc = getby(id);
+	if(!pc)
+		pc = getfirst();
+	if(!pc)
+		return 0;
+	auto pe = pc;
+	auto pl = getlast();
+	int inc = 1;
+	if(key == KeyLeft || key == KeyUp || key == (KeyTab | Shift))
+		inc = -1;
+	while(true) {
+		pc += inc;
+		if(pc > pl)
+			pc = elements;
+		else if(pc < elements)
+			pc = pl;
+		if(pe == pc)
+			return pe->id;
+		switch(key) {
+		case KeyRight:
+			if(pe->rc.y1 >= pc->rc.y1
+				&& pe->rc.y1 <= pc->rc.y2
+				&& pe->rc.x1 < pc->rc.x1)
+				return pc->id;
+			break;
+		case KeyLeft:
+			if(pe->rc.y1 >= pc->rc.y1
+				&& pe->rc.y1 <= pc->rc.y2
+				&& pe->rc.x1 > pc->rc.x1)
+				return pc->id;
+			break;
+		case KeyDown:
+			if(pc->rc.y1 >= pe->rc.y2)
+				return pc->id;
+			break;
+		case KeyUp:
+			if(pc->rc.y2 <= pe->rc.y1)
+				return pc->id;
+			break;
+		default:
+			return pc->id;
+		}
+	}
+}
+
+void draw::setfocus(int id, bool instant) {
+	if(instant)
+		current_focus = id;
+	else if(current_focus != id)
+		execute(setfocus_callback, id);
+}
+
+int draw::getfocus() {
+	return current_focus;
+}
+
 void draw::execute(void(*proc)(), int param) {
 	current_execute = proc;
 	hot.key = 0;
@@ -68,9 +186,28 @@ int draw::getresult() {
 	return break_result;
 }
 
+static bool control_focus() {
+	int id;
+	switch(hot.key) {
+	case 0:
+		exit(0);
+		return true;
+	case KeyTab:
+	case KeyTab | Shift:
+	case KeyTab | Ctrl:
+	case KeyTab | Ctrl | Shift:
+		id = getnext(draw::getfocus(), hot.key);
+		if(id)
+			setfocus(id, true);
+		return true;
+	}
+	return false;
+}
+
 static void before_render() {
 	hot.cursor = CursorArrow;
 	hot.hilite.clear();
+	render_control = elements;
 	current_execute = 0;
 	if(hot.mouse.x < 0 || hot.mouse.y < 0)
 		sys_static_area.clear();
@@ -313,6 +450,13 @@ static bool control_board() {
 	return true;
 }
 
+void control_standart() {
+	if(control_focus())
+		return;
+	if(control_board())
+		return;
+}
+
 areas draw::hilite(rect rc) {
 	auto border = gui.border;
 	rc.offset(-border, -border);
@@ -440,7 +584,7 @@ void draw::report(const char* format) {
 		render_board(current_player, current_player, 0, 0);
 		draw::window(gui.border * 2, gui.border * 2, gui.window_width, format);
 		domodal();
-		control_board();
+		control_standart();
 	}
 }
 
@@ -458,7 +602,7 @@ action_info* draw::getaction(player_info* player, hero_info* hero) {
 			y += windowb(x, y, gui.hero_window_width, e.getname(), cmd(breakparam, (int)&e), gui.border) + 1;
 		y += windowb(x, y, gui.hero_window_width, msg.cancel, cmd(breakparam, 0)) + 1;
 		domodal();
-		control_board();
+		control_standart();
 	}
 	return (action_info*)getresult();
 }
@@ -473,7 +617,7 @@ province_info* draw::getprovince(player_info* player, hero_info* hero, action_in
 		y += windowb(x, y, gui.hero_window_width, action->getname(), cmd(), gui.border) + 1;
 		y += windowb(x, y, gui.hero_window_width, msg.cancel, cmd(breakparam, 0)) + 1;
 		domodal();
-		control_board();
+		control_standart();
 	}
 	return (province_info*)getresult();
 }
@@ -504,10 +648,10 @@ void player_info::makemove() {
 	current_player = this;
 	while(ismodal()) {
 		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
-		auto y = render_board(current_player, current_player, 0, choose_action) + gui.padding*3;
+		auto y = render_board(current_player, current_player, 0, choose_action) + gui.padding * 3;
 		button(x, y, gui.hero_window_width, "Закончить ход", cmd(end_turn));
 		domodal();
-		control_board();
+		control_standart();
 	}
 }
 
@@ -524,12 +668,12 @@ void draw::avatar(int x, int y, const char* id) {
 	blit(*draw::canvas, x, y, gui.hero_width, gui.hero_width, 0, p->value, 0, 0);
 }
 
+void draw::addbutton(char* result, const char* result_max, const char* name) {
+	szprint(zend(result), result_max, "\n$(%1)", name);
+}
+
 int	draw::button(int x, int y, int width, const char* label, const runable& e, unsigned key) {
 	return windowb(x, y, width, label, e, 0, key);
-	//rect rc = {x, y, x + width, y + 4 * 2 + draw::texth()}; rc.offset(gui.control_border, gui.control_border);
-	//if(buttonh(rc, false, true, false, true, label, 0, false, tips))
-	//	execute(proc);
-	//return rc.height() + gui.padding * 2;
 }
 
 TEXTPLUGIN(accept) {

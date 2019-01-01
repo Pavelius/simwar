@@ -7,7 +7,6 @@ bsreq player_info::metadata[] = {
 	BSREQ(player_info, text, text_type),
 	BSREQ(player_info, gold, number_type),
 	BSREQ(player_info, influence, number_type),
-	BSREQ(player_info, capital, province_type),
 {}};
 adat<player_info, player_max> player_data;
 bsdata player_manager("player", player_data, player_info::metadata);
@@ -82,25 +81,14 @@ unsigned player_info::getprovinces(province_info** source, unsigned maximum, con
 }
 
 province_info* player_info::getbestprovince() const {
-	province_info* elements[64];
+	province_info* elements[province_max];
 	auto count = getprovinces(elements, sizeof(elements) / sizeof(elements[0]), this);
 	if(!count)
 		return 0;
 	return elements[0];
 }
 
-void player_info::update() {
-	if(!capital)
-		capital = getbestprovince();
-	gold += getincome();
-}
-
 void player_info::before_turn() {
-	for(auto& e : player_data) {
-		if(!e)
-			continue;
-		e.update();
-	}
 	for(auto& e : hero_data) {
 		if(!e)
 			continue;
@@ -109,6 +97,11 @@ void player_info::before_turn() {
 }
 
 void player_info::after_turn() {
+	for(auto& e : player_data) {
+		if(!e)
+			continue;
+		e.gold += e.getincome();
+	}
 }
 
 void player_info::maketurn() {

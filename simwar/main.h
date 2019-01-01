@@ -11,6 +11,7 @@ enum province_type_s : unsigned char {
 };
 
 const int player_max = 8;
+const int province_max = 128;
 
 bsreq action_type[];
 bsreq landscape_type[];
@@ -20,6 +21,8 @@ bsreq province_type[];
 bsreq tactic_type[];
 bsreq trait_type[];
 bsreq unit_type[];
+
+extern bsdata tactic_manager;
 
 struct player_info;
 struct tip_info {
@@ -32,6 +35,7 @@ struct tip_info {
 struct combat_info {
 	char						attack, defend, raid;
 	char						sword, shield;
+	int							get(const char* id) const;
 };
 struct prof_info {
 	char						cost;
@@ -64,6 +68,7 @@ struct province_info : name_info {
 	char						level;
 	point						position;
 	short						support[player_max];
+	bool						battle(char* result, const char* result_max, player_info* attacker_player, player_info* defender_player, const char* attack_skill = 0, const char* defend_skill = 0);
 	player_info*				getplayer() const { return player; }
 	point						getposition() const { return position; }
 	int							getincome(tip_info* ti = 0) const;
@@ -76,11 +81,14 @@ struct tactic_info : name_info, combat_info {
 };
 struct hero_info : name_info {
 	void						before_turn();
+	int							get(const char* id) const;
 	const char*					getavatar() const { return avatar; }
 	action_info*				getaction() const { return action; }
+	int							getbonus(const char* id) const;
 	aref<trait_info*>			getbonuses() { return traits; }
 	player_info*				getplayer() const { return player; }
 	province_info*				getprovince() const { return province; }
+	tactic_info*				gettactic() const { return tactic; }
 	static bsreq				metadata[];
 	bool						isready() const { return true; }
 	void						setaction(action_info* value) { action = value; }
@@ -99,6 +107,9 @@ struct unit_info : name_info, combat_info, prof_info {
 };
 struct troop_info {
 	explicit operator bool() const { return type != 0; }
+	int							fix(tip_info* ti, int value) const { return type->fix(ti, type->name, value); }
+	int							get(const char* id) const { return type->get(id); }
+	int							getbonus(const char* id) const { return 0; }
 	const char*					getname() const { return type->name; }
 	const char*					getnameof() const { return type->nameof; }
 	player_info*				getplayer() const { return player; }
@@ -115,8 +126,8 @@ struct player_info : name_info {
 	static void					after_turn();
 	static void					before_turn();
 	province_info*				getbestprovince() const;
-	province_info*				getcapital() const { return capital; }
 	int							getincome(tip_info* ti = 0) const;
+	const char*					getnameof() const { return nameof; }
 	static unsigned				getheroes(hero_info** source, unsigned maximum_count, const province_info* province = 0, const player_info* player = 0);
 	static unsigned				getprovinces(province_info** source, unsigned maximum, const player_info* player = 0);
 	int							getsupport(tip_info* ti = 0) const;
@@ -124,12 +135,10 @@ struct player_info : name_info {
 	void						makemove();
 	static void					maketurn();
 	static bsreq				metadata[];
-	void						update();
 private:
 	const char*					nameof;
 	int							influence;
 	int							gold;
-	province_info*				capital;
 };
 struct game_info {
 	action_info*				default_action;
@@ -179,6 +188,7 @@ private:
 	callback_proc				proc;
 	int							param;
 };
+void							addbutton(char* result, const char* result_max, const char* name);
 void							avatar(int x, int y, const char* id);
 int								button(int x, int y, int width, const char* label, const runable& e, unsigned key = 0);
 bool							initializemap();
@@ -197,6 +207,7 @@ extern adat<hero_info, 128>		hero_data;
 extern msg_info					msg;
 extern adat<landscape_info, 32> landscape_data;
 extern adat<player_info, player_max> player_data;
-extern adat<province_info, 64>	province_data;
+extern adat<province_info, province_max> province_data;
+extern tactic_info				tactic_data[];
 extern adat<troop_info, 256>	troop_data;
 extern adat<unit_info, 64>		unit_data;

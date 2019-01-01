@@ -13,7 +13,7 @@ bsreq province_type[] = {
 	BSREQ(province_info, level, number_type),
 	BSREQ(province_info, position, point_type),
 {}};
-adat<province_info, 64>	province_data; BSMETA(province);
+adat<province_info, province_max> province_data; BSMETA(province);
 
 int province_info::getincome(tip_info* ti) const {
 	auto result = 0;
