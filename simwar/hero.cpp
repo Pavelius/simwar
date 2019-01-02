@@ -34,3 +34,13 @@ int hero_info::get(const char* id) const {
 int hero_info::getbonus(const char* id) const {
 	return 0;
 }
+
+int	hero_info::getincome() const {
+	auto result = 0;
+	for(auto p : traits) {
+		if(p)
+			result++;
+	}
+	result += getex("nobility");
+	return result;
+}

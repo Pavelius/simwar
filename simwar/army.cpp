@@ -1,14 +1,10 @@
 #include "main.h"
 
-army::army(player_info* player, hero_info* general, const char* skill) :
-	player(player), general(general), tactic(0), skill(skill), raid_mode(false) {
+army::army(player_info* player, hero_info* general, bool attack, bool raid) :
+	player(player), general(general), tactic(0), attack(attack), raid(raid) {
 }
 
-void army::fill(const province_info* province) {
-	fill(player, province, skill);
-}
-
-void army::fill(const player_info* player, const province_info* province, const char* skill) {
+void army::fill(const player_info* player, const province_info* province) {
 	for(auto& e : troop_data) {
 		if(!e)
 			continue;
@@ -16,10 +12,14 @@ void army::fill(const player_info* player, const province_info* province, const 
 			continue;
 		if(province && e.getprovince() != province)
 			continue;
-		if(skill && e.get(skill) == 0)
+		if(raid && e.get("raid")<=0)
 			continue;
 		add(&e);
 	}
+}
+
+int army::getstrenght(tip_info* ti, bool include_number) const {
+	return get(attack ? "attack" : "defend", ti, include_number);
 }
 
 int army::get(const char* id, tip_info* ti, bool include_number) const {
@@ -28,17 +28,17 @@ int army::get(const char* id, tip_info* ti, bool include_number) const {
 		zcpy(ti->result, "[\"");
 	if(general) {
 		r += general->fix(ti, general->get(id) + general->getbonus(id));
-		if(raid_mode)
+		if(raid)
 			r += general->fix(ti, general->get("raid") + general->getbonus("raid"));
 	}
 	for(auto p : *this) {
 		r += p->fix(ti, p->get(id) + p->getbonus(id));
-		if(raid_mode)
+		if(raid)
 			r += p->fix(ti, general->get("raid") + general->getbonus("raid"));
 	}
 	if(tactic) {
 		r += tactic->fix(ti, tactic->get(id));
-		if(raid_mode)
+		if(raid)
 			r += tactic->fix(ti, tactic->get("raid"));
 	}
 	if(ti && include_number)

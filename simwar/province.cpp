@@ -39,3 +39,16 @@ static void clear_movement() {
 void province_info::createwave() {
 	clear_movement();
 }
+
+hero_info* province_info::gethero(const player_info* player) const {
+	for(auto& e : hero_data) {
+		if(!e)
+			continue;
+		if(e.getplayer() != player)
+			continue;
+		if(e.getprovince() != this)
+			continue;
+		return &e;
+	}
+	return 0;
+}

@@ -32,11 +32,11 @@
 #province deadly_swamp position(509, 276) neighbors(iron_peaks, sunrise_hills, river_dale)
 #province sunny_coast position(487, 975)
 
-#trait general name("Генерал") defend(1)
-#trait diplomat name("Дипломат") defend(1)
-#trait hireling name("Наемник") attack(1)
-#trait carefull name("Осторожный") defend(1)
-#trait bloody name("Кровожадный") attack(1)
+#trait general name("Генерал") defend(1) attack(1)
+#trait diplomat name("Дипломат") defend(1) diplomacy(1)
+#trait hireling name("Наемник") raid(2) nobility(-1)
+#trait carefull name("Осторожный") shield(1)
+#trait bloody name("Кровожадный") attack(1) cruelty(1)
 
 #tactic lighting_attack name("Внезапная атака") attack(2) raid(3) defend(2) text("%1 применили внезапную атаку в надежде рассеять противника.")
 #tactic careful_defence name("Тщательная защита") shield(1) text("%1 выстроили защитное построение и приготовились отражать удар.")

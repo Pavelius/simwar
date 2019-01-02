@@ -12,14 +12,31 @@ adat<player_info, player_max> player_data;
 bsdata player_manager("player", player_data, player_info::metadata);
 
 int player_info::getincome(tip_info* ti) const {
-	auto result = 0;
+	auto result = 0, r = 0;
 	for(auto& e : province_data) {
 		if(!e)
 			continue;
 		if(e.getplayer() != this)
 			continue;
-		result += e.fix(ti, e.getincome());
+		r += e.getincome();
 	}
+	result += fix(ti, msg.income_province, r); r = 0;
+	for(auto& e : troop_data) {
+		if(!e)
+			continue;
+		if(e.getplayer() != this)
+			continue;
+		r += e.getincome();
+	}
+	result += fix(ti, msg.income_units, r); r = 0;
+	for(auto& e : hero_data) {
+		if(!e)
+			continue;
+		if(e.getplayer() != this)
+			continue;
+		r += e.getincome();
+	}
+	result += fix(ti, msg.income_units, r); r = 0;
 	return result;
 }
 

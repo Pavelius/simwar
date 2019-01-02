@@ -826,9 +826,9 @@ bool draw::move(const player_info* player, hero_info* hero, const action_info* a
 		x = x1; y = y3;
 		char tip_temp[2048];
 		tip_info ti(tip_temp);
-		auto attacker_strenght = s2.get(s2.skill, &ti);
+		auto attacker_strenght = s2.getstrenght(&ti);
 		char temp[4096]; zprint(temp, msg.total_strenght, tip_temp);
-		auto defender_strenght = a3.get(a3.skill, 0);
+		auto defender_strenght = a3.getstrenght(0);
 		szprint(zend(temp), zendof(temp), " ");
 		if(attacker_strenght < defender_strenght)
 			szprint(zend(temp), zendof(temp), msg.predict_fail);
@@ -867,15 +867,10 @@ static void choose_action() {
 			return;
 	}
 	if(action->raid || action->attack) {
-		army a1(current_player, hero, "attack");
-		army a2(current_player, hero, "attack");
-		army a3(0, 0, "defend");
-		if(action->raid) {
-			a1.fill(current_player, 0, "raid");
-			a2.raid_mode = true;
-		} else
-			a1.fill(current_player, 0, "attack");
-		a3.fill(province->getplayer(), province, a3.skill);
+		auto raid = action->raid > 0;
+		army a1(current_player, hero, true, raid); a1.fill(current_player, 0);
+		army a2(current_player, hero, true, raid);
+		army a3(0, 0, false, raid); a3.fill(province->getplayer(), province);
 		if(!move(current_player, hero, action, province, a1, a2, a3))
 			return;
 		for(auto p : a2)

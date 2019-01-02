@@ -5,8 +5,14 @@ lead: под предводительством [%1]
 casualties: Потери
 
 attack: Атака
-defence: Защита
+defend: Защита
 raid: Рейд
+sword: Меч
+shield: Щит
+diplomacy: Дипломатия
+cruelty: Жестокость
+nobility: Благородство
+will: Воля
 income: Доход
 cost: Стоимость
 squads: %1i отряда %2

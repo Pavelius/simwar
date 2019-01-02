@@ -8,9 +8,18 @@ bsreq msg_type[] = {
 	BSREQ(msg_info, lead, text_type),
 	//
 	BSREQ(msg_info, attack, text_type),
-	BSREQ(msg_info, defence, text_type),
+	BSREQ(msg_info, defend, text_type),
 	BSREQ(msg_info, raid, text_type),
+	BSREQ(msg_info, sword, text_type),
+	BSREQ(msg_info, shield, text_type),
+	BSREQ(msg_info, diplomacy, text_type),
+	BSREQ(msg_info, cruelty, text_type),
+	BSREQ(msg_info, nobility, text_type),
+	BSREQ(msg_info, will, text_type),
+	//
 	BSREQ(msg_info, income, text_type),
+	BSREQ(msg_info, income_province, text_type),
+	BSREQ(msg_info, income_units, text_type),
 	BSREQ(msg_info, cost, text_type),
 	BSREQ(msg_info, squads, text_type),
 	//

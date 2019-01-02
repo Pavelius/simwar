@@ -241,5 +241,8 @@
     <Text Include="..\script\test_ru.txt">
       <Filter>Скрипты</Filter>
     </Text>
+    <Text Include="..\errors.txt">
+      <Filter>Скрипты</Filter>
+    </Text>
   </ItemGroup>
 </Project>

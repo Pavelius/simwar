@@ -24,6 +24,7 @@ bsreq unit_type[];
 
 extern bsdata tactic_manager;
 
+struct hero_info;
 struct player_info;
 struct tip_info {
 	char*						result;
@@ -61,9 +62,9 @@ struct action_info : name_info, combat_info, prof_info {
 	province_flag_s				getprovince() const;
 };
 struct character_info : combat_info  {
-	char						bloodthirty;
+	char						cruelty;
 	char						diplomacy;
-	char						noble;
+	char						nobility;
 	char						will;
 	int							get(const char* id) const;
 };
@@ -71,8 +72,9 @@ struct landscape_info : name_info, combat_info, prof_info {
 	int							getprofit(tip_info* ti) const;
 };
 struct province_info : name_info {
-	bool						battle(char* result, const char* result_max, player_info* attacker_player, player_info* defender_player, const char* attack_skill = 0, const char* defend_skill = 0);
+	bool						battle(char* result, const char* result_max, player_info* attacker_player, player_info* defender_player, bool raid);
 	void						createwave();
+	hero_info*					gethero(const player_info* player) const;
 	player_info*				getplayer() const { return player; }
 	point						getposition() const { return position; }
 	int							getincome(tip_info* ti = 0) const;
@@ -100,6 +102,8 @@ struct hero_info : name_info {
 	const char*					getavatar() const { return avatar; }
 	action_info*				getaction() const { return action; }
 	int							getbonus(const char* id) const;
+	int							getex(const char* id) const { return get(id) + getbonus(id); }
+	int							getincome() const;
 	player_info*				getplayer() const { return player; }
 	province_info*				getprovince() const { return province; }
 	tactic_info*				gettactic() const { return tactic; }
@@ -125,6 +129,7 @@ struct troop_info {
 	int							fix(tip_info* ti, int value) const { return type->fix(ti, type->name, value); }
 	int							get(const char* id) const { return type->get(id); }
 	int							getbonus(const char* id) const { return 0; }
+	int							getincome() const { return type->income; }
 	const char*					getname() const { return type->name; }
 	const char*					getnameof() const { return type->nameof; }
 	player_info*				getplayer() const { return player; }
@@ -171,11 +176,19 @@ struct msg_info {
 	const char* winner;
 	const char* lead;
 	const char* attack;
-	const char* defence;
+	const char* defend;
 	const char* raid;
+	const char* sword;
+	const char* shield;
+	const char* diplomacy;
+	const char* cruelty;
+	const char* nobility;
+	const char* will;
 	const char* total_strenght;
 	const char *predict_fail, *predict_partial, *predict_success;
 	const char* income;
+	const char* income_province;
+	const char* income_units;
 	const char* cost;
 	const char* squads;
 	const char* title;
@@ -197,14 +210,15 @@ struct gui_info {
 struct army : adat<troop_info*, 32> {
 	hero_info*					general;
 	player_info*				player;
+	province_info*				province;
 	const tactic_info*			tactic;
-	const char*					skill;
-	bool						raid_mode;
-	constexpr army() : general(0), player(0), tactic(0), skill(""), raid_mode(false) {}
-	army(player_info* player, hero_info* general, const char* skill = 0);
-	void						fill(const player_info* player, const province_info* province, const char* skill = 0);
-	void						fill(const province_info* province);
+	bool						attack;
+	bool						raid;
+	constexpr army() : general(0), player(0), tactic(0), province(0), attack(false), raid(false) {}
+	army(player_info* player, hero_info* general, bool attack, bool raid);
+	void						fill(const player_info* player, const province_info* province);
 	int							get(const char* id, tip_info* ti, bool include_number = true) const;
+	int							getstrenght(tip_info* ti, bool include_number = true) const;
 };
 namespace draw {
 void							addaccept(char* result, const char* result_max);

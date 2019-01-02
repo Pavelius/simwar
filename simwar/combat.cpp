@@ -7,8 +7,8 @@ class combatside : public army {
 
 public:
 
-	combatside(const province_info* province, player_info* player, const char* skill) : army(player, 0, skill), strenght(0), casualties(0) {
-		fill(province);
+	combatside(const province_info* province, player_info* player, bool attack, bool raid) : army(player, 0, attack, raid), strenght(0), casualties(0) {
+		fill(player, province);
 		// Get all heroes in province and choose one best matched
 		for(auto& e : hero_data) {
 			if(!e)
@@ -40,7 +40,7 @@ public:
 		return result;
 	}
 
-	char* setstrenght(char* result, const char* result_max, const char* format, const char* id, const char* province_name) {
+	char* setstrenght(char* result, const char* result_max, const char* format, const char* province_name) {
 		char text_lead[260]; text_lead[0] = 0;
 		char text_tips[2048]; text_tips[0] = 0;
 		tip_info ti(text_tips, zendof(text_tips));
@@ -53,7 +53,7 @@ public:
 			else
 				tactic = tactic_data;
 		}
-		strenght = get(id, &ti);
+		strenght = army::getstrenght(&ti);
 		szprint(result, result_max, format, getlead(text_lead, zendof(text_lead)), text_tips, province_name);
 		return zend(result);
 	}
@@ -112,16 +112,12 @@ public:
 
 };
 
-bool province_info::battle(char* result, const char* result_max, player_info* attacker_player, player_info* defender_player, const char* attack_skill, const char* defend_skill) {
-	if(!attack_skill)
-		attack_skill = "attack";
-	if(!defend_skill)
-		defend_skill = "defend";
+bool province_info::battle(char* result, const char* result_max, player_info* attacker_player, player_info* defender_player, bool raid) {
 	auto p = result;
-	combatside attackers(this, attacker_player, attack_skill);
-	combatside defenders(this, defender_player, defend_skill);
-	p = attackers.setstrenght(p, result_max, msg.attacking_force, attack_skill, getname()); zcat(p, " ");
-	p = defenders.setstrenght(zend(p), result_max, msg.defending_force, defend_skill, getname());
+	combatside attackers(this, attacker_player, true, raid);
+	combatside defenders(this, defender_player, false, raid);
+	p = attackers.setstrenght(p, result_max, msg.attacking_force, getname()); zcat(p, " ");
+	p = defenders.setstrenght(zend(p), result_max, msg.defending_force, getname());
 	attackers.setcasualty(zend(p), result_max, defenders);
 	defenders.setcasualty(zend(p), result_max, attackers);
 	auto& winner = (attackers.getstrenght() > defenders.getstrenght()) ? attackers : defenders;
