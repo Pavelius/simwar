@@ -152,6 +152,7 @@ struct player_info : name_info {
 	province_info*				getbestprovince() const;
 	int							getgold() const { return gold; }
 	int							getincome(tip_info* ti = 0) const;
+	int							getinfluence() const { return influence; }
 	const char*					getnameof() const { return nameof; }
 	static unsigned				getheroes(hero_info** source, unsigned maximum_count, const province_info* province = 0, const player_info* player = 0);
 	static unsigned				getprovinces(province_info** source, unsigned maximum, const player_info* player = 0, province_flag_s state = AnyProvince);

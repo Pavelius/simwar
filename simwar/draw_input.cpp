@@ -283,8 +283,10 @@ static int render_player(int x, int y, const player_info* player) {
 	stringcreator sc;
 	stringbuilder sb(sc, temp);
 	sb.add("###%1\n", player->getname());
-	auto income = player->getincome(&ti);
-	sb.add(":gold:%1i[%4\"%3\"%+2i]", player->getgold(), income, tips, (income>=0) ? "+" : "-");
+	auto value = player->getincome(&ti);
+	sb.add(":gold:%1i[%4\"%3\"%+2i]", player->getgold(), value, tips, (value>=0) ? "+" : "-");
+	value = player->getinfluence();
+	sb.add(" :house:%1i", value);
 	return window(x, y, gui.window_width, temp);
 }
 

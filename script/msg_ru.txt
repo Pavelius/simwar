@@ -14,9 +14,9 @@ cruelty: Жестокость
 nobility: Благородство
 will: Воля
 income: Доход
-income_heroes: Доход от героев
+income_heroes: Расходы на героев
 income_province: Доход от провинций
-income_units: Доход от отрядов
+income_units: Расходы на войска
 cost: Стоимость
 squads: %1i отряда %2
 
