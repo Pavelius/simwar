@@ -868,9 +868,15 @@ static void choose_action() {
 			return;
 	}
 	if(action->raid || action->attack) {
-		army a1(current_player, hero, "attack"); a1.fill(0);
+		army a1(current_player, hero, "attack");
 		army a2(current_player, hero, "attack");
-		army a3(0, 0, "defend"); a3.fill(province->getplayer(), province, a3.skill);
+		army a3(0, 0, "defend");
+		if(action->raid) {
+			a1.fill(current_player, 0, "raid");
+			a2.raid_mode = true;
+		} else
+			a1.fill(current_player, 0, "attack");
+		a3.fill(province->getplayer(), province, a3.skill);
 		if(!move(current_player, hero, action, province, a1, a2, a3))
 			return;
 		for(auto p : a2)

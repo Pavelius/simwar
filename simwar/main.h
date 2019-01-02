@@ -191,7 +191,8 @@ struct army : adat<troop_info*, 32> {
 	player_info*				player;
 	const tactic_info*			tactic;
 	const char*					skill;
-	constexpr army() : general(0), player(0), tactic(0), skill("") {}
+	bool						raid_mode;
+	constexpr army() : general(0), player(0), tactic(0), skill(""), raid_mode(false) {}
 	army(player_info* player, hero_info* general, const char* skill = 0);
 	void						fill(const player_info* player, const province_info* province, const char* skill = 0);
 	void						fill(const province_info* province);
