@@ -14,6 +14,7 @@ const int player_max = 8;
 const int province_max = 128;
 
 bsreq action_type[];
+bsreq character_type[];
 bsreq landscape_type[];
 bsreq msg_type[];
 bsreq point_type[];
@@ -59,6 +60,13 @@ struct action_info : name_info, combat_info, prof_info {
 	char						recruit, support, profit, placeable;
 	province_flag_s				getprovince() const;
 };
+struct character_info : combat_info  {
+	char						bloodthirty;
+	char						diplomacy;
+	char						noble;
+	char						will;
+	int							get(const char* id) const;
+};
 struct landscape_info : name_info, combat_info, prof_info {
 	int							getprofit(tip_info* ti) const;
 };
@@ -81,7 +89,7 @@ private:
 	short						support[player_max];
 	province_info*				neighbors[8];
 };
-struct trait_info : name_info, combat_info {
+struct trait_info : name_info, character_info {
 };
 struct tactic_info : name_info, combat_info {
 	constexpr tactic_info(const char* id) : name_info(id), combat_info() {}

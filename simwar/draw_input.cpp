@@ -438,19 +438,18 @@ static int render_hero(int x, int y, int width, hero_info* e, bool hilite, bool 
 	}
 	draw::textf(x1, y - 3, rc.x2 - x1, temp);
 	if(hittest == AreaHilited || hittest == AreaHilitedPressed) {
-		static const char* abilities[] = {"attack", "defence", "raid", "sword", "shield"};
 		temp[0] = 0;
 		// Ability block
 		auto ps = zend(temp);
 		auto ph = hero_info::metadata;
-		for(auto text : abilities) {
-			auto pf = msg_type->find(text);
+		for(auto ppf = character_type; *ppf; ppf++) {
+			auto pf = msg_type->find(ppf->id);
 			if(!pf)
 				continue;
 			auto pn = (const char*)pf->get(pf->ptr(&msg));
 			if(!pn)
 				continue;
-			auto value = e->get(text);
+			auto value = e->get(ppf->id);
 			if(!value)
 				continue;
 			if(ps[0])

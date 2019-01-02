@@ -148,6 +148,9 @@
     <ClCompile Include="army.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
+    <ClCompile Include="character_info.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="draw.h">
