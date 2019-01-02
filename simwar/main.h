@@ -31,7 +31,7 @@ struct tip_info {
 	const char*					result_max;
 	const char*					text;
 	const char*					separator;
-	constexpr tip_info(char* result, const char* result_max) :result(result), result_max(result_max), text("%+1i %2"), separator("\r\n") { result[0] = 0; }
+	constexpr tip_info(char* result, const char* result_max) :result(result), result_max(result_max), text("[%3%+1i]\t%2"), separator("\n") { result[0] = 0; }
 	template<unsigned N> constexpr tip_info(char(&result)[N]) : tip_info(result, result + sizeof(result)) {}
 };
 struct combat_info {
@@ -69,7 +69,7 @@ struct character_info : combat_info  {
 	int							get(const char* id) const;
 };
 struct landscape_info : name_info, combat_info, prof_info {
-	int							getprofit(tip_info* ti) const;
+	int							getincome(tip_info* ti) const;
 };
 struct province_info : name_info {
 	bool						battle(char* result, const char* result_max, player_info* attacker_player, player_info* defender_player, bool raid);
@@ -150,6 +150,7 @@ struct player_info : name_info {
 	static void					after_turn();
 	static void					before_turn();
 	province_info*				getbestprovince() const;
+	int							getgold() const { return gold; }
 	int							getincome(tip_info* ti = 0) const;
 	const char*					getnameof() const { return nameof; }
 	static unsigned				getheroes(hero_info** source, unsigned maximum_count, const province_info* province = 0, const player_info* player = 0);
@@ -189,6 +190,7 @@ struct msg_info {
 	const char* income;
 	const char* income_province;
 	const char* income_units;
+	const char* income_heroes;
 	const char* cost;
 	const char* squads;
 	const char* title;

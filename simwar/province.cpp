@@ -27,7 +27,7 @@ province_flag_s province_info::getstatus(const player_info* player) const {
 int province_info::getincome(tip_info* ti) const {
 	auto result = 0;
 	if(landscape)
-		result += landscape->getprofit(ti);
+		result += landscape->getincome(ti);
 	result += level * game.income_per_level;
 	return result;
 }

@@ -277,11 +277,14 @@ static void render_power(int x, int y, const player_info* owner, const province_
 }
 
 static int render_player(int x, int y, const player_info* player) {
-	char temp[2048]; temp[0] = 0;
+	char temp[8192]; temp[0] = 0;
+	char tips[1024]; tips[0] = 0;
+	tip_info ti(tips);
 	stringcreator sc;
 	stringbuilder sb(sc, temp);
 	sb.add("###%1\n", player->getname());
-	sb.add(":gold:2+10");
+	auto income = player->getincome(&ti);
+	sb.add(":gold:%1i[%4\"%3\"%+2i]", player->getgold(), income, tips, (income>=0) ? "+" : "-");
 	return window(x, y, gui.window_width, temp);
 }
 

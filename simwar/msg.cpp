@@ -20,6 +20,7 @@ bsreq msg_type[] = {
 	BSREQ(msg_info, income, text_type),
 	BSREQ(msg_info, income_province, text_type),
 	BSREQ(msg_info, income_units, text_type),
+	BSREQ(msg_info, income_heroes, text_type),
 	BSREQ(msg_info, cost, text_type),
 	BSREQ(msg_info, squads, text_type),
 	//

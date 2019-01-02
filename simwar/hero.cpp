@@ -10,8 +10,7 @@ bsreq hero_info::metadata[] = {
 	BSREQ(hero_info, traits, trait_type),
 	BSREQ(hero_info, player, player_info::metadata),
 	BSREQ(hero_info, province, province_info::metadata),
-{0}
-};
+{}};
 adat<hero_info, 128> hero_data;
 bsdata hero_manager("hero", hero_data, hero_info::metadata);
 
@@ -39,7 +38,7 @@ int	hero_info::getincome() const {
 	auto result = 0;
 	for(auto p : traits) {
 		if(p)
-			result++;
+			result--;
 	}
 	result += getex("nobility");
 	return result;

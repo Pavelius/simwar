@@ -1,3 +1,0 @@
-﻿In file script/msg_ru.txt you need add next lines
-income_province:
-income_units:

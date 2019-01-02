@@ -118,7 +118,7 @@ static const char* textspc(const char* p, int x0, int& x, int tab_width) {
 		case '\t':
 			p++;
 			if(!tab_width)
-				tb = draw::textw(' ') * 4;
+				tb = draw::textw('A') * 3;
 			else
 				tb = tab_width;
 			x = x0 + ((x - x0 + tb) / tb)*tb;
@@ -325,12 +325,12 @@ int draw::textf(int x, int y, int width, const char* string, int* max_width,
 			y += render_control(&p, x, y, width);
 		} else {
 			y += textfln(x, y, width, &p, color_text, &mw2, tab_width);
-			if(p[0]) {
-				if(p[0] == ':' && p[1] == ':' && p[2] == ':')
-					p += 3;
-				else
-					y += draw::texth() / 4;
-			}
+			//if(p[0]) {
+			//	if(p[0] == ':' && p[1] == ':' && p[2] == ':')
+			//		p += 3;
+			//	else
+			//		y += draw::texth() / 4;
+			//}
 		}
 		// Возвратим стандартные настройки блока
 		font = metrics::font;

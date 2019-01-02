@@ -36,7 +36,7 @@ int player_info::getincome(tip_info* ti) const {
 			continue;
 		r += e.getincome();
 	}
-	result += fix(ti, msg.income_units, r); r = 0;
+	result += fix(ti, msg.income_heroes, r); r = 0;
 	return result;
 }
 
