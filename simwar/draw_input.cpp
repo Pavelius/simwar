@@ -209,8 +209,6 @@ void control::view(const rect& rc) {
 		current_hilite = this;
 	if((control*)getfocus() == this)
 		current_focus_control = this;
-	if(show_background)
-		rectf(rc, colors::window);
 	if(show_border)
 		rectb(rc, colors::border);
 }

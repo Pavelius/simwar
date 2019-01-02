@@ -183,20 +183,12 @@ struct gui_info {
 	short						padding;
 };
 namespace draw {
-struct runable {
-	virtual void				execute() const = 0;
-	virtual bool				isdisabled() const = 0;
+namespace controls {
+struct units : list {
+	adat<troop_info*, 32>		source;
+	virtual const char*			getname(char* result, const char* result_max, int line, int column) const override { return source.data[line]->getname(); }
 };
-struct cmd : runable {
-	constexpr cmd() : proc(0), param(0) {}
-	constexpr cmd(callback_proc proc, int param = 0) : proc(proc), param(param) {}
-	explicit operator bool() const { return proc != 0; }
-	void						execute() const override { draw::execute(proc, param); }
-	bool						isdisabled() const { return false; }
-private:
-	callback_proc				proc;
-	int							param;
-};
+}
 void							addaccept(char* result, const char* result_max);
 void							addbutton(char* result, const char* result_max, const char* name);
 void							avatar(int x, int y, const char* id);

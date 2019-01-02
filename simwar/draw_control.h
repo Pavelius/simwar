@@ -11,12 +11,24 @@ enum column_size_s : unsigned char {
 enum select_mode_s : unsigned char {
 	SelectCell, SelectText, SelectRow,
 };
+struct runable {
+	virtual void			execute() const = 0;
+	virtual bool			isdisabled() const = 0;
+};
+struct cmd : runable {
+	constexpr cmd() : proc(0), param(0) {}
+	constexpr cmd(callback_proc proc, int param = 0) : proc(proc), param(param) {}
+	explicit operator bool() const { return proc != 0; }
+	void					execute() const override { draw::execute(proc, param); }
+	bool					isdisabled() const { return false; }
+private:
+	callback_proc			proc;
+	int						param;
+};
 namespace controls {
 struct control {
-	typedef bool			(control::*callback)(bool run);
 	bool					show_border;
-	bool					show_background;
-	constexpr control() : show_border(true), show_background(true) {}
+	constexpr control() : show_border(true) {}
 	virtual ~control() {}
 	virtual const char*		getlabel(char* result, const char* result_maximum) const { return 0; }
 	virtual bool			isdisabled() const { return false; }
