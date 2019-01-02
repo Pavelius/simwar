@@ -145,6 +145,9 @@
     <ClCompile Include="bsdata_locale.cpp">
       <Filter>Коллекции</Filter>
     </ClCompile>
+    <ClCompile Include="army.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="draw.h">

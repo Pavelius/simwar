@@ -229,8 +229,10 @@ static bool control_focus() {
 			return true;
 		}
 	}
-	if(current_focus_control)
-		return current_focus_control->keyinput(hot.key);
+	if(current_focus_control) {
+		if(current_focus_control->keyinput(hot.key))
+			return true;
+	}
 	int id;
 	switch(hot.key) {
 	case 0:
@@ -272,6 +274,15 @@ bool draw::ismodal() {
 static void render_power(int x, int y, const player_info* owner, const province_info* province) {
 	draw::circlef(x, y, 4 * 4, colors::green, 128);
 	draw::circle(x, y, 4 * 4, colors::green);
+}
+
+static int render_player(int x, int y, const player_info* player) {
+	char temp[2048]; temp[0] = 0;
+	stringcreator sc;
+	stringbuilder sb(sc, temp);
+	sb.add("###%1\n", player->getname());
+	sb.add(":gold:2+10");
+	return window(x, y, gui.window_width, temp);
 }
 
 static void choose_current_province() {
@@ -483,15 +494,17 @@ static int render_province(int x, int y, const province_info* province) {
 	return draw::window(x, y, gui.window_width, temp) + gui.border * 2 + gui.padding;
 }
 
-static int render_board(const player_info* province_owner, player_info* hero_owner, callback_proc choose_province, callback_proc choose_hero, const province_info* province) {
+static int render_board(const player_info* province_owner, player_info* current_player, callback_proc choose_province, callback_proc choose_hero, const province_info* province) {
 	render_frame({0, 0, draw::getwidth(), draw::getheight()}, province_owner, choose_province);
 	auto x = gui.border + gui.border;
 	auto y = gui.padding + gui.border;
+	if(current_player)
+		y += render_player(x, y, current_player);
 	if(province)
 		y += render_province(x, y, province);
 	x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
 	y = gui.padding + gui.border;
-	return render_heroes(x, y, hero_owner, choose_hero);
+	return render_heroes(x, y, current_player, choose_hero);
 }
 
 static int render_board(const player_info* province_owner, player_info* hero_owner, callback_proc choose_province, callback_proc choose_hero) {
@@ -543,6 +556,26 @@ void control_standart() {
 		return;
 	if(control_board())
 		return;
+}
+
+static void draw_icon(int& x, int& y, int x0, int x2, int* max_width, int& w, const char* id) {
+	static amap<const char*, draw::surface> source;
+	auto p = source.find(id);
+	if(!p) {
+		char temp[260];
+		p = source.add(id, surface());
+		memset(p, 0, sizeof(*p));
+		p->value.read(szurl(temp, "art/icons", id, "png"));
+	}
+	auto dy = draw::texth();
+	w = p->value.width;
+	if(x + w > x2) {
+		if(max_width)
+			*max_width = imax(*max_width, x - x0);
+		x = x0;
+		y += draw::texth();
+	}
+	draw::blit(*draw::canvas, x, y + dy - p->value.height - 1, w, p->value.height, ImageTransparent, p->value, 0, 0);
 }
 
 areas draw::hilite(rect rc) {
@@ -638,14 +671,29 @@ static void render_tooltips() {
 }
 
 void draw::initialize() {
-	colors::form = colors::black;
-	colors::h1 = colors::white.mix(colors::form, 128);
-	colors::h2 = colors::white.mix(colors::form, 144);
-	colors::h3 = colors::white.mix(colors::form, 196);
-	colors::text = colors::white;
+	colors::active = color::create(172, 128, 0);
+	colors::border = color::create(73, 73, 80);
+	colors::button = color::create(0, 122, 204);
+	colors::form = color::create(32, 32, 32);
+	colors::window = color::create(64, 64, 64);
+	colors::text = color::create(255, 255, 255);
+	colors::edit = color::create(38, 79, 120);
+	colors::special = color::create(255, 244, 32);
+	colors::border = colors::window.mix(colors::text, 128);
+	colors::tips::text = color::create(255, 255, 255);
+	colors::tips::back = color::create(100, 100, 120);
+	colors::tabs::back = color::create(255, 204, 0);
+	colors::tabs::text = colors::black;
+	colors::h1 = colors::text.mix(colors::edit, 64);
+	colors::h2 = colors::text.mix(colors::edit, 96);
+	colors::h3 = colors::text.mix(colors::edit, 128);
+	//colors::h1 = colors::white.mix(colors::form, 128);
+	//colors::h2 = colors::white.mix(colors::form, 144);
+	//colors::h3 = colors::white.mix(colors::form, 196);
 	draw::font = metrics::font;
 	draw::fore = colors::text;
 	draw::fore_stroke = colors::blue;
+	set(draw_icon);
 }
 
 bool draw::initializemap() {
@@ -666,6 +714,23 @@ bool draw::initializemap() {
 //			continue;
 //	}
 //}
+
+struct army_list : army, list {
+	army_list(army& source) : source(source) {}
+	army&		source;
+	virtual const char* getname(char* result, const char* result_maximum, int line, int column) const override {
+		switch(column) {
+		case 0:
+			szprint(result, result_maximum, source.data[line]->getname());
+			szupper(result, 1);
+			break;
+		default:
+			return "";
+		}
+		return result;
+	}
+	virtual int getmaximum() const override { return source.getcount(); }
+};
 
 void draw::report(const char* format) {
 	while(ismodal()) {
@@ -710,6 +775,32 @@ province_info* draw::getprovince(player_info* player, hero_info* hero, action_in
 	return (province_info*)getresult();
 }
 
+bool draw::move(const player_info* player, hero_info* hero, const action_info* action, const province_info* province, army& s1, army& s2) {
+	army_list u1(s1);
+	army_list u2(s2);
+	while(ismodal()) {
+		rect rc = {0, 0, draw::getwidth(), draw::getheight()};
+		render_frame(rc, player, 0);
+		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
+		auto y = gui.padding + gui.border;
+		y += render_hero(x, y, gui.hero_window_width, hero, false, false, 0) + 1;
+		y += windowb(x, y, gui.hero_window_width, action->getname(), cmd(), gui.border) + 1;
+		y += windowb(x, y, gui.hero_window_width, msg.accept, cmd(breakparam, 1)) + 1;
+		y += windowb(x, y, gui.hero_window_width, msg.cancel, cmd(breakparam, 0)) + 1;
+		x = gui.border * 2;
+		y = gui.padding + gui.border;
+		auto w = gui.window_width / 2;
+		auto pw = gui.padding / 2;
+		draw::window({x, y, x + gui.window_width, y + gui.window_width});
+		u1.view({x, y, x + w - pw, y + gui.window_width});
+		x = x + w + gui.padding;
+		u2.view({x, y, x + w - pw, y + gui.window_width});
+		domodal();
+		control_standart();
+	}
+	return getresult()!=0;
+}
+
 static void choose_action() {
 	hero_info* hero = (hero_info*)hot.param;
 	if(!hero)
@@ -722,6 +813,12 @@ static void choose_action() {
 		auto choose_mode = action->getprovince();
 		province = getprovince(current_player, hero, action);
 		if(!province)
+			return;
+	}
+	if(action->raid || action->attack) {
+		army a1(current_player, 0);
+		army a2;
+		if(!move(current_player, hero, action, province, a1, a2))
 			return;
 	}
 	hero->setaction(action);
@@ -739,7 +836,7 @@ void player_info::makemove() {
 	while(ismodal()) {
 		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
 		auto y = render_board(current_player, current_player, 0, choose_action, current_province) + gui.padding * 3;
-		button(x, y, gui.hero_window_width, "Закончить ход", cmd(end_turn));
+		buttonw(x, y, gui.hero_window_width, "Закончить ход", cmd(end_turn));
 		domodal();
 		control_standart();
 	}
@@ -766,7 +863,7 @@ void draw::addbutton(char* result, const char* result_max, const char* name) {
 	szprint(zend(result), result_max, "\n$(%1)", name);
 }
 
-int	draw::button(int x, int y, int width, const char* label, const runable& e, unsigned key) {
+int	draw::buttonw(int x, int y, int width, const char* label, const runable& e, unsigned key) {
 	return windowb(x, y, width, label, e, 0, key);
 }
 

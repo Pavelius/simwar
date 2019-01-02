@@ -40,11 +40,6 @@ static bool initialize_map() {
 	return result;
 }
 
-void test_units() {
-	draw::controls::units u1;
-	u1.view({0, 0, 200, 200});
-}
-
 int main(int argc, char* argv[]) {
 	if(!initialize_messages({"msg"}))
 		return 0;

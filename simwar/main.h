@@ -182,22 +182,23 @@ struct gui_info {
 	short						button_width, window_width, tips_width, hero_width, hero_window_width, control_border;
 	short						padding;
 };
-namespace draw {
-namespace controls {
-struct units : list {
-	adat<troop_info*, 32>		source;
-	virtual const char*			getname(char* result, const char* result_max, int line, int column) const override { return source.data[line]->getname(); }
+struct army : adat<troop_info*, 32> {
+	army() {}
+	army(const player_info* player, const province_info* province) { fill(player, province); }
+	void						fill(const player_info* player, const province_info* province);
 };
-}
+namespace draw {
 void							addaccept(char* result, const char* result_max);
 void							addbutton(char* result, const char* result_max, const char* name);
 void							avatar(int x, int y, const char* id);
-int								button(int x, int y, int width, const char* label, const runable& e, unsigned key = 0);
-bool							initializemap();
+inline int						button(int x, int y, int width, const char* label, const runable& e, unsigned key = 0) { return 0; }
+int								buttonw(int x, int y, int width, const char* label, const runable& e, unsigned key = 0);
 action_info*					getaction(player_info* player, hero_info* hero);
 color							getcolor(province_flag_s id);
 province_info*					getprovince(player_info* player, hero_info* hero, action_info* action);
 areas							hilite(rect rc);
+bool							initializemap();
+bool							move(const player_info* player, hero_info* hero, const action_info* action, const province_info* province, army& s1, army& s2);
 void							report(const char* format);
 areas							window(rect rc, bool disabled = false, bool hilight = false, int border = 0);
 int								window(int x, int y, int width, const char* string);

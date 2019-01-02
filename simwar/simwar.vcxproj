@@ -120,6 +120,7 @@
   <ItemGroup>
     <ClCompile Include="action.cpp" />
     <ClCompile Include="archive.cpp" />
+    <ClCompile Include="army.cpp" />
     <ClCompile Include="bsdata.cpp" />
     <ClCompile Include="bsdata_check.cpp" />
     <ClCompile Include="bsdata_locale.cpp" />
