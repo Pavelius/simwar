@@ -22,7 +22,13 @@ void hero_info::before_turn() {
 }
 
 int hero_info::get(const char* id) const {
-	return 0;
+	auto r = 0;
+	for(auto p : traits) {
+		if(!p)
+			continue;
+		r += p->get(id);
+	}
+	return r;
 }
 
 int hero_info::getbonus(const char* id) const {

@@ -1,27 +1,14 @@
 #include "main.h"
 
-class combatside {
+class combatside : public army {
 
-	adat<troop_info*, 32>	units;
-	hero_info*				general;
-	tactic_info*			tactic;
-	player_info*			player;
 	int						strenght;
 	int						casualties;
 
 public:
 
-	combatside(const province_info* province, player_info* player) : player(player), general(0), tactic(0), strenght(0), casualties(0) {
-		// Get all units in province by one owner
-		for(auto& e : troop_data) {
-			if(!e)
-				continue;
-			if(e.getplayer() != player)
-				continue;
-			if(e.getprovince(player) != province)
-				continue;
-			units.add(&e);
-		}
+	combatside(const province_info* province, player_info* player, const char* skill) : army(player, 0, skill), strenght(0), casualties(0) {
+		fill(province);
 		// Get all heroes in province and choose one best matched
 		for(auto& e : hero_data) {
 			if(!e)
@@ -37,26 +24,11 @@ public:
 	}
 
 	operator bool() const {
-		return units.getcount();
+		return getcount();
 	}
 
 	void shuffle() {
-		zshuffle(units.data, units.count);
-	}
-
-	int get(const char* id, tip_info* ti, bool include_number = true) const {
-		auto r = 0;
-		if(ti && include_number)
-			zcpy(ti->result, "[\"");
-		if(general)
-			r += general->fix(ti, general->get(id) + general->getbonus(id));
-		for(auto p : units)
-			r += p->fix(ti, p->get(id) + p->getbonus(id));
-		if(tactic)
-			r += tactic->fix(ti, tactic->get(id));
-		if(ti && include_number)
-			szprint(zend(ti->result), ti->result_max, "\"%1i]", r);
-		return r;
+		zshuffle(data, count);
 	}
 
 	char* getlead(char* result, const char* result_max) const {
@@ -127,11 +99,11 @@ public:
 				szprint(result, result_max, "\n%1 %2: ", msg.casualties, getsideof());
 				ps = zend(result);
 			}
-			if(units.count>0) {
+			if(getcount()>0) {
 				if(ps[0])
 					zcat(ps, ", ");
-				zcat(result, units.data[units.count - 1]->getname());
-				units.count--;
+				zcat(result, data[count - 1]->getname());
+				count--;
 			}
 		}
 		if(result[0])
@@ -146,8 +118,8 @@ bool province_info::battle(char* result, const char* result_max, player_info* at
 	if(!defend_skill)
 		defend_skill = "defend";
 	auto p = result;
-	combatside attackers(this, attacker_player);
-	combatside defenders(this, defender_player);
+	combatside attackers(this, attacker_player, attack_skill);
+	combatside defenders(this, defender_player, defend_skill);
 	p = attackers.setstrenght(p, result_max, msg.attacking_force, attack_skill, getname()); zcat(p, " ");
 	p = defenders.setstrenght(zend(p), result_max, msg.defending_force, defend_skill, getname());
 	attackers.setcasualty(zend(p), result_max, defenders);

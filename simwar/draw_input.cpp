@@ -418,7 +418,9 @@ static int render_hero(int x, int y, int width, hero_info* e, bool hilite, bool 
 	auto pa = e->getavatar();
 	int height = gui.hero_width;
 	szprint(zend(temp), zendof(temp), "###%1\n", e->getname());
-	for(auto p : e->getbonuses()) {
+	for(auto p : e->traits) {
+		if(!p)
+			continue;
 		zcat(temp, p->getname());
 		zcat(temp, "\n");
 	}
@@ -436,23 +438,20 @@ static int render_hero(int x, int y, int width, hero_info* e, bool hilite, bool 
 	}
 	draw::textf(x1, y - 3, rc.x2 - x1, temp);
 	if(hittest == AreaHilited || hittest == AreaHilitedPressed) {
-		static const char* abilities[] = {"attack", "defence", "raid", "enemy_casualties", "friendly_casualties"};
+		static const char* abilities[] = {"attack", "defence", "raid", "sword", "shield"};
 		temp[0] = 0;
 		// Ability block
 		auto ps = zend(temp);
 		auto ph = hero_info::metadata;
 		for(auto text : abilities) {
-			auto pf = ph->find(text);
-			if(!pf)
-				continue;
-			auto value = pf->get(pf->ptr(e));
-			if(!value)
-				continue;
-			pf = msg_type->find(text);
+			auto pf = msg_type->find(text);
 			if(!pf)
 				continue;
 			auto pn = (const char*)pf->get(pf->ptr(&msg));
 			if(!pn)
+				continue;
+			auto value = e->get(text);
+			if(!value)
 				continue;
 			if(ps[0])
 				zcat(temp, "\n");
@@ -716,12 +715,12 @@ bool draw::initializemap() {
 //}
 
 struct army_list : list {
-	
+
 	army&		source;
 	int			id;
 
 	army_list(army& source) : source(source), id(0) {}
-	
+
 	const char* getname(char* result, const char* result_maximum, int line, int column) const override {
 		switch(column) {
 		case 0:
@@ -733,7 +732,7 @@ struct army_list : list {
 		}
 		return result;
 	}
-	
+
 	int getmaximum() const override {
 		return source.getcount();
 	}
@@ -800,9 +799,10 @@ province_info* draw::getprovince(player_info* player, hero_info* hero, action_in
 	return (province_info*)getresult();
 }
 
-bool draw::move(const player_info* player, hero_info* hero, const action_info* action, const province_info* province, army& s1, army& s2) {
+bool draw::move(const player_info* player, hero_info* hero, const action_info* action, const province_info* province, army& s1, army& s2, const army& a3) {
 	army_list u1(s1); u1.id = 10;
-	army_list u2(s2); u1.id = 11;
+	army_list u2(s2); u2.id = 11;
+	auto th = texth() * 4;
 	while(ismodal()) {
 		rect rc = {0, 0, draw::getwidth(), draw::getheight()};
 		render_frame(rc, player, 0);
@@ -814,13 +814,30 @@ bool draw::move(const player_info* player, hero_info* hero, const action_info* a
 		y += windowb(x, y, gui.hero_window_width, msg.cancel, cmd(breakparam, 0)) + 1;
 		x = gui.border * 2;
 		y = gui.padding + gui.border;
+		auto x1 = x;
 		auto w = gui.window_width / 2;
 		auto pw = gui.padding / 2;
 		y += render_player(x, y, player);
-		draw::window({x, y, x + gui.window_width, y + gui.window_width});
-		u1.view({x, y, x + w - pw, y + gui.window_width});
+		auto y2 = getheight() - gui.padding * 2 - gui.border;
+		auto y3 = y2 - th;
+		draw::window({x, y, x + gui.window_width, y2});
+		u1.view({x, y, x + w - pw, y3});
 		x = x + w + gui.padding;
-		u2.view({x, y, x + w - pw, y + gui.window_width});
+		u2.view({x, y, x + w - pw, y3});
+		x = x1; y = y3;
+		char tip_temp[2048];
+		tip_info ti(tip_temp);
+		auto attacker_strenght = s2.get(s2.skill, &ti);
+		char temp[4096]; zprint(temp, msg.total_strenght, tip_temp);
+		auto defender_strenght = a3.get(a3.skill, 0);
+		szprint(zend(temp), zendof(temp), " ");
+		if(attacker_strenght < defender_strenght)
+			szprint(zend(temp), zendof(temp), msg.predict_fail);
+		else if(attacker_strenght <= defender_strenght + 1)
+			szprint(zend(temp), zendof(temp), msg.predict_partial);
+		else
+			szprint(zend(temp), zendof(temp), msg.predict_success);
+		y += textf(x, y, gui.window_width, temp);
 		domodal();
 		control_standart();
 		if(hot.key == u1.id) {
@@ -833,7 +850,7 @@ bool draw::move(const player_info* player, hero_info* hero, const action_info* a
 			u1.source.add(p1);
 		}
 	}
-	return getresult()!=0;
+	return getresult() != 0;
 }
 
 static void choose_action() {
@@ -851,9 +868,10 @@ static void choose_action() {
 			return;
 	}
 	if(action->raid || action->attack) {
-		army a1(current_player, 0);
-		army a2;
-		if(!move(current_player, hero, action, province, a1, a2))
+		army a1(current_player, hero, "attack"); a1.fill(0);
+		army a2(current_player, hero, "attack");
+		army a3(0, 0, "defend"); a3.fill(province->getplayer(), province, a3.skill);
+		if(!move(current_player, hero, action, province, a1, a2, a3))
 			return;
 		for(auto p : a2)
 			p->setmove(province);

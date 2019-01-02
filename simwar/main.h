@@ -30,6 +30,7 @@ struct tip_info {
 	const char*					text;
 	const char*					separator;
 	constexpr tip_info(char* result, const char* result_max) :result(result), result_max(result_max), text("%+1i %2"), separator("\r\n") { result[0] = 0; }
+	template<unsigned N> constexpr tip_info(char(&result)[N]) : tip_info(result, result + sizeof(result)) {}
 };
 struct combat_info {
 	char						attack, defend, raid;
@@ -91,7 +92,6 @@ struct hero_info : name_info {
 	const char*					getavatar() const { return avatar; }
 	action_info*				getaction() const { return action; }
 	int							getbonus(const char* id) const;
-	aref<trait_info*>			getbonuses() { return traits; }
 	player_info*				getplayer() const { return player; }
 	province_info*				getprovince() const { return province; }
 	tactic_info*				gettactic() const { return tactic; }
@@ -99,6 +99,7 @@ struct hero_info : name_info {
 	bool						isready() const { return true; }
 	void						setaction(action_info* value) { action = value; }
 	void						setprovince(province_info* value) { province = value; }
+	trait_info*					traits[4];
 private:
 	action_info*				action;
 	const char*					avatar;
@@ -106,13 +107,13 @@ private:
 	player_info*				player;
 	province_info*				province;
 	tactic_info*				tactic;
-	adat<trait_info*, 4>		traits;
 };
 struct unit_info : name_info, combat_info, prof_info {
 	const char*					nameof;
 };
 struct troop_info {
 	explicit operator bool() const { return type != 0; }
+	static int					compare(const void* p1, const void* p2);
 	int							fix(tip_info* ti, int value) const { return type->fix(ti, type->name, value); }
 	int							get(const char* id) const { return type->get(id); }
 	int							getbonus(const char* id) const { return 0; }
@@ -164,6 +165,8 @@ struct msg_info {
 	const char* attack;
 	const char* defence;
 	const char* raid;
+	const char* total_strenght;
+	const char *predict_fail, *predict_partial, *predict_success;
 	const char* income;
 	const char* cost;
 	const char* squads;
@@ -184,9 +187,15 @@ struct gui_info {
 	short						padding;
 };
 struct army : adat<troop_info*, 32> {
-	army() {}
-	army(const player_info* player, const province_info* province) { fill(player, province); }
-	void						fill(const player_info* player, const province_info* province);
+	hero_info*					general;
+	player_info*				player;
+	const tactic_info*			tactic;
+	const char*					skill;
+	constexpr army() : general(0), player(0), tactic(0), skill("") {}
+	army(player_info* player, hero_info* general, const char* skill = 0);
+	void						fill(const player_info* player, const province_info* province, const char* skill = 0);
+	void						fill(const province_info* province);
+	int							get(const char* id, tip_info* ti, bool include_number = true) const;
 };
 namespace draw {
 void							addaccept(char* result, const char* result_max);
@@ -199,7 +208,7 @@ color							getcolor(province_flag_s id);
 province_info*					getprovince(player_info* player, hero_info* hero, action_info* action);
 areas							hilite(rect rc);
 bool							initializemap();
-bool							move(const player_info* player, hero_info* hero, const action_info* action, const province_info* province, army& s1, army& s2);
+bool							move(const player_info* player, hero_info* hero, const action_info* action, const province_info* province, army& s1, army& s2, const army& a3);
 void							report(const char* format);
 areas							window(rect rc, bool disabled = false, bool hilight = false, int border = 0);
 int								window(int x, int y, int width, const char* string);

@@ -9,14 +9,21 @@ bsreq troop_info::metadata[] = {
 adat<troop_info, 256> troop_data;
 bsdata troop_manager("troop", troop_data, troop_info::metadata);
 
-static int compare_troop(const void* p1, const void* p2) {
+int troop_info::compare(const void* p1, const void* p2) {
 	auto e1 = *((troop_info**)p1);
 	auto e2 = *((troop_info**)p2);
-	return strcmp(e1->getname(), e2->getname());
+	auto rs = strcmp(e1->getname(), e2->getname());
+	if(rs != 0)
+		return rs;
+	if(e1->move > e2->move)
+		return 1;
+	else if(e1->move < e2->move)
+		return -1;
+	return 0;
 }
 
 void troop_info::sort(troop_info** source, unsigned count) {
-	qsort(source, count, sizeof(source[0]), compare_troop);
+	qsort(source, count, sizeof(source[0]), compare);
 }
 
 const char* troop_info::getpresent(char* result, const char* result_maximum, troop_info** objects, unsigned count) {

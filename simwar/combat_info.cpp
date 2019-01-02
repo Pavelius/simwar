@@ -1,11 +1,11 @@
 #include "main.h"
 
 bsreq combat_type[] = {
-	BSREQ(unit_info, attack, number_type),
-	BSREQ(unit_info, defend, number_type),
-	BSREQ(unit_info, raid, number_type),
-	BSREQ(unit_info, sword, number_type),
-	BSREQ(unit_info, shield, number_type),
+	BSREQ(combat_info, attack, number_type),
+	BSREQ(combat_info, defend, number_type),
+	BSREQ(combat_info, raid, number_type),
+	BSREQ(combat_info, sword, number_type),
+	BSREQ(combat_info, shield, number_type),
 {}};
 
 int combat_info::get(const char* id) const {

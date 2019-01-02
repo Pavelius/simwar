@@ -66,7 +66,7 @@ struct bsval {
 	constexpr bsval(void* data, const bsreq* type) : type(type), data(data) {}
 	explicit operator bool() const { return data != 0; }
 	bsval&				dereference();
-	int					get() const { return type->get(type->ptr(data)); }
+	int					get() const { return data ? type->get(type->ptr(data)) : 0; }
 	bsval&				get(const char* id);
 	const char*			getid() const;
 	const char*			getname() const;
