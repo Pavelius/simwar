@@ -50,7 +50,7 @@ unsigned player_info::getheroes(hero_info** source, unsigned maximum_count, cons
 	return ps - source;
 }
 
-unsigned player_info::gettroops(troop_info** source, unsigned maximum_count, const province_info* province, const player_info* player) {
+unsigned player_info::gettroops(troop_info** source, unsigned maximum_count, const province_info* province, const player_info* player, const player_info* player_move) {
 	auto ps = source;
 	auto pe = ps + maximum_count;
 	for(auto& e : troop_data) {
@@ -58,7 +58,7 @@ unsigned player_info::gettroops(troop_info** source, unsigned maximum_count, con
 			continue;
 		if(player && e.getplayer() != player)
 			continue;
-		if(province && e.getprovince() != province)
+		if(province && e.getprovince(player_move) != province)
 			continue;
 		if(ps<pe)
 			*ps++ = &e;

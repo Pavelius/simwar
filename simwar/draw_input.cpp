@@ -362,12 +362,12 @@ static void render_province_general(rect rc, point mouse, const player_info* pla
 			pt.y += texth();
 		}
 		troop_info* troop_array[8];
-		count = player_info::gettroops(troop_array, lenghtof(troop_array), &e, 0);
+		count = player_info::gettroops(troop_array, lenghtof(troop_array), &e, 0, player);
 		if(count) {
 			troop_info::sort(troop_array, count);
 			troop_info::getpresent(temp, zendof(temp), troop_array, count);
 			rect rc = {0, 0, 200, 0}; draw::textw(rc, temp);
-			pt.y += draw::text({pt.x - rc.width() / 2, pt.y, pt.x + rc.width() / 2, pt.y + rc.height()}, temp, AlignCenter);
+			pt.y += draw::text({pt.x - rc.width() / 2, pt.y, pt.x + rc.width() / 2 + 1, pt.y + rc.height()}, temp, AlignCenter);
 		}
 	}
 }
@@ -715,10 +715,14 @@ bool draw::initializemap() {
 //	}
 //}
 
-struct army_list : army, list {
-	army_list(army& source) : source(source) {}
+struct army_list : list {
+	
 	army&		source;
-	virtual const char* getname(char* result, const char* result_maximum, int line, int column) const override {
+	int			id;
+
+	army_list(army& source) : source(source), id(0) {}
+	
+	const char* getname(char* result, const char* result_maximum, int line, int column) const override {
 		switch(column) {
 		case 0:
 			szprint(result, result_maximum, source.data[line]->getname());
@@ -729,7 +733,28 @@ struct army_list : army, list {
 		}
 		return result;
 	}
-	virtual int getmaximum() const override { return source.getcount(); }
+	
+	int getmaximum() const override {
+		return source.getcount();
+	}
+
+	troop_info* getcurrent() {
+		if(current < source.getcount())
+			return source.data[current];
+		return 0;
+	}
+
+	bool keyinput(unsigned id) override {
+		switch(id) {
+		case KeyEnter:
+			hot.key = this->id;
+			break;
+		default:
+			return control::keyinput(id);
+		}
+		return true;
+	}
+
 };
 
 void draw::report(const char* format) {
@@ -776,8 +801,8 @@ province_info* draw::getprovince(player_info* player, hero_info* hero, action_in
 }
 
 bool draw::move(const player_info* player, hero_info* hero, const action_info* action, const province_info* province, army& s1, army& s2) {
-	army_list u1(s1);
-	army_list u2(s2);
+	army_list u1(s1); u1.id = 10;
+	army_list u2(s2); u1.id = 11;
 	while(ismodal()) {
 		rect rc = {0, 0, draw::getwidth(), draw::getheight()};
 		render_frame(rc, player, 0);
@@ -791,12 +816,22 @@ bool draw::move(const player_info* player, hero_info* hero, const action_info* a
 		y = gui.padding + gui.border;
 		auto w = gui.window_width / 2;
 		auto pw = gui.padding / 2;
+		y += render_player(x, y, player);
 		draw::window({x, y, x + gui.window_width, y + gui.window_width});
 		u1.view({x, y, x + w - pw, y + gui.window_width});
 		x = x + w + gui.padding;
 		u2.view({x, y, x + w - pw, y + gui.window_width});
 		domodal();
 		control_standart();
+		if(hot.key == u1.id) {
+			auto p1 = u1.getcurrent();
+			u1.source.remove(u1.current);
+			u2.source.add(p1);
+		} else if(hot.key == u2.id) {
+			auto p1 = u2.getcurrent();
+			u2.source.remove(u2.current);
+			u1.source.add(p1);
+		}
 	}
 	return getresult()!=0;
 }
@@ -820,6 +855,8 @@ static void choose_action() {
 		army a2;
 		if(!move(current_player, hero, action, province, a1, a2))
 			return;
+		for(auto p : a2)
+			p->setmove(province);
 	}
 	hero->setaction(action);
 	hero->setprovince(province);

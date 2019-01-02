@@ -124,6 +124,7 @@ struct troop_info {
 	province_info*				getprovince(const player_info* player) const;
 	province_info*				getmove() const { return move; }
 	static bsreq				metadata[];
+	void						setmove(province_info* value) { move = value; }
 	static void					sort(troop_info** source, unsigned count);
 private:
 	unit_info*					type;
@@ -140,7 +141,7 @@ struct player_info : name_info {
 	static unsigned				getheroes(hero_info** source, unsigned maximum_count, const province_info* province = 0, const player_info* player = 0);
 	static unsigned				getprovinces(province_info** source, unsigned maximum, const player_info* player = 0, province_flag_s state = AnyProvince);
 	int							getsupport(tip_info* ti = 0) const;
-	static unsigned				gettroops(troop_info** source, unsigned maximum_count, const province_info* province = 0, const player_info* player = 0);
+	static unsigned				gettroops(troop_info** source, unsigned maximum_count, const province_info* province = 0, const player_info* player = 0, const player_info* player_move = 0);
 	void						makemove();
 	static void					maketurn();
 	static bsreq				metadata[];
