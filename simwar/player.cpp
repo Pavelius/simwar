@@ -130,3 +130,48 @@ void player_info::maketurn() {
 	}
 	after_turn();
 }
+
+unsigned player_info::getactions(hero_info** source, unsigned maximum, int order) {
+	auto ps = source;
+	auto pe = ps + maximum;
+	for(auto& e : hero_data) {
+		if(!e)
+			continue;
+		auto a = e.getaction();
+		if(!a)
+			continue;
+		if(a->order != order)
+			continue;
+		if(ps < pe)
+			*ps++ = &e;
+	}
+	return ps - source;
+}
+
+static int compare_heroes_by_order(const void* p1, const void* p2) {
+	auto e1 = *((hero_info**)p1);
+	auto e2 = *((hero_info**)p2);
+	auto pl1 = e1->getplayer();
+	auto pl2 = e2->getplayer();
+	auto sp1 = pl1->getinfluence();
+	auto sp2 = pl2->getinfluence();
+	if(sp1 < sp2)
+		return -1;
+	else if(sp1 > sp2)
+		return 1;
+	return 0;
+}
+
+void player_info::resolve_actions() {
+	hero_info* heroes[64];
+	for(auto i = 0; i < 10; i++) {
+		auto count = getactions(heroes, sizeof(heroes) / sizeof(heroes[0]), i);
+		if(!count)
+			continue;
+		qsort(heroes, count, sizeof(heroes[0]), compare_heroes_by_order);
+		for(unsigned j = 0; j < count; j++) {
+			auto hero = heroes[j];
+			hero->resolve();
+		}
+	}
+}

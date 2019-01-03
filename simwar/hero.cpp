@@ -43,3 +43,13 @@ int	hero_info::getincome() const {
 	result += getex("nobility");
 	return result;
 }
+
+void hero_info::resolve() {
+	char temp[8192];
+	if(action->attack || action->raid) {
+		auto israid = (action->raid > 0);
+		auto enemy = province->getplayer();
+		if(enemy!=player)
+			province->battle(temp, zendof(temp), player, enemy, israid);
+	}
+}

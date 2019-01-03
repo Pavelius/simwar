@@ -59,6 +59,7 @@ struct name_info {
 struct action_info : name_info, combat_info, prof_info {
 	const char*					nameact;
 	char						recruit, support, profit, placeable;
+	char						order;
 	province_flag_s				getprovince() const;
 };
 struct character_info : combat_info  {
@@ -109,6 +110,7 @@ struct hero_info : name_info {
 	tactic_info*				gettactic() const { return tactic; }
 	static bsreq				metadata[];
 	bool						isready() const { return true; }
+	void						resolve();
 	void						setaction(action_info* value) { action = value; }
 	void						setprovince(province_info* value) { province = value; }
 	trait_info*					traits[4];
@@ -149,6 +151,7 @@ private:
 struct player_info : name_info {
 	static void					after_turn();
 	static void					before_turn();
+	static unsigned				getactions(hero_info** source, unsigned maximum_count, int order);
 	province_info*				getbestprovince() const;
 	int							getgold() const { return gold; }
 	int							getincome(tip_info* ti = 0) const;
@@ -161,6 +164,7 @@ struct player_info : name_info {
 	void						makemove();
 	static void					maketurn();
 	static bsreq				metadata[];
+	static void					resolve_actions();
 private:
 	const char*					nameof;
 	int							influence;
