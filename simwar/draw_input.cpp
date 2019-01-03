@@ -781,7 +781,7 @@ action_info* draw::getaction(player_info* player, hero_info* hero) {
 		y += render_hero(x, y, gui.hero_window_width, hero, false, !hero->isready(), 0) + 1;
 		for(auto& e : action_data)
 			y += windowb(x, y, gui.hero_window_width, e.getname(), cmd(breakparam, (int)&e), gui.border) + 1;
-		y += windowb(x, y, gui.hero_window_width, msg.cancel, cmd(breakparam, 0)) + 1;
+		y += windowb(x, y, gui.hero_window_width, msg.cancel, cmd(breakparam, 0), 0, KeyEscape) + 1;
 		domodal();
 		control_standart();
 	}
@@ -796,7 +796,7 @@ province_info* draw::getprovince(player_info* player, hero_info* hero, action_in
 		auto y = gui.padding + gui.border;
 		y += render_hero(x, y, gui.hero_window_width, hero, false, !hero->isready(), 0) + 1;
 		y += windowb(x, y, gui.hero_window_width, action->getname(), cmd(), gui.border) + 1;
-		y += windowb(x, y, gui.hero_window_width, msg.cancel, cmd(breakparam, 0)) + 1;
+		y += windowb(x, y, gui.hero_window_width, msg.cancel, cmd(breakparam, 0), 0, KeyEscape) + 1;
 		domodal();
 		control_standart();
 	}
@@ -814,8 +814,8 @@ bool draw::move(const player_info* player, hero_info* hero, const action_info* a
 		auto y = gui.padding + gui.border;
 		y += render_hero(x, y, gui.hero_window_width, hero, false, false, 0) + 1;
 		y += windowb(x, y, gui.hero_window_width, action->getname(), cmd(), gui.border) + 1;
-		y += windowb(x, y, gui.hero_window_width, msg.accept, cmd(breakparam, 1)) + 1;
-		y += windowb(x, y, gui.hero_window_width, msg.cancel, cmd(breakparam, 0)) + 1;
+		y += windowb(x, y, gui.hero_window_width, msg.accept, cmd(breakparam, 1), 0, KeyEnter) + 1;
+		y += windowb(x, y, gui.hero_window_width, msg.cancel, cmd(breakparam, 0), 0, KeyEscape) + 1;
 		x = gui.border * 2;
 		y = gui.padding + gui.border;
 		auto x1 = x;
