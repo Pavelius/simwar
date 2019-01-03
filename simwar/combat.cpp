@@ -82,7 +82,7 @@ public:
 		if(game.casualties)
 			casualties += (enemy.strenght / game.casualties);
 		if(enemy.tactic)
-			casualties += enemy.tactic->sword;
+			casualties += enemy.tactic->cruelty;
 		if(tactic)
 			casualties -= tactic->shield;
 		if(tactic) {

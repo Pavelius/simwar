@@ -17,8 +17,8 @@ adat<action_info, 32> action_data; BSMETA(action);
 
 province_flag_s action_info::getprovince() const {
 	if(attack > 0 || raid > 0)
-		return HostileProvince;
-	else if(defend > 0)
+		return NoFriendlyProvince;
+	else if(defend > 0 || recruit > 0)
 		return FriendlyProvince;
 	return AnyProvince;
 }

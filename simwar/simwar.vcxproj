@@ -156,6 +156,7 @@
     <ClCompile Include="png.cpp" />
     <ClCompile Include="point.cpp" />
     <ClCompile Include="province.cpp" />
+    <ClCompile Include="report.cpp" />
     <ClCompile Include="stringcreator.cpp" />
     <ClCompile Include="string_value.cpp" />
     <ClCompile Include="surface_serial.cpp" />

@@ -47,6 +47,7 @@ int main(int argc, char* argv[]) {
 	draw::initialize();
 	draw::create(-1, -1, 800, 600, WFResize|WFMinmax, 32);
 	draw::setcaption(msg.title);
+	draw::settimer(250);
 	if(!initialize_map())
 		return 0;
 	player_info::maketurn();

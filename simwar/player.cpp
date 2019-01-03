@@ -61,7 +61,7 @@ unsigned player_info::getheroes(hero_info** source, unsigned maximum_count, cons
 			continue;
 		if(province && e.getprovince() != province)
 			continue;
-		if(ps<pe)
+		if(ps < pe)
 			*ps++ = &e;
 	}
 	return ps - source;
@@ -77,7 +77,7 @@ unsigned player_info::gettroops(troop_info** source, unsigned maximum_count, con
 			continue;
 		if(province && e.getprovince(player_move) != province)
 			continue;
-		if(ps<pe)
+		if(ps < pe)
 			*ps++ = &e;
 	}
 	return ps - source;
@@ -89,9 +89,23 @@ unsigned player_info::getprovinces(province_info** source, unsigned maximum, con
 	for(auto& e : province_data) {
 		if(!e)
 			continue;
-		if(player && e.getplayer() != player)
-			continue;
-		if(ps<pe)
+		switch(state) {
+		case NoFriendlyProvince:
+			if(e.getstatus(player) == FriendlyProvince)
+				continue;
+			break;
+		case FriendlyProvince:
+			if(e.getstatus(player) != FriendlyProvince)
+				continue;
+			break;
+		case NeutralProvince:
+			if(e.getstatus(player) != NeutralProvince)
+				continue;
+			break;
+		default:
+			break;
+		}
+		if(ps < pe)
 			*ps++ = &e;
 	}
 	return ps - source;

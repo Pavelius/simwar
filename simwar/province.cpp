@@ -21,7 +21,9 @@ static unsigned short	province_movement[province_max];
 province_flag_s province_info::getstatus(const player_info* player) const {
 	if(this->player == player)
 		return FriendlyProvince;
-	return HostileProvince;
+	if(!this->player)
+		return NeutralProvince;
+	return NoFriendlyProvince;
 }
 
 int province_info::getincome(tip_info* ti) const {

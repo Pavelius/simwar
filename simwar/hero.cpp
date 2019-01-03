@@ -45,7 +45,7 @@ int	hero_info::getincome() const {
 }
 
 void hero_info::resolve() {
-	char temp[8192];
+	char temp[8192]; temp[0] = 0;
 	if(action->attack || action->raid) {
 		auto israid = (action->raid > 0);
 		auto enemy = province->getplayer();

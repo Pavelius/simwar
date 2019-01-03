@@ -42,7 +42,7 @@
 
 #tactic lighting_attack name("Внезапная атака") attack(2) raid(3) defend(2) text("%1 применили внезапную атаку в надежде рассеять противника.")
 #tactic careful_defence name("Тщательная защита") shield(1) text("%1 выстроили защитное построение и приготовились отражать удар.")
-#tactic messy_fighting name("Кровавая баня") sword(1) text("%1 ринулись в бой не щадя себя, чтобы нанести максимальный урон врагу.")
+#tactic messy_fighting name("Кровавая баня") cruelty(1) text("%1 ринулись в бой не щадя себя, чтобы нанести максимальный урон врагу.")
 
 #game map("cradle.png")
 #game casualties(4)

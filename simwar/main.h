@@ -7,7 +7,7 @@
 
 enum province_flag_s {
 	AnyProvince,
-	HostileProvince, FriendlyProvince,
+	NoFriendlyProvince, FriendlyProvince, NeutralProvince,
 };
 
 const int player_max = 8;
@@ -36,7 +36,7 @@ struct tip_info {
 };
 struct combat_info {
 	char						attack, defend, raid;
-	char						sword, shield;
+	char						cruelty, shield;
 	int							get(const char* id) const;
 };
 struct prof_info {
@@ -63,7 +63,6 @@ struct action_info : name_info, combat_info, prof_info {
 	province_flag_s				getprovince() const;
 };
 struct character_info : combat_info  {
-	char						cruelty;
 	char						diplomacy;
 	char						nobility;
 	char						will;
@@ -91,6 +90,19 @@ private:
 	point						position;
 	short						support[player_max];
 	province_info*				neighbors[8];
+};
+struct report_info {
+	constexpr report_info() : hero(0), player(0), province(0), text(0) {}
+	static report_info*			add(player_info* player, province_info* province, hero_info* hero, const char* text);
+	const province_info*		getprovince() const { return province; }
+	const char*					get() const { return text; }
+	bool						is(const player_info* player) const;
+	void						set(player_info* player);
+private:
+	hero_info*					hero;
+	player_info*				player;
+	province_info*				province;
+	const char*					text;
 };
 struct trait_info : name_info, character_info {
 };
@@ -235,7 +247,7 @@ inline int						button(int x, int y, int width, const char* label, const runable
 int								buttonw(int x, int y, int width, const char* label, const runable& e, unsigned key = 0);
 action_info*					getaction(player_info* player, hero_info* hero);
 color							getcolor(province_flag_s id);
-province_info*					getprovince(player_info* player, hero_info* hero, action_info* action);
+province_info*					getprovince(player_info* player, hero_info* hero, action_info* action, aref<province_info*> selection, color selection_color);
 areas							hilite(rect rc);
 bool							initializemap();
 bool							move(const player_info* player, hero_info* hero, const action_info* action, const province_info* province, army& s1, army& s2, const army& a3);
@@ -252,6 +264,7 @@ extern msg_info					msg;
 extern adat<landscape_info, 32> landscape_data;
 extern adat<player_info, player_max> player_data;
 extern adat<province_info, province_max> province_data;
+extern adat<report_info, 2048>	report_data;
 extern tactic_info				tactic_data[];
 extern adat<troop_info, 256>	troop_data;
 extern adat<unit_info, 64>		unit_data;

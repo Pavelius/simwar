@@ -312,46 +312,42 @@ void province_info::render_neighbors(const rect& rc) const {
 	}
 }
 
-static void render_province_general(rect rc, point mouse, const player_info* player, callback_proc proc, province_flag_s province_state) {
+static void render_province(rect rc, point mouse, const player_info* player, callback_proc proc, aref<province_info*> selection, color selection_color) {
+	unsigned count;
 	char temp[1024];
-	draw::state push;
-	draw::fore = colors::black;
-	draw::fore_stroke = colors::white;
 	if(!draw::font)
 		return;
-	unsigned count;
-	auto choose_mode = proc != 0;
+	draw::state push;
+	draw::fore = colors::black;
 	for(auto& e : province_data) {
 		if(!e)
 			continue;
 		draw::font = metrics::h1;
-		auto pt = getscreen(rc, e.getposition());
+		fore_stroke = colors::white.mix(selection_color);
 		zprint(temp, e.getname());
 		auto text_width = draw::textw(temp);
-		auto hilite = choose_mode;
-		auto a = AreaNormal;
 		hero_info* hero_array[16];
 		count = player_info::getheroes(hero_array, lenghtof(hero_array), &e, player);
-		if(count > 0)
-			hilite = false;
-		if(hilite) {
-			if(province_state && province_state != e.getstatus(player))
-				hilite = false;
-		}
-		if(proc && hilite) {
-			rect rc = {pt.x - text_width / 2, pt.y - draw::texth() / 2, pt.x + text_width / 2, pt.y + draw::texth() / 2};
-			a = draw::area(rc);
-			if(a == AreaHilitedPressed && hot.key == MouseLeft)
-				draw::execute(proc, (int)&e);
-		}
-		//render_power(pt.x, pt.y, owner, &e);
-		if(hilite)
-			draw::fore_stroke = colors::white.mix(getcolor(e.getstatus(player)), 128);
+		auto pt = getscreen(rc, e.getposition());
+		rect rc = {pt.x - text_width / 2, pt.y - draw::texth() / 2, pt.x + text_width / 2, pt.y + draw::texth() / 2};
+		auto a = draw::area(rc);
+		auto inlist = selection.is(&e);
+		if(inlist)
+			fore_stroke = colors::white.mix(selection_color);
 		else
-			draw::fore_stroke = colors::white;
+			fore_stroke = colors::white;
 		if(a == AreaHilited || a == AreaHilitedPressed) {
-			draw::fore_stroke = getcolor(e.getstatus(player));
-			hot.cursor = CursorHand;
+			if(inlist) {
+				fore_stroke = selection_color;
+				hot.cursor = CursorHand;
+				if(hot.key == MouseLeft) {
+					if(proc)
+						draw::execute(proc, (int)&e);
+				}
+			} else {
+				if(hot.key == MouseLeft)
+					draw::execute(choose_current_province, (int)&e);
+			}
 		}
 		draw::text(pt.x - text_width / 2, pt.y - draw::texth() / 2, temp, -1, TextStroke);
 		pt.y += draw::texth() / 2;
@@ -377,7 +373,7 @@ static void render_province_general(rect rc, point mouse, const player_info* pla
 	}
 }
 
-static void render_frame(const rect& rco, const player_info* player, callback_proc proc, province_flag_s province_state = AnyProvince) {
+static void render_board(const rect& rco, const player_info* player, callback_proc proc, aref<province_info*> selection, color selection_color) {
 	auto rc = rco;
 	draw::state push;
 	draw::area(rc); // Drag and drop analize this result
@@ -413,7 +409,11 @@ static void render_frame(const rect& rco, const player_info* player, callback_pr
 	if(current_province)
 		current_province->render_neighbors(rco);
 	if(player)
-		render_province_general(last_board, last_mouse, player, proc, province_state);
+		render_province(last_board, last_mouse, player, proc, selection, selection_color);
+}
+
+static void render_board() {
+	render_board({0, 0, draw::getwidth(), draw::getheight()}, current_player, 0, {}, colors::blue);
 }
 
 static int render_hero(int x, int y, int width, hero_info* e, bool hilite, bool disabled, const char* disable_text, callback_proc proc = 0) {
@@ -497,24 +497,20 @@ static int render_province(int x, int y, const province_info* province) {
 	return draw::window(x, y, gui.window_width, temp) + gui.border * 2 + gui.padding;
 }
 
-static int render_board(const player_info* province_owner, player_info* current_player, callback_proc choose_province, callback_proc choose_hero, const province_info* province) {
-	render_frame({0, 0, draw::getwidth(), draw::getheight()}, province_owner, choose_province);
+static int render_left_side(bool show_current_province = true) {
 	auto x = gui.border + gui.border;
 	auto y = gui.padding + gui.border;
 	if(current_player)
 		y += render_player(x, y, current_player);
-	if(province)
-		y += render_province(x, y, province);
-	x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
-	y = gui.padding + gui.border;
-	return render_heroes(x, y, current_player, choose_hero);
+	if(show_current_province && current_province)
+		y += render_province(x, y, current_province);
+	return y;
 }
 
-static int render_board(const player_info* province_owner, player_info* hero_owner, callback_proc choose_province, callback_proc choose_hero) {
-	render_frame({0, 0, draw::getwidth(), draw::getheight()}, province_owner, choose_province);
+static int render_right_side(callback_proc proc = 0) {
 	auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
 	auto y = gui.padding + gui.border;
-	return render_heroes(x, y, hero_owner, choose_hero);
+	return y + render_heroes(x, y, current_player, proc);
 }
 
 static void mouse_map_info() {
@@ -708,16 +704,6 @@ bool draw::initializemap() {
 	return true;
 }
 
-//void draw::render(draw::controls::control& element, rect rc) {
-//	while(ismodal()) {
-//		render_board(current_player, current_player, 0, 0);
-//		element.view(rc);
-//		auto id = input();
-//		if(control_board(id))
-//			continue;
-//	}
-//}
-
 struct army_list : list {
 
 	army&		source;
@@ -762,8 +748,11 @@ struct army_list : list {
 
 void draw::report(const char* format) {
 	while(ismodal()) {
-		render_board(current_player, current_player, 0, 0);
-		draw::window(gui.border * 2, gui.border * 2, gui.window_width, format);
+		render_board();
+		render_right_side();
+		auto x = gui.border * 2;
+		auto y = render_left_side(false);
+		draw::window(x, y, gui.window_width, format);
 		domodal();
 		control_standart();
 	}
@@ -775,7 +764,7 @@ static void breakparam() {
 
 action_info* draw::getaction(player_info* player, hero_info* hero) {
 	while(ismodal()) {
-		render_frame({0, 0, draw::getwidth(), draw::getheight()}, player, 0);
+		render_board();
 		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
 		auto y = gui.padding + gui.border;
 		y += render_hero(x, y, gui.hero_window_width, hero, false, !hero->isready(), 0) + 1;
@@ -788,10 +777,10 @@ action_info* draw::getaction(player_info* player, hero_info* hero) {
 	return (action_info*)getresult();
 }
 
-province_info* draw::getprovince(player_info* player, hero_info* hero, action_info* action) {
+province_info* draw::getprovince(player_info* player, hero_info* hero, action_info* action, aref<province_info*> selection, color selection_color) {
 	while(ismodal()) {
 		rect rc = {0, 0, draw::getwidth(), draw::getheight()};
-		render_frame(rc, player, breakparam, action->getprovince());
+		render_board(rc, player, breakparam, selection, selection_color);
 		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
 		auto y = gui.padding + gui.border;
 		y += render_hero(x, y, gui.hero_window_width, hero, false, !hero->isready(), 0) + 1;
@@ -808,8 +797,7 @@ bool draw::move(const player_info* player, hero_info* hero, const action_info* a
 	army_list u2(s2); u2.id = 11;
 	auto th = texth() * 4;
 	while(ismodal()) {
-		rect rc = {0, 0, draw::getwidth(), draw::getheight()};
-		render_frame(rc, player, 0);
+		render_board();
 		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
 		auto y = gui.padding + gui.border;
 		y += render_hero(x, y, gui.hero_window_width, hero, false, false, 0) + 1;
@@ -867,7 +855,9 @@ static void choose_action() {
 		return;
 	if(action->placeable) {
 		auto choose_mode = action->getprovince();
-		province = getprovince(current_player, hero, action);
+		province_info* provinces[128];
+		auto count = current_player->getprovinces(provinces, sizeof(provinces) / sizeof(provinces[0]), current_player, choose_mode);
+		province = getprovince(current_player, hero, action, {provinces, count}, getcolor(choose_mode));
 		if(!province)
 			return;
 	}
@@ -894,9 +884,12 @@ void player_info::makemove() {
 	current_player = this;
 	current_province = province_data.data + 0;
 	while(ismodal()) {
+		render_board();
+		render_left_side(true);
 		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
-		auto y = render_board(current_player, current_player, 0, choose_action, current_province) + gui.padding * 3;
-		buttonw(x, y, gui.hero_window_width, "Закончить ход", cmd(end_turn));
+		auto y = render_right_side(choose_action);
+		y += buttonw(x, y, gui.hero_window_width, "Закончить ход", cmd(end_turn));
+		//current_player, current_player, 0, choose_action, current_province) + gui.padding * 3;
 		domodal();
 		control_standart();
 	}
@@ -965,7 +958,7 @@ void draw::domodal() {
 
 color draw::getcolor(province_flag_s id) {
 	switch(id) {
-	case HostileProvince: return colors::red;
+	case NoFriendlyProvince: return colors::red;
 	case FriendlyProvince: return colors::green;
 	default: return colors::gray;
 	}
