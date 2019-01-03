@@ -416,7 +416,7 @@ static void render_board() {
 	render_board({0, 0, draw::getwidth(), draw::getheight()}, current_player, 0, {}, colors::blue);
 }
 
-static int render_hero(int x, int y, int width, hero_info* e, bool disabled, const char* disable_text, callback_proc proc = 0) {
+static int render_hero(int x, int y, int width, hero_info* e, const char* error_text, callback_proc proc = 0) {
 	char temp[2048]; temp[0] = 0;
 	draw::state push;
 	draw::font = metrics::font;
@@ -431,7 +431,7 @@ static int render_hero(int x, int y, int width, hero_info* e, bool disabled, con
 	}
 	auto owner = e->getplayer();
 	rect rc = {x, y, x + width, y + height};
-	areas hittest = window(rc, disabled, true);
+	areas hittest = window(rc, error_text!=0, true);
 	//if(owner)
 	//	draw::shield(x + drw.hero_width - 20, y + 18, owner->getimage());
 	int x1 = x;
@@ -461,6 +461,11 @@ static int render_hero(int x, int y, int width, hero_info* e, bool disabled, con
 				zcat(temp, "\n");
 			szprint(zend(temp), zendof(temp), "%+2i %1", pn, value);
 		}
+		if(error_text) {
+			if(temp[0])
+				szprint(zend(temp), zendof(temp), "\n");
+			szprint(zend(temp), zendof(temp), "[-%1]", error_text);
+		}
 		tooltips(x, y, width, temp);
 		if(hittest == AreaHilitedPressed && hot.key == MouseLeft && proc)
 			execute(proc, (int)e);
@@ -479,8 +484,13 @@ static int render_heroes(int x, int y, const player_info* player, callback_proc 
 	for(auto& e : hero_data) {
 		if(!e || e.getplayer() != player)
 			continue;
-		char temp[260]; zprint(temp, msg.hero_wait, e.getwait());
-		y += render_hero(x, y, gui.hero_window_width, &e, !e.isready(), temp, proc);
+		char temp[260]; temp[0] = 0;
+		const char* error_text = 0;
+		if(!e.isready()) {
+			zprint(temp, msg.hero_wait, e.getwait());
+			error_text = temp;
+		}
+		y += render_hero(x, y, gui.hero_window_width, &e, error_text, proc);
 		y += gui.padding;
 	}
 	return y - y0;
@@ -605,10 +615,8 @@ areas draw::window(rect rc, bool disabled, bool hilight, int border) {
 	color b = colors::form;
 	auto rs = draw::area(rc);
 	auto op = gui.opacity;
-	if(disabled) {
-		c = colors::red;
+	if(disabled)
 		op = op / 2;
-	}
 	else if(hilight && (rs == AreaHilited || rs == AreaHilitedPressed))
 		op = gui.opacity_hilighted;
 	draw::rectf(rc, c, op);

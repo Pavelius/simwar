@@ -16,11 +16,13 @@ adat<hero_info, 128> hero_data;
 bsdata hero_manager("hero", hero_data, hero_info::metadata);
 
 void hero_info::before_turn() {
-	tactic = 0;
-	province = 0;
-	action = game.default_action;
 	if(wait > 0)
 		wait--;
+	if(wait==0) {
+		tactic = 0;
+		province = 0;
+		action = game.default_action;
+	}
 }
 
 int hero_info::get(const char* id) const {
