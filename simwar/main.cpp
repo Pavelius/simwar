@@ -20,9 +20,10 @@ static bool initialize_messages(std::initializer_list<const char*> files) {
 	return result;
 }
 
-static bool initialize_map() {
+static bool initialize_map(const char* name) {
 	auto result = true;
 	auto url_errors = "errors.txt";
+	game.clear();
 	if(true) {
 		bslog log(url_errors);
 		log.create_record_when_not_found = true;
@@ -47,10 +48,9 @@ int main(int argc, char* argv[]) {
 	draw::initialize();
 	draw::create(-1, -1, 800, 600, WFResize|WFMinmax, 32);
 	draw::setcaption(msg.title);
-	draw::settimer(250);
-	if(!initialize_map())
+	if(!initialize_map("test"))
 		return 0;
-	player_info::maketurn();
+	player_info::playgame();
 	return 0;
 }
 

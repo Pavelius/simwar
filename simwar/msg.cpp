@@ -4,6 +4,8 @@ bsreq msg_type[] = {
 	BSREQ(msg_info, attacking_force, text_type),
 	BSREQ(msg_info, casualties, text_type),
 	BSREQ(msg_info, defending_force, text_type),
+	BSREQ(msg_info, neutral_army, text_type),
+	BSREQ(msg_info, neutral_army_of, text_type),
 	BSREQ(msg_info, winner, text_type),
 	BSREQ(msg_info, lead, text_type),
 	//
@@ -23,10 +25,11 @@ bsreq msg_type[] = {
 	BSREQ(msg_info, income_heroes, text_type),
 	BSREQ(msg_info, cost, text_type),
 	BSREQ(msg_info, squads, text_type),
+	BSREQ(msg_info, turns, text_type),
 	//
 	BSREQ(msg_info, hero_wait, text_type),
 	BSREQ(msg_info, total_strenght, text_type),
-	BSREQ(msg_info, total_cost, text_type),
+	BSREQ(msg_info, total, text_type),
 	BSREQ(msg_info, predict_fail, text_type),
 	BSREQ(msg_info, predict_partial, text_type),
 	BSREQ(msg_info, predict_success, text_type),

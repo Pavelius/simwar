@@ -58,3 +58,63 @@ hero_info* province_info::gethero(const player_info* player) const {
 	}
 	return 0;
 }
+
+unsigned province_info::select(province_info** source, unsigned maximum, const player_info* player, province_flag_s state) {
+	auto ps = source;
+	auto pe = ps + maximum;
+	for(auto& e : province_data) {
+		if(!e)
+			continue;
+		switch(state) {
+		case NoFriendlyProvince:
+			if(e.getstatus(player) == FriendlyProvince)
+				continue;
+			break;
+		case FriendlyProvince:
+			if(e.getstatus(player) != FriendlyProvince)
+				continue;
+			break;
+		case NeutralProvince:
+			if(e.getstatus(player) != NeutralProvince)
+				continue;
+			break;
+		default:
+			break;
+		}
+		if(ps < pe)
+			*ps++ = &e;
+	}
+	return ps - source;
+}
+
+unsigned province_info::remove_hero_present(aref<province_info*> source, const player_info* player) {
+	auto ps = source.data;
+	for(auto p : source) {
+		if(p->gethero(player))
+			continue;
+		*ps++ = p;
+	}
+	return ps - source.data;
+}
+
+char* province_info::getinfo(char* result, const char* result_maximum, bool show_landscape) const {
+	result[0] = 0;
+	if(show_landscape)
+		szprint(zend(result), result_maximum, "%1 ", landscape->name);
+	szprint(zend(result), result_maximum, ":gold:%1i :house:%2i :shield_grey:%3i",
+		getincome(), getlevel(), getdefend());
+	return result;
+}
+
+void province_info::build(unit_info* unit, int turns) {
+	if(turns<1)
+		turns = 1;
+	auto p = build_data.add();
+	p->province = this;
+	p->unit = unit;
+	p->wait = turns;
+}
+
+void province_info::add(unit_info* unit) {
+	troop_info::add(this, unit);
+}

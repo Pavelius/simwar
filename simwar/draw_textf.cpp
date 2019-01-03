@@ -323,15 +323,8 @@ int draw::textf(int x, int y, int width, const char* string, int* max_width,
 		} else if(p[0] == '$' && p[1] == '(') {
 			p = zskipsp(p + 2);
 			y += render_control(&p, x, y, width);
-		} else {
+		} else
 			y += textfln(x, y, width, &p, color_text, &mw2, tab_width);
-			//if(p[0]) {
-			//	if(p[0] == ':' && p[1] == ':' && p[2] == ':')
-			//		p += 3;
-			//	else
-			//		y += draw::texth() / 4;
-			//}
-		}
 		// Возвратим стандартные настройки блока
 		font = metrics::font;
 		fore = color_text;

@@ -57,3 +57,22 @@ province_info* troop_info::getprovince(const player_info* player) const {
 		return move;
 	return province;
 }
+
+unsigned troop_info::remove_moved(aref<troop_info*> source) {
+	auto ps = source.data;
+	for(auto p : source) {
+		if(p->move)
+			continue;
+		*ps++ = p;
+	}
+	return ps - source.data;
+}
+
+troop_info* troop_info::add(province_info* province, unit_info* type) {
+	auto p = troop_data.add();
+	memset(p, 0, sizeof(*p));
+	p->province = province;
+	p->player = province->getplayer();
+	p->type = type;
+	return p;
+}

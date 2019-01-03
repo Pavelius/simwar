@@ -48,7 +48,7 @@ void list::hilight(const rect& rc, const rect* p_current_rect) const {
 		p_current_rect = &rc;
 	auto focused = isfocused();
 	const color c1 = focused ? colors::edit : colors::edit.mix(colors::window, 192);
-	rect r1 = {rc.x1, rc.y1, rc.x2-1, rc.y2-1};
+	rect r1 = {rc.x1, rc.y1, rc.x2 - 1, rc.y2 - 1};
 	rectf(r1, c1); rectb(r1, c1);
 	if(focused)
 		rectx(r1, colors::text.mix(colors::form, 200));
@@ -68,9 +68,14 @@ void list::rowhilite(const rect& rc, int index) const {
 void list::row(const rect& rc, int index) {
 	char temp[260]; temp[0] = 0;
 	rowhilite(rc, index);
-	auto p = getname(temp, temp + sizeof(temp) / sizeof(temp[0]) - 1, index, 0);
+	auto p = getname(temp, zendof(temp), index, 0);
 	if(p)
 		draw::textc(rc.x1 + 4, rc.y1 + 4, rc.width() - 4 * 2, p);
+	p = getname(temp, zendof(temp), index, 1);
+	if(p) {
+		auto w = textfw(p);
+		textf(rc.x2 - 4 - w, rc.y1 + 4, rc.width() - 4 * 2, p);
+	}
 }
 
 int	list::getrowheight() {

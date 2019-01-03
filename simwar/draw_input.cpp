@@ -283,10 +283,10 @@ static int render_player(int x, int y, const player_info* player) {
 	stringcreator sc;
 	stringbuilder sb(sc, temp);
 	sb.add("###%1\n", player->getname());
-	auto value = player->getincome(&ti);
-	sb.add(":gold:%1i[%4\"%3\"%+2i]", player->getgold(), value, tips, (value>=0) ? "+" : "-");
-	value = player->getinfluence();
-	sb.add(" :house:%1i", value);
+	auto cost = player->getcost();
+	auto income = player->getincome(&ti);
+	sb.add(":gold:%1i[%4\"%3\"%+2i]", cost.gold, income, tips, (income>=0) ? "+" : "-");
+	sb.add(" :flag_grey:%1i", cost.fame);
 	return window(x, y, gui.window_width, temp);
 }
 
@@ -312,30 +312,33 @@ void province_info::render_neighbors(const rect& rc) const {
 	}
 }
 
-static void render_province(rect rc, point mouse, const player_info* player, callback_proc proc, aref<province_info*> selection, color selection_color) {
+static void render_province(rect rc, point mouse, const player_info* player, callback_proc proc, aref<province_info*> selection, color selection_color, bool set_current_province) {
 	unsigned count;
 	char temp[1024];
 	if(!draw::font)
 		return;
 	draw::state push;
-	draw::fore = colors::black;
 	for(auto& e : province_data) {
 		if(!e)
 			continue;
 		draw::font = metrics::h1;
+		fore = colors::black;
 		fore_stroke = colors::white.mix(selection_color);
 		zprint(temp, e.getname());
 		auto text_width = draw::textw(temp);
 		hero_info* hero_array[16];
-		count = player_info::getheroes(hero_array, lenghtof(hero_array), &e, player);
+		count = hero_info::select(hero_array, lenghtof(hero_array), &e, player);
 		auto pt = getscreen(rc, e.getposition());
 		rect rc = {pt.x - text_width / 2, pt.y - draw::texth() / 2, pt.x + text_width / 2, pt.y + draw::texth() / 2};
-		auto a = draw::area(rc);
+		auto status = e.getstatus(player);
 		auto inlist = selection.is(&e);
 		if(inlist)
 			fore_stroke = colors::white.mix(selection_color);
 		else
 			fore_stroke = colors::white;
+		auto a = AreaNormal;
+		if(set_current_province || inlist)
+			a = draw::area(rc);
 		if(a == AreaHilited || a == AreaHilitedPressed) {
 			if(inlist) {
 				fore_stroke = selection_color;
@@ -352,6 +355,10 @@ static void render_province(rect rc, point mouse, const player_info* player, cal
 		draw::text(pt.x - text_width / 2, pt.y - draw::texth() / 2, temp, -1, TextStroke);
 		pt.y += draw::texth() / 2;
 		draw::font = metrics::font;
+		e.getinfo(temp, zendof(temp), false);
+		auto w = textfw(temp);
+		textf(pt.x - w / 2, pt.y, w, temp);
+		pt.y += texth();
 		if(count) {
 			auto hero = hero_array[0];
 			auto action = hero->getaction();
@@ -370,10 +377,21 @@ static void render_province(rect rc, point mouse, const player_info* player, cal
 			rect rc = {0, 0, 200, 0}; draw::textw(rc, temp);
 			pt.y += draw::text({pt.x - rc.width() / 2, pt.y, pt.x + rc.width() / 2 + 1, pt.y + rc.height()}, temp, AlignCenter);
 		}
+		if(status == FriendlyProvince) {
+			build_info* build_array[16];
+			count = build_info::select(build_array, lenghtof(build_array), &e);
+			fore = fore.mix(colors::blue);
+			if(count) {
+				build_info::sort(build_array, count);
+				build_info::getpresent(temp, zendof(temp), build_array, count);
+				rect rc = {0, 0, 200, 0}; draw::textw(rc, temp);
+				pt.y += draw::text({pt.x - rc.width() / 2, pt.y, pt.x + rc.width() / 2 + 1, pt.y + rc.height()}, temp, AlignCenter);
+			}
+		}
 	}
 }
 
-static void render_board(const rect& rco, const player_info* player, callback_proc proc, aref<province_info*> selection, color selection_color) {
+static void render_board(const rect& rco, const player_info* player, callback_proc proc, aref<province_info*> selection, color selection_color, bool set_current_province) {
 	auto rc = rco;
 	draw::state push;
 	draw::area(rc); // Drag and drop analize this result
@@ -409,11 +427,11 @@ static void render_board(const rect& rco, const player_info* player, callback_pr
 	if(current_province)
 		current_province->render_neighbors(rco);
 	if(player)
-		render_province(last_board, last_mouse, player, proc, selection, selection_color);
+		render_province(last_board, last_mouse, player, proc, selection, selection_color, set_current_province);
 }
 
 static void render_board() {
-	render_board({0, 0, draw::getwidth(), draw::getheight()}, current_player, 0, {}, colors::blue);
+	render_board({0, 0, draw::getwidth(), draw::getheight()}, current_player, 0, {}, colors::blue, true);
 }
 
 static int render_hero(int x, int y, int width, hero_info* e, const char* error_text, callback_proc proc = 0) {
@@ -500,13 +518,12 @@ static int render_province(int x, int y, const province_info* province) {
 	char temp[4096];
 	if(!province)
 		return 0;
-	stringcreator sc;
-	stringbuilder sb(sc, temp);
-	sb.addh(province->getname());
-	sb.addn("%1 :gold:%2i :house:%3i :shield_grey:%4i", province->getlandscape()->name,
-		province->getincome(), province->getlevel(), province->getdefend());
-	if(province->text)
-		sb.addn(province->text);
+	zprint(temp, "###%1\n", province->getname());
+	province->getinfo(zend(temp), zendof(temp), true);
+	if(province->text) {
+		szprint(zend(temp), zendof(temp), "\n");
+		szprint(zend(temp), zendof(temp), province->text);
+	}
 	if(!temp[0])
 		return 0;
 	draw::state state;
@@ -591,7 +608,7 @@ static void draw_icon(int& x, int& y, int x0, int x2, int* max_width, int& w, co
 		x = x0;
 		y += draw::texth();
 	}
-	draw::blit(*draw::canvas, x, y + dy - p->value.height - 1, w, p->value.height, ImageTransparent, p->value, 0, 0);
+	draw::blit(*draw::canvas, x, y + dy - p->value.height - 2, w, p->value.height, ImageTransparent, p->value, 0, 0);
 }
 
 areas draw::hilite(rect rc) {
@@ -738,7 +755,7 @@ struct unit_list : list {
 			szupper(result, 1);
 			break;
 		case 1:
-			szprint(result, result_maximum, ":gold:%1i", source.data[line]->get("cost"));
+			source.data[line]->cost_info::get(result, result_maximum);
 			break;
 		default:
 			return "";
@@ -765,19 +782,6 @@ struct unit_list : list {
 			return list::keyinput(id);
 		}
 		return true;
-	}
-
-	void row(const rect& rc, int index) override {
-		char temp[260]; temp[0] = 0;
-		rowhilite(rc, index);
-		auto p = getname(temp, zendof(temp), index, 0);
-		if(p)
-			draw::textc(rc.x1 + 4, rc.y1 + 4, rc.width() - 4 * 2, p);
-		p = getname(temp, zendof(temp), index, 1);
-		if(p) {
-			auto w = textfw(p);
-			textf(rc.x2 - 4 - w, rc.y1 + 4, rc.width() - 4 * 2, p);
-		}
 	}
 
 };
@@ -843,6 +847,7 @@ static void breakparam() {
 action_info* draw::getaction(player_info* player, hero_info* hero) {
 	while(ismodal()) {
 		render_board();
+		render_left_side();
 		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
 		auto y = gui.padding + gui.border;
 		y += render_hero(x, y, hero) + 1;
@@ -858,7 +863,8 @@ action_info* draw::getaction(player_info* player, hero_info* hero) {
 province_info* draw::getprovince(player_info* player, hero_info* hero, action_info* action, aref<province_info*> selection, color selection_color) {
 	while(ismodal()) {
 		rect rc = {0, 0, draw::getwidth(), draw::getheight()};
-		render_board(rc, player, breakparam, selection, selection_color);
+		render_board(rc, player, breakparam, selection, selection_color, false);
+		render_left_side(false);
 		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
 		auto y = gui.padding + gui.border;
 		y += render_hero(x, y, hero) + 1;
@@ -870,20 +876,21 @@ province_info* draw::getprovince(player_info* player, hero_info* hero, action_in
 	return (province_info*)getresult();
 }
 
-bool draw::recruit(const player_info* player, hero_info* hero, const action_info* action, const province_info* province, unit_set& s1, unit_set& s2) {
+bool draw::recruit(const player_info* player, hero_info* hero, const action_info* action, const province_info* province, unit_set& s1, unit_set& s2, cost_info& cost) {
 	unit_list u1(s1); u1.id = 10;
 	unit_list u2(s2); u2.id = 11;
-	auto th = texth() * 3 + 2;
+	auto th = texth() * 1 + gui.padding;
 	while(ismodal()) {
 		render_board();
-		auto gold = s2.get("cost");
+		auto player_cost = player->getcost();
+		cost = s2.getcost();
 		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
 		auto y = gui.padding + gui.border;
 		y += render_hero(x, y, hero) + 1;
 		y += windowb(x, y, gui.hero_window_width, action->getname(), cmd(), gui.border) + 1;
 		auto isdisabled = false;
 		const char* error_info = 0;
-		if(gold > player->getgold()) {
+		if(cost > player_cost) {
 			isdisabled = true;
 			error_info = msg.not_enought_gold;
 		}
@@ -901,8 +908,9 @@ bool draw::recruit(const player_info* player, hero_info* hero, const action_info
 		u1.view({x, y, x + w - pw, y3});
 		x = x + w + gui.padding;
 		u2.view({x, y, x + w - pw, y3});
-		x = x1; y = y3 + 2;
-		char temp[1024]; zprint(temp, msg.total_cost, gold);
+		x = x1; y = y3 + gui.padding;
+		char tem1[1024]; cost.get(tem1, zendof(tem1));
+		char temp[1024]; zprint(temp, "%1: %2", msg.total, tem1);
 		y += textf(x, y, gui.window_width, temp);
 		domodal();
 		control_standart();
@@ -919,10 +927,11 @@ bool draw::recruit(const player_info* player, hero_info* hero, const action_info
 	return getresult() != 0;
 }
 
-bool draw::move(const player_info* player, hero_info* hero, const action_info* action, const province_info* province, army& s1, army& s2, const army& a3) {
+bool draw::conquer(const player_info* player, hero_info* hero, const action_info* action, const province_info* province, army& s1, army& s2, const army& a3) {
 	army_list u1(s1); u1.id = 10;
 	army_list u2(s2); u2.id = 11;
 	auto th = texth() * 3 + 2;
+	auto defender_strenght = a3.getstrenght(0);
 	while(ismodal()) {
 		render_board();
 		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
@@ -946,7 +955,6 @@ bool draw::move(const player_info* player, hero_info* hero, const action_info* a
 		x = x1; y = y3 + 2;
 		auto attacker_strenght = s2.getstrenght(0);
 		char temp[4096]; zprint(temp, msg.total_strenght, attacker_strenght);
-		auto defender_strenght = a3.getstrenght(0);
 		szprint(zend(temp), zendof(temp), " ");
 		if(attacker_strenght < defender_strenght)
 			szprint(zend(temp), zendof(temp), msg.predict_fail);
@@ -971,40 +979,49 @@ bool draw::move(const player_info* player, hero_info* hero, const action_info* a
 }
 
 static void choose_action() {
+	cost_info cost;
 	hero_info* hero = (hero_info*)hot.param;
 	if(!hero)
 		return;
-	auto action = getaction(current_player, hero);
+	auto player = current_player;
+	auto action = getaction(player, hero);
 	if(!action)
 		return;
 	province_info* province = 0;
 	if(action->isplaceable()) {
 		auto choose_mode = action->getprovince();
 		province_info* provinces[128];
-		auto count = current_player->getprovinces(provinces, sizeof(provinces) / sizeof(provinces[0]), current_player, choose_mode);
-		province = getprovince(current_player, hero, action, {provinces, count}, getcolor(choose_mode));
+		auto count = province_info::select(provinces, sizeof(provinces) / sizeof(provinces[0]), player, choose_mode);
+		count = province_info::remove_hero_present({provinces, count}, player);
+		province = getprovince(player, hero, action, {provinces, count}, getcolor(choose_mode));
 		if(!province)
 			return;
 	}
+	auto raid = action->raid > 0;
+	army troops_move(player, province, hero, true, raid);
+	unit_set units_product;
 	if(action->raid || action->attack) {
-		auto raid = action->raid > 0;
-		army a1(current_player, province, hero, true, raid); a1.fill(current_player, 0);
-		army a2(current_player, province, hero, true, raid);
-		army a3(0, 0, 0, false, raid); a3.fill(province->getplayer(), province);
-		if(!move(current_player, hero, action, province, a1, a2, a3))
+		army a1(player, province, hero, true, raid);
+		army a3(0, province, 0, false, raid);
+		a1.fill(player, 0);
+		a1.count = troop_info::remove_moved(a1);
+		a3.fill(province->getplayer(), province);
+		if(!conquer(player, hero, action, province, a1, troops_move, a3))
 			return;
-		for(auto p : a2)
-			p->setmove(province);
 	} else if(action->recruit) {
-		unit_set a1; a1.fill(current_player, province, hero, action);
-		unit_set a2;
-		if(!recruit(current_player, hero, action, province, a1, a2))
+		unit_set a1; a1.fill(player, province, hero, action);
+		if(!recruit(player, hero, action, province, a1, units_product, cost))
 			return;
 	}
+	hero->cancelaction();
 	hero->setaction(action);
 	hero->setprovince(province);
-	if(action->wait)
-		hero->setwait(hero->getwait() + action->wait);
+	hero->pay = cost;
+	*current_player -= cost;
+	for(auto p : troops_move)
+		p->setmove(province);
+	for(auto p : units_product)
+		province->build(p, p->recruit_time);
 	current_province = province;
 }
 
@@ -1012,9 +1029,18 @@ static void end_turn() {
 	breakmodal(0);
 }
 
+static void show_reports() {
+	for(auto& e : report_data) {
+		if(e.getturn() != game.turn)
+			continue;
+		report(e.get());
+	}
+}
+
 void player_info::makemove() {
 	current_player = this;
 	current_province = province_data.data + 0;
+	show_reports();
 	while(ismodal()) {
 		render_board();
 		render_left_side(true);

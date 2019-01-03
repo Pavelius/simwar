@@ -154,6 +154,12 @@
     <ClCompile Include="report.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
+    <ClCompile Include="cost_info.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
+    <ClCompile Include="build.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="draw.h">

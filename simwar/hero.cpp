@@ -61,3 +61,33 @@ void hero_info::resolve() {
 		}
 	}
 }
+
+unsigned hero_info::select(hero_info** source, unsigned maximum_count, const province_info* province, const player_info* player) {
+	auto ps = source;
+	auto pe = ps + maximum_count;
+	for(auto& e : hero_data) {
+		if(!e)
+			continue;
+		if(player && e.getplayer() != player)
+			continue;
+		if(province && e.getprovince() != province)
+			continue;
+		if(ps < pe)
+			*ps++ = &e;
+	}
+	return ps - source;
+}
+
+void hero_info::cancelaction() {
+	if(!action)
+		return;
+	for(auto& e : troop_data) {
+		if(!e)
+			continue;
+		if(e.getplayer() == player && e.getmove() == province)
+			e.setmove(0);
+	}
+	if(player)
+		*player += pay;
+	pay.clear();
+}

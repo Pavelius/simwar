@@ -375,9 +375,9 @@ void draw::setcaption(const char* string) {
 	SetWindowTextA(hwnd, string);
 }
 
-void draw::settimer(unsigned milleseconds) {
-	if(milleseconds)
-		SetTimer(hwnd, InputTimer, milleseconds, 0);
-	else
-		KillTimer(hwnd, InputTimer);
-}
+//void draw::settimer(unsigned milleseconds) {
+//	if(milleseconds)
+//		SetTimer(hwnd, InputTimer, milleseconds, 0);
+//	else
+//		KillTimer(hwnd, InputTimer);
+//}

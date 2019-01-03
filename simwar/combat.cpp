@@ -1,25 +1,17 @@
 #include "main.h"
 
+extern bsdata tactic_manager;
+
 class combatside : public army {
 
-	int						strenght;
-	int						casualties;
+	int strenght;
+	int	casualties;
 
 public:
 
 	combatside(province_info* province, player_info* player, bool attack, bool raid) : army(player, province, 0, attack, raid), strenght(0), casualties(0) {
 		fill(player, province);
-		// Get all heroes in province and choose one best matched
-		for(auto& e : hero_data) {
-			if(!e)
-				continue;
-			if(e.getplayer() != player)
-				continue;
-			if(e.getprovince() != province)
-				continue;
-			general = &e;
-			break;
-		}
+		general = province->gethero(player);
 		shuffle();
 	}
 
@@ -35,8 +27,10 @@ public:
 		zcpy(result, getsideof());
 		if(result[0])
 			zcat(result, " ");
-		if(general)
+		if(general) {
 			szprint(zend(result), result_max, msg.lead, general->getname());
+			zcat(result, " ");
+		}
 		return result;
 	}
 
@@ -65,13 +59,13 @@ public:
 	const char* getside() const {
 		if(player)
 			return player->getname();
-		return "";
+		return msg.neutral_army;
 	}
 
 	const char* getsideof() const {
 		if(player)
 			return player->getnameof();
-		return "";
+		return msg.neutral_army_of;
 	}
 
 	player_info* getowner() {
@@ -85,6 +79,8 @@ public:
 			casualties += enemy.tactic->cruelty;
 		if(tactic)
 			casualties -= tactic->shield;
+		if(casualties > (int)count)
+			casualties = count;
 		if(tactic) {
 			zcat(result, " ");
 			szprint(zend(result), result_max, tactic->text, getside());

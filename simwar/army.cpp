@@ -27,23 +27,26 @@ int army::get(const char* id, tip_info* ti, bool include_number) const {
 	if(ti && include_number)
 		zcpy(ti->result, "[\"");
 	if(general) {
-		r += general->fix(ti, general->get(id) + general->getbonus(id));
+		auto value = general->get(id) + general->getbonus(id);
 		if(attack && raid)
-			r += general->fix(ti, general->get("raid") + general->getbonus("raid"));
+			value += general->get("raid") + general->getbonus("raid");
+		r += general->fix(ti, value);
 	}
 	for(auto p : *this) {
-		r += p->fix(ti, p->get(id) + p->getbonus(id));
+		auto value = p->get(id) + p->getbonus(id);
 		if(attack && raid)
-			r += p->fix(ti, general->get("raid") + general->getbonus("raid"));
+			value += p->get("raid") + p->getbonus("raid");
+		r += p->fix(ti, value);
 	}
 	if(!attack) {
 		if(province)
 			r += province->fix(ti, province->getdefend());
 	}
 	if(tactic) {
-		r += tactic->fix(ti, tactic->get(id));
+		auto value = tactic->get(id);
 		if(raid)
-			r += tactic->fix(ti, tactic->get("raid"));
+			value += tactic->get("raid");
+		r += tactic->fix(ti, value);
 	}
 	if(ti && include_number)
 		szprint(zend(ti->result), ti->result_max, "\"%1i]", r);

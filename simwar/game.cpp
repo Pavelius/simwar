@@ -8,3 +8,7 @@ static bsreq game_type[] = {
 {}};
 game_info		game;
 bsdata			game_manager("game", game, game_type);
+
+void game_info::clear() {
+	memset(this, 0, sizeof(*this));
+}
