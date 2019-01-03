@@ -9,5 +9,5 @@ bsreq combat_type[] = {
 {}};
 
 int combat_info::get(const char* id) const {
-	return bsval((void*)this, combat_type).get(id).get();
+	return name_info::getnum(this, combat_type, id);
 }

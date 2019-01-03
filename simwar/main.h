@@ -53,13 +53,16 @@ struct name_info {
 	explicit operator bool() const { return id != 0; }
 	const char*					getid() const { return id; }
 	const char*					getname() const { return name; }
+	static int					getnum(const void* object, const bsreq* type, const char* id);
 	static int					fix(tip_info* ti, const char* name, int value);
 	int							fix(tip_info* ti, int value) const { return fix(ti, name, value); }
 };
 struct action_info : name_info, combat_info, prof_info {
 	const char*					nameact;
-	char						recruit, support, profit, placeable;
+	char						recruit, support, profit;
 	char						order;
+	char						wait;
+	bool						isplaceable() const;
 	province_flag_s				getprovince() const;
 };
 struct character_info : combat_info  {
@@ -74,10 +77,14 @@ struct landscape_info : name_info, combat_info, prof_info {
 struct province_info : name_info {
 	bool						battle(char* result, const char* result_max, player_info* attacker_player, player_info* defender_player, bool raid);
 	void						createwave();
+	int							getdefend() const;
+	int							geteconomy() const { return level; }
 	hero_info*					gethero(const player_info* player) const;
 	player_info*				getplayer() const { return player; }
 	point						getposition() const { return position; }
 	int							getincome(tip_info* ti = 0) const;
+	landscape_info*				getlandscape() const { return landscape; }
+	int							getlevel() const { return level; }
 	province_flag_s				getstatus(const player_info* player) const;
 	int							getsupport(const player_info* player) const;
 	static bsreq				metadata[];
@@ -120,11 +127,13 @@ struct hero_info : name_info {
 	player_info*				getplayer() const { return player; }
 	province_info*				getprovince() const { return province; }
 	tactic_info*				gettactic() const { return tactic; }
+	int							getwait() const { return wait; }
 	static bsreq				metadata[];
-	bool						isready() const { return true; }
+	bool						isready() const { return (wait==0); }
 	void						resolve();
 	void						setaction(action_info* value) { action = value; }
 	void						setprovince(province_info* value) { province = value; }
+	void						setwait(int v) { wait = v; }
 	trait_info*					traits[4];
 private:
 	action_info*				action;
@@ -133,9 +142,14 @@ private:
 	player_info*				player;
 	province_info*				province;
 	tactic_info*				tactic;
+	int							wait;
 };
 struct unit_info : name_info, combat_info, prof_info {
 	const char*					nameof;
+	char						level;
+	char						recruit_count;
+	landscape_info*				recruit_landscape;
+	int							get(const char* id) const;
 };
 struct troop_info {
 	explicit operator bool() const { return type != 0; }
@@ -161,6 +175,7 @@ private:
 	player_info*				player;
 };
 struct player_info : name_info {
+	void						add(province_info* province, hero_info* hero, const char* text);
 	static void					after_turn();
 	static void					before_turn();
 	static unsigned				getactions(hero_info** source, unsigned maximum_count, int order);
@@ -176,6 +191,7 @@ struct player_info : name_info {
 	void						makemove();
 	static void					maketurn();
 	static bsreq				metadata[];
+	static void					playgame();
 	static void					resolve_actions();
 private:
 	const char*					nameof;
@@ -202,12 +218,14 @@ struct msg_info {
 	const char* cruelty;
 	const char* nobility;
 	const char* will;
-	const char* total_strenght;
+	const char *total_strenght, *total_cost;
 	const char *predict_fail, *predict_partial, *predict_success;
+	const char*	hero_wait;
 	const char* income;
 	const char* income_province;
 	const char* income_units;
 	const char* income_heroes;
+	const char* not_enought_gold;
 	const char* cost;
 	const char* squads;
 	const char* title;
@@ -226,6 +244,10 @@ struct gui_info {
 	short						button_width, window_width, tips_width, hero_width, hero_window_width, control_border;
 	short						padding;
 };
+struct unit_set : adat<unit_info*, 32> {
+	void						fill(const player_info* player, const province_info* province, const hero_info* hero, const action_info* action);
+	int							get(const char* id) const;
+};
 struct army : adat<troop_info*, 32> {
 	hero_info*					general;
 	player_info*				player;
@@ -234,7 +256,7 @@ struct army : adat<troop_info*, 32> {
 	bool						attack;
 	bool						raid;
 	constexpr army() : general(0), player(0), tactic(0), province(0), attack(false), raid(false) {}
-	army(player_info* player, hero_info* general, bool attack, bool raid);
+	army(player_info* player, province_info* province, hero_info* general, bool attack, bool raid);
 	void						fill(const player_info* player, const province_info* province);
 	int							get(const char* id, tip_info* ti, bool include_number = true) const;
 	int							getstrenght(tip_info* ti, bool include_number = true) const;
@@ -244,17 +266,18 @@ void							addaccept(char* result, const char* result_max);
 void							addbutton(char* result, const char* result_max, const char* name);
 void							avatar(int x, int y, const char* id);
 inline int						button(int x, int y, int width, const char* label, const runable& e, unsigned key = 0) { return 0; }
-int								buttonw(int x, int y, int width, const char* label, const runable& e, unsigned key = 0);
+int								buttonw(int x, int y, int width, const char* label, const runable& e, unsigned key = 0, const char* tips = 0);
 action_info*					getaction(player_info* player, hero_info* hero);
 color							getcolor(province_flag_s id);
 province_info*					getprovince(player_info* player, hero_info* hero, action_info* action, aref<province_info*> selection, color selection_color);
 areas							hilite(rect rc);
 bool							initializemap();
 bool							move(const player_info* player, hero_info* hero, const action_info* action, const province_info* province, army& s1, army& s2, const army& a3);
+bool							recruit(const player_info* player, hero_info* hero, const action_info* action, const province_info* province, unit_set& s1, unit_set& s2);
 void							report(const char* format);
 areas							window(rect rc, bool disabled = false, bool hilight = false, int border = 0);
 int								window(int x, int y, int width, const char* string);
-int								windowb(int x, int y, int width, const char* string, const runable& e, int border = 0, unsigned key = 0);
+int								windowb(int x, int y, int width, const char* string, const runable& e, int border = 0, unsigned key = 0, const char* tips = 0);
 }
 extern adat<action_info, 32>	action_data;
 extern game_info				game;

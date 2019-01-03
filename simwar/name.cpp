@@ -13,3 +13,10 @@ int name_info::fix(tip_info* ti, const char* name, int value) {
 	}
 	return value;
 }
+
+int name_info::getnum(const void* object, const bsreq* type, const char* id) {
+	auto pf = type->find(id);
+	if(!pf)
+		return 0;
+	return pf->get(pf->ptr(object));
+}

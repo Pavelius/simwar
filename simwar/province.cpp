@@ -26,6 +26,10 @@ province_flag_s province_info::getstatus(const player_info* player) const {
 	return NoFriendlyProvince;
 }
 
+int province_info::getdefend() const {
+	return landscape->defend + level;
+}
+
 int province_info::getincome(tip_info* ti) const {
 	auto result = 0;
 	if(landscape)

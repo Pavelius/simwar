@@ -350,3 +350,11 @@ int draw::textf(rect& rc, const char* string, int tab_width) {
 	rc.x2 += rc.x1;
 	return rc.height();
 }
+
+int draw::textfw(const char* string, int tab_width) {
+	state push;
+	clipping.clear();
+	int width = 0;
+	draw::textf(0, 0, 1000, string, &width, 0, 0, 0, tab_width);
+	return width;
+}

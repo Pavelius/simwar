@@ -1,7 +1,7 @@
 #include "main.h"
 
-army::army(player_info* player, hero_info* general, bool attack, bool raid) :
-	player(player), general(general), tactic(0), attack(attack), raid(raid) {
+army::army(player_info* player, province_info* province, hero_info* general, bool attack, bool raid) :
+	player(player), general(general), tactic(0), attack(attack), province(province), raid(raid) {
 }
 
 void army::fill(const player_info* player, const province_info* province) {
@@ -28,13 +28,17 @@ int army::get(const char* id, tip_info* ti, bool include_number) const {
 		zcpy(ti->result, "[\"");
 	if(general) {
 		r += general->fix(ti, general->get(id) + general->getbonus(id));
-		if(raid)
+		if(attack && raid)
 			r += general->fix(ti, general->get("raid") + general->getbonus("raid"));
 	}
 	for(auto p : *this) {
 		r += p->fix(ti, p->get(id) + p->getbonus(id));
-		if(raid)
+		if(attack && raid)
 			r += p->fix(ti, general->get("raid") + general->getbonus("raid"));
+	}
+	if(!attack) {
+		if(province)
+			r += province->fix(ti, province->getdefend());
 	}
 	if(tactic) {
 		r += tactic->fix(ti, tactic->get(id));

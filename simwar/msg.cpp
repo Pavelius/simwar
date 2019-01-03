@@ -24,10 +24,13 @@ bsreq msg_type[] = {
 	BSREQ(msg_info, cost, text_type),
 	BSREQ(msg_info, squads, text_type),
 	//
+	BSREQ(msg_info, hero_wait, text_type),
 	BSREQ(msg_info, total_strenght, text_type),
+	BSREQ(msg_info, total_cost, text_type),
 	BSREQ(msg_info, predict_fail, text_type),
 	BSREQ(msg_info, predict_partial, text_type),
 	BSREQ(msg_info, predict_success, text_type),
+	BSREQ(msg_info, not_enought_gold, text_type),
 	//
 	BSREQ(msg_info, title, text_type),
 	BSREQ(msg_info, exit, text_type),

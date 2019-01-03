@@ -314,6 +314,7 @@ int						textlb(const char* string, int index, int width, int* line_index = 0, i
 int						texte(rect rc, const char* string, unsigned flags, int i1, int i2);
 int						textf(int x, int y, int width, const char* text, int* max_width = 0, int min_height = 0, int* cashe_height = 0, const char** cashe_string = 0, int tab_width = 0);
 int						textf(rect& rc, const char* string, int tab_width = 0);
+int						textfw(const char* string, int tab_width = 0);
 int						texth();
 int						texth(const char* string, int width);
 int						textw(int sym);

@@ -7,7 +7,7 @@ class combatside : public army {
 
 public:
 
-	combatside(const province_info* province, player_info* player, bool attack, bool raid) : army(player, 0, attack, raid), strenght(0), casualties(0) {
+	combatside(province_info* province, player_info* player, bool attack, bool raid) : army(player, province, 0, attack, raid), strenght(0), casualties(0) {
 		fill(player, province);
 		// Get all heroes in province and choose one best matched
 		for(auto& e : hero_data) {

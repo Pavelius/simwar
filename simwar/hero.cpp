@@ -10,6 +10,7 @@ bsreq hero_info::metadata[] = {
 	BSREQ(hero_info, traits, trait_type),
 	BSREQ(hero_info, player, player_info::metadata),
 	BSREQ(hero_info, province, province_info::metadata),
+	BSREQ(hero_info, wait, number_type),
 {}};
 adat<hero_info, 128> hero_data;
 bsdata hero_manager("hero", hero_data, hero_info::metadata);
@@ -18,6 +19,8 @@ void hero_info::before_turn() {
 	tactic = 0;
 	province = 0;
 	action = game.default_action;
+	if(wait > 0)
+		wait--;
 }
 
 int hero_info::get(const char* id) const {
@@ -49,7 +52,10 @@ void hero_info::resolve() {
 	if(action->attack || action->raid) {
 		auto israid = (action->raid > 0);
 		auto enemy = province->getplayer();
-		if(enemy!=player)
+		if(enemy != player) {
 			province->battle(temp, zendof(temp), player, enemy, israid);
+			player->add(province, this, temp);
+			enemy->add(province, province->gethero(enemy), temp);
+		}
 	}
 }

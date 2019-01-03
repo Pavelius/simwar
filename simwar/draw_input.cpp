@@ -416,7 +416,7 @@ static void render_board() {
 	render_board({0, 0, draw::getwidth(), draw::getheight()}, current_player, 0, {}, colors::blue);
 }
 
-static int render_hero(int x, int y, int width, hero_info* e, bool hilite, bool disabled, const char* disable_text, callback_proc proc = 0) {
+static int render_hero(int x, int y, int width, hero_info* e, bool disabled, const char* disable_text, callback_proc proc = 0) {
 	char temp[2048]; temp[0] = 0;
 	draw::state push;
 	draw::font = metrics::font;
@@ -431,7 +431,7 @@ static int render_hero(int x, int y, int width, hero_info* e, bool hilite, bool 
 	}
 	auto owner = e->getplayer();
 	rect rc = {x, y, x + width, y + height};
-	areas hittest = window(rc, disabled, hilite);
+	areas hittest = window(rc, disabled, true);
 	//if(owner)
 	//	draw::shield(x + drw.hero_width - 20, y + 18, owner->getimage());
 	int x1 = x;
@@ -468,6 +468,10 @@ static int render_hero(int x, int y, int width, hero_info* e, bool hilite, bool 
 	return height + gui.border * 2;
 }
 
+static int render_hero(int x, int y, hero_info* e) {
+	return render_hero(x, y, gui.hero_window_width, e, false, 0);
+}
+
 static int render_heroes(int x, int y, const player_info* player, callback_proc proc) {
 	auto y0 = y;
 	if(!player)
@@ -475,7 +479,8 @@ static int render_heroes(int x, int y, const player_info* player, callback_proc 
 	for(auto& e : hero_data) {
 		if(!e || e.getplayer() != player)
 			continue;
-		y += render_hero(x, y, gui.hero_window_width, &e, true, !e.isready(), 0, proc);
+		char temp[260]; zprint(temp, msg.hero_wait, e.getwait());
+		y += render_hero(x, y, gui.hero_window_width, &e, !e.isready(), temp, proc);
 		y += gui.padding;
 	}
 	return y - y0;
@@ -488,6 +493,8 @@ static int render_province(int x, int y, const province_info* province) {
 	stringcreator sc;
 	stringbuilder sb(sc, temp);
 	sb.addh(province->getname());
+	sb.addn("%1 :gold:%2i :house:%3i :shield_grey:%4i", province->getlandscape()->name,
+		province->getincome(), province->getlevel(), province->getdefend());
 	if(province->text)
 		sb.addn(province->text);
 	if(!temp[0])
@@ -595,14 +602,17 @@ areas draw::window(rect rc, bool disabled, bool hilight, int border) {
 		border = gui.border;
 	rc.offset(-border, -border);
 	color c = colors::form;
+	color b = colors::form;
 	auto rs = draw::area(rc);
 	auto op = gui.opacity;
-	if(disabled)
+	if(disabled) {
+		c = colors::red;
 		op = op / 2;
-	else if(hilight && !disabled && (rs == AreaHilited || rs == AreaHilitedPressed))
+	}
+	else if(hilight && (rs == AreaHilited || rs == AreaHilitedPressed))
 		op = gui.opacity_hilighted;
 	draw::rectf(rc, c, op);
-	draw::rectb(rc, c);
+	draw::rectb(rc, b);
 	return rs;
 }
 
@@ -618,12 +628,14 @@ int draw::window(int x, int y, int width, const char* string) {
 	return height + gui.border * 2 + gui.padding;
 }
 
-int draw::windowb(int x, int y, int width, const char* string, const runable& e, int border, unsigned key) {
+int draw::windowb(int x, int y, int width, const char* string, const runable& e, int border, unsigned key, const char* tips) {
 	draw::state push;
 	draw::font = metrics::font;
 	rect rc = {x, y, x + width, y + draw::texth()};
-	auto ra = window(rc, false, !e.isdisabled(), border);
+	auto ra = window(rc, e.isdisabled(), true, border);
 	draw::text(rc, string, AlignCenterCenter);
+	if((ra==AreaHilited || ra==AreaHilitedPressed) && tips)
+		tooltips(x, y, rc.width(), tips);
 	if(!e.isdisabled()
 		&& ((ra == AreaHilitedPressed && hot.key == MouseLeft)
 			|| (key && key == hot.key)))
@@ -704,6 +716,64 @@ bool draw::initializemap() {
 	return true;
 }
 
+struct unit_list : list {
+
+	unit_set&	source;
+	int			id;
+
+	unit_list(unit_set& source) : source(source), id(0) {}
+
+	const char* getname(char* result, const char* result_maximum, int line, int column) const override {
+		switch(column) {
+		case 0:
+			szprint(result, result_maximum, source.data[line]->getname());
+			szupper(result, 1);
+			break;
+		case 1:
+			szprint(result, result_maximum, ":gold:%1i", source.data[line]->get("cost"));
+			break;
+		default:
+			return "";
+		}
+		return result;
+	}
+
+	int getmaximum() const override {
+		return source.getcount();
+	}
+
+	unit_info* getcurrent() {
+		if(current < source.getcount())
+			return source.data[current];
+		return 0;
+	}
+
+	bool keyinput(unsigned id) override {
+		switch(id) {
+		case KeyEnter:
+			hot.key = this->id;
+			break;
+		default:
+			return list::keyinput(id);
+		}
+		return true;
+	}
+
+	void row(const rect& rc, int index) override {
+		char temp[260]; temp[0] = 0;
+		rowhilite(rc, index);
+		auto p = getname(temp, zendof(temp), index, 0);
+		if(p)
+			draw::textc(rc.x1 + 4, rc.y1 + 4, rc.width() - 4 * 2, p);
+		p = getname(temp, zendof(temp), index, 1);
+		if(p) {
+			auto w = textfw(p);
+			textf(rc.x2 - 4 - w, rc.y1 + 4, rc.width() - 4 * 2, p);
+		}
+	}
+
+};
+
 struct army_list : list {
 
 	army&		source;
@@ -739,7 +809,7 @@ struct army_list : list {
 			hot.key = this->id;
 			break;
 		default:
-			return control::keyinput(id);
+			return list::keyinput(id);
 		}
 		return true;
 	}
@@ -767,7 +837,7 @@ action_info* draw::getaction(player_info* player, hero_info* hero) {
 		render_board();
 		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
 		auto y = gui.padding + gui.border;
-		y += render_hero(x, y, gui.hero_window_width, hero, false, !hero->isready(), 0) + 1;
+		y += render_hero(x, y, hero) + 1;
 		for(auto& e : action_data)
 			y += windowb(x, y, gui.hero_window_width, e.getname(), cmd(breakparam, (int)&e), gui.border) + 1;
 		y += windowb(x, y, gui.hero_window_width, msg.cancel, cmd(breakparam, 0), 0, KeyEscape) + 1;
@@ -783,7 +853,7 @@ province_info* draw::getprovince(player_info* player, hero_info* hero, action_in
 		render_board(rc, player, breakparam, selection, selection_color);
 		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
 		auto y = gui.padding + gui.border;
-		y += render_hero(x, y, gui.hero_window_width, hero, false, !hero->isready(), 0) + 1;
+		y += render_hero(x, y, hero) + 1;
 		y += windowb(x, y, gui.hero_window_width, action->getname(), cmd(), gui.border) + 1;
 		y += windowb(x, y, gui.hero_window_width, msg.cancel, cmd(breakparam, 0), 0, KeyEscape) + 1;
 		domodal();
@@ -792,15 +862,64 @@ province_info* draw::getprovince(player_info* player, hero_info* hero, action_in
 	return (province_info*)getresult();
 }
 
+bool draw::recruit(const player_info* player, hero_info* hero, const action_info* action, const province_info* province, unit_set& s1, unit_set& s2) {
+	unit_list u1(s1); u1.id = 10;
+	unit_list u2(s2); u2.id = 11;
+	auto th = texth() * 3 + 2;
+	while(ismodal()) {
+		render_board();
+		auto gold = s2.get("cost");
+		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
+		auto y = gui.padding + gui.border;
+		y += render_hero(x, y, hero) + 1;
+		y += windowb(x, y, gui.hero_window_width, action->getname(), cmd(), gui.border) + 1;
+		auto isdisabled = false;
+		const char* error_info = 0;
+		if(gold > player->getgold()) {
+			isdisabled = true;
+			error_info = msg.not_enought_gold;
+		}
+		y += windowb(x, y, gui.hero_window_width, msg.accept, cmd(breakparam, 1, isdisabled), 0, KeyEnter, error_info) + 1;
+		y += windowb(x, y, gui.hero_window_width, msg.cancel, cmd(breakparam, 0), 0, KeyEscape) + 1;
+		x = gui.border * 2;
+		y = gui.padding + gui.border;
+		auto x1 = x;
+		auto w = gui.window_width / 2;
+		auto pw = gui.padding / 2;
+		y += render_player(x, y, player);
+		auto y2 = getheight() - gui.padding * 2 - gui.border;
+		auto y3 = y2 - th;
+		draw::window({x, y, x + gui.window_width, y2});
+		u1.view({x, y, x + w - pw, y3});
+		x = x + w + gui.padding;
+		u2.view({x, y, x + w - pw, y3});
+		x = x1; y = y3 + 2;
+		char temp[1024]; zprint(temp, msg.total_cost, gold);
+		y += textf(x, y, gui.window_width, temp);
+		domodal();
+		control_standart();
+		if(hot.key == u1.id) {
+			auto p1 = u1.getcurrent();
+			u1.source.remove(u1.current);
+			u2.source.add(p1);
+		} else if(hot.key == u2.id) {
+			auto p1 = u2.getcurrent();
+			u2.source.remove(u2.current);
+			u1.source.add(p1);
+		}
+	}
+	return getresult() != 0;
+}
+
 bool draw::move(const player_info* player, hero_info* hero, const action_info* action, const province_info* province, army& s1, army& s2, const army& a3) {
 	army_list u1(s1); u1.id = 10;
 	army_list u2(s2); u2.id = 11;
-	auto th = texth() * 4;
+	auto th = texth() * 3 + 2;
 	while(ismodal()) {
 		render_board();
 		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
 		auto y = gui.padding + gui.border;
-		y += render_hero(x, y, gui.hero_window_width, hero, false, false, 0) + 1;
+		y += render_hero(x, y, hero) + 1;
 		y += windowb(x, y, gui.hero_window_width, action->getname(), cmd(), gui.border) + 1;
 		y += windowb(x, y, gui.hero_window_width, msg.accept, cmd(breakparam, 1), 0, KeyEnter) + 1;
 		y += windowb(x, y, gui.hero_window_width, msg.cancel, cmd(breakparam, 0), 0, KeyEscape) + 1;
@@ -816,11 +935,9 @@ bool draw::move(const player_info* player, hero_info* hero, const action_info* a
 		u1.view({x, y, x + w - pw, y3});
 		x = x + w + gui.padding;
 		u2.view({x, y, x + w - pw, y3});
-		x = x1; y = y3;
-		char tip_temp[2048];
-		tip_info ti(tip_temp);
-		auto attacker_strenght = s2.getstrenght(&ti);
-		char temp[4096]; zprint(temp, msg.total_strenght, tip_temp);
+		x = x1; y = y3 + 2;
+		auto attacker_strenght = s2.getstrenght(0);
+		char temp[4096]; zprint(temp, msg.total_strenght, attacker_strenght);
 		auto defender_strenght = a3.getstrenght(0);
 		szprint(zend(temp), zendof(temp), " ");
 		if(attacker_strenght < defender_strenght)
@@ -849,11 +966,11 @@ static void choose_action() {
 	hero_info* hero = (hero_info*)hot.param;
 	if(!hero)
 		return;
-	province_info* province = 0;
 	auto action = getaction(current_player, hero);
 	if(!action)
 		return;
-	if(action->placeable) {
+	province_info* province = 0;
+	if(action->isplaceable()) {
 		auto choose_mode = action->getprovince();
 		province_info* provinces[128];
 		auto count = current_player->getprovinces(provinces, sizeof(provinces) / sizeof(provinces[0]), current_player, choose_mode);
@@ -863,16 +980,23 @@ static void choose_action() {
 	}
 	if(action->raid || action->attack) {
 		auto raid = action->raid > 0;
-		army a1(current_player, hero, true, raid); a1.fill(current_player, 0);
-		army a2(current_player, hero, true, raid);
-		army a3(0, 0, false, raid); a3.fill(province->getplayer(), province);
+		army a1(current_player, province, hero, true, raid); a1.fill(current_player, 0);
+		army a2(current_player, province, hero, true, raid);
+		army a3(0, 0, 0, false, raid); a3.fill(province->getplayer(), province);
 		if(!move(current_player, hero, action, province, a1, a2, a3))
 			return;
 		for(auto p : a2)
 			p->setmove(province);
+	} else if(action->recruit) {
+		unit_set a1; a1.fill(current_player, province, hero, action);
+		unit_set a2;
+		if(!recruit(current_player, hero, action, province, a1, a2))
+			return;
 	}
 	hero->setaction(action);
 	hero->setprovince(province);
+	if(action->wait)
+		hero->setwait(hero->getwait() + action->wait);
 	current_province = province;
 }
 
@@ -916,7 +1040,7 @@ void draw::addbutton(char* result, const char* result_max, const char* name) {
 	szprint(zend(result), result_max, "\n$(%1)", name);
 }
 
-int	draw::buttonw(int x, int y, int width, const char* label, const runable& e, unsigned key) {
+int	draw::buttonw(int x, int y, int width, const char* label, const runable& e, unsigned key, const char* tips) {
 	return windowb(x, y, width, label, e, 0, key);
 }
 

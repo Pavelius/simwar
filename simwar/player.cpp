@@ -142,6 +142,7 @@ void player_info::maketurn() {
 			continue;
 		e.makemove();
 	}
+	resolve_actions();
 	after_turn();
 }
 
@@ -187,5 +188,15 @@ void player_info::resolve_actions() {
 			auto hero = heroes[j];
 			hero->resolve();
 		}
+	}
+}
+
+void player_info::add(province_info* province, hero_info* hero, const char* text) {
+	report_info::add(this, province, hero, text);
+}
+
+void player_info::playgame() {
+	while(true) {
+		maketurn();
 	}
 }
