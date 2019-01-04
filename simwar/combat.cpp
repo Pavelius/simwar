@@ -121,5 +121,6 @@ bool province_info::battle(char* result, const char* result_max, player_info* at
 	attackers.applycasualty(zend(p), result_max);
 	defenders.applycasualty(zend(p), result_max);
 	draw::addbutton(zend(p), result_max, "accept");
+	add(attacker_player, -1);
 	return &winner == &attackers;
 }

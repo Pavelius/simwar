@@ -81,6 +81,7 @@ struct landscape_info : name_info, combat_info, cost_info {
 };
 struct province_info : name_info {
 	void						add(unit_info* unit);
+	void						add(const player_info* player, int value) { setsupport(player, getsupport(player) + value); }
 	bool						battle(char* result, const char* result_max, player_info* attacker_player, player_info* defender_player, bool raid);
 	void						build(unit_info* unit, int wait = 1);
 	static void					change_support();
@@ -100,6 +101,7 @@ struct province_info : name_info {
 	static unsigned				remove_hero_present(aref<province_info*> source, const player_info* player);
 	void						render_neighbors(const rect& rc) const;
 	static unsigned				select(province_info** source, unsigned maximum, const player_info* player = 0, province_flag_s state = AnyProvince);
+	void						setsupport(const player_info* player, int value);
 private:
 	player_info * player;
 	landscape_info*				landscape;

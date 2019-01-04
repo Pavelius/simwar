@@ -139,3 +139,21 @@ void province_info::change_support() {
 		}
 	}
 }
+
+int	province_info::getsupport(const player_info* player) const {
+	auto player_index = player_data.indexof(player);
+	if(player_index == -1)
+		return 0;
+	return support[player_index];
+}
+
+void province_info::setsupport(const player_info* player, int value) {
+	auto player_index = player_data.indexof(player);
+	if(player_index == -1)
+		return;
+	if(value > game.support_maximum)
+		value = game.support_maximum;
+	if(value < game.support_minimum)
+		value = game.support_minimum;
+	support[player_index] = value;
+}
