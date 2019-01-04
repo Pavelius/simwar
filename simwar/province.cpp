@@ -107,7 +107,7 @@ char* province_info::getinfo(char* result, const char* result_maximum, bool show
 }
 
 void province_info::build(unit_info* unit, int turns) {
-	if(turns<1)
+	if(turns < 1)
 		turns = 1;
 	auto p = build_data.add();
 	p->province = this;
@@ -117,4 +117,25 @@ void province_info::build(unit_info* unit, int turns) {
 
 void province_info::add(unit_info* unit) {
 	troop_info::add(this, unit);
+}
+
+void province_info::change_support() {
+	for(auto& e : province_data) {
+		if(!e)
+			continue;
+		auto player = e.player;
+		auto player_index = player_data.indexof(player);
+		for(auto i = 0; i < sizeof(e.support) / sizeof(e.support[0]); i++) {
+			auto value = e.support[i];
+			if(player_index == i) {
+				if(value < game.support_maximum)
+					value++;
+			} else if(value > 0) {
+				if(value > game.support_minimum)
+					value--;
+			} else if(value < 0)
+				value++;
+			e.support[i] = value;
+		}
+	}
 }

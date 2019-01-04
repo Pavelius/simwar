@@ -83,6 +83,7 @@ struct province_info : name_info {
 	void						add(unit_info* unit);
 	bool						battle(char* result, const char* result_max, player_info* attacker_player, player_info* defender_player, bool raid);
 	void						build(unit_info* unit, int wait = 1);
+	static void					change_support();
 	void						createwave();
 	int							getdefend() const;
 	int							geteconomy() const { return level; }
@@ -99,7 +100,6 @@ struct province_info : name_info {
 	static unsigned				remove_hero_present(aref<province_info*> source, const player_info* player);
 	void						render_neighbors(const rect& rc) const;
 	static unsigned				select(province_info** source, unsigned maximum, const player_info* player = 0, province_flag_s state = AnyProvince);
-	static void					update_status(const player_info* player);
 private:
 	player_info * player;
 	landscape_info*				landscape;
@@ -129,7 +129,6 @@ struct tactic_info : name_info, combat_info {
 };
 struct hero_info : name_info {
 	cost_info					pay;
-	void						before_turn();
 	void						cancelaction();
 	int							get(const char* id) const;
 	const char*					getavatar() const { return avatar; }
@@ -143,6 +142,7 @@ struct hero_info : name_info {
 	int							getwait() const { return wait; }
 	static bsreq				metadata[];
 	bool						isready() const { return (wait == 0); }
+	static void					refresh_heroes();
 	void						resolve();
 	static unsigned				select(hero_info** source, unsigned maximum_count, const province_info* province = 0, const player_info* player = 0);
 	void						setaction(action_info* value) { action = value; }
@@ -194,8 +194,7 @@ private:
 struct player_info : name_info, cost_info {
 	operator cost_info&() { return *static_cast<cost_info*>(this); }
 	void						add(province_info* province, hero_info* hero, const char* text);
-	static void					after_turn();
-	static void					before_turn();
+	static void					gain_profit();
 	static unsigned				getactions(hero_info** source, unsigned maximum_count, int order);
 	province_info*				getbestprovince() const;
 	cost_info					getcost() const { return *static_cast<const cost_info*>(this); }
@@ -226,6 +225,7 @@ struct game_info {
 	const char*					map;
 	action_info*				default_action;
 	char						income_per_level, casualties;
+	char						support_maximum, support_minimum;
 	int							turn;
 	void						clear();
 };
@@ -267,7 +267,7 @@ struct msg_info {
 	const char* no;
 };
 struct gui_info {
-	unsigned char				border;
+	unsigned char				border, button_border;
 	unsigned char				opacity, opacity_disabled, opacity_hilighted, opacity_hilighted_province;
 	short						button_width, window_width, tips_width, hero_width, hero_window_width, control_border;
 	short						padding;
@@ -293,7 +293,7 @@ namespace draw {
 void							addaccept(char* result, const char* result_max);
 void							addbutton(char* result, const char* result_max, const char* name);
 void							avatar(int x, int y, const char* id);
-inline int						button(int x, int y, int width, const char* label, const runable& e, unsigned key = 0) { return 0; }
+int								button(int x, int y, int width, const char* label, const runable& e, unsigned key = 0);
 int								buttonw(int x, int y, int width, const char* label, const runable& e, unsigned key = 0, const char* tips = 0);
 bool							conquer(const player_info* player, hero_info* hero, const action_info* action, const province_info* province, army& s1, army& s2, const army& a3);
 action_info*					getaction(player_info* player, hero_info* hero);

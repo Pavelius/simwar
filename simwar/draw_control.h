@@ -13,6 +13,7 @@ enum select_mode_s : unsigned char {
 };
 struct runable {
 	virtual void			execute() const = 0;
+	virtual int				getid() const = 0;
 	virtual bool			isdisabled() const = 0;
 };
 struct cmd : runable {
@@ -20,6 +21,7 @@ struct cmd : runable {
 	constexpr cmd(callback_proc proc, int param = 0, bool disabled = false) : proc(proc), param(param), disabled(disabled) {}
 	explicit operator bool() const { return proc != 0; }
 	void					execute() const override { draw::execute(proc, param); }
+	int						getid() const override { return (int)proc; }
 	bool					isdisabled() const { return disabled; }
 private:
 	callback_proc			proc;

@@ -75,15 +75,7 @@ province_info* player_info::getbestprovince() const {
 	return elements[0];
 }
 
-void player_info::before_turn() {
-	for(auto& e : hero_data) {
-		if(!e)
-			continue;
-		e.before_turn();
-	}
-}
-
-void player_info::after_turn() {
+void player_info::gain_profit() {
 	for(auto& e : player_data) {
 		if(!e)
 			continue;
@@ -143,14 +135,15 @@ void player_info::add(province_info* province, hero_info* hero, const char* text
 
 void player_info::playgame() {
 	while(true) {
-		before_turn();
+		hero_info::refresh_heroes();
 		for(auto& e : player_data) {
 			if(!e)
 				continue;
 			e.makemove();
 		}
 		game.turn++;
-		resolve_actions();
-		after_turn();
+		player_info::resolve_actions();
+		player_info::gain_profit();
+		province_info::change_support();
 	}
 }

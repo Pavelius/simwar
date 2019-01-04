@@ -250,7 +250,6 @@ void					decortext(unsigned flags);
 void					domodal();
 void					execute(void(*callback)(), int value = 0);
 void					execute(const hotinfo& value);
-void					focusing(int id, unsigned& flags, rect rc);
 rect					getarea();
 int						getbpp();
 color					getcolor(color normal, unsigned flags);

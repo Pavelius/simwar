@@ -43,6 +43,7 @@ static bsreq gui_type[] = {
 	BSREQ(gui_info, border, number_type),
 	BSREQ(gui_info, control_border, number_type),
 	BSREQ(gui_info, button_width, number_type),
+	BSREQ(gui_info, button_border, number_type),
 	BSREQ(gui_info, window_width, number_type),
 	BSREQ(gui_info, hero_window_width, number_type),
 	BSREQ(gui_info, tips_width, number_type),
@@ -829,6 +830,8 @@ struct army_list : list {
 };
 
 void draw::report(const char* format) {
+	auto old_focus = getfocus();
+	setfocus(0);
 	while(ismodal()) {
 		render_board();
 		render_right_side();
@@ -838,6 +841,7 @@ void draw::report(const char* format) {
 		domodal();
 		control_standart();
 	}
+	setfocus(old_focus);
 }
 
 static void breakparam() {
@@ -1066,6 +1070,21 @@ void draw::avatar(int x, int y, const char* id) {
 	blit(*draw::canvas, x, y, gui.hero_width, gui.hero_width, 0, p->value, 0, 0);
 }
 
+int	draw::button(int x, int y, int width, const char* label, const runable& e, unsigned key) {
+	rect rc = {x, y, x + width, y + texth()};
+	rc.offset(-gui.button_border, -gui.button_border);
+	addelement(e.getid(), rc);
+	if(!getfocus())
+		setfocus(e.getid());
+	auto isfocused = (getfocus() == e.getid());
+	if(buttonh(rc,
+		false, isfocused, e.isdisabled(), true, label, key, false, 0)
+		|| (isfocused && hot.key == KeyEnter)) {
+		e.execute();
+	}
+	return rc.height();
+}
+
 void draw::addaccept(char* result, const char* result_max) {
 	addbutton(result, result_max, "accept");
 }
@@ -1081,7 +1100,9 @@ int	draw::buttonw(int x, int y, int width, const char* label, const runable& e, 
 TEXTPLUGIN(accept) {
 	if(hot.key == KeyEnter)
 		execute(buttonok);
-	return button(x + width - gui.button_width - gui.padding * 2, y + gui.padding + 4, gui.button_width, msg.accept, cmd(buttonok));
+	return button(x + width - gui.button_width - gui.button_border,
+		y + gui.button_border + gui.padding,
+		gui.button_width, msg.accept, cmd(buttonok)) + gui.padding;
 }
 
 TEXTPLUGIN(yesno) {

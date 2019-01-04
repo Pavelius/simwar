@@ -15,13 +15,17 @@ bsreq hero_info::metadata[] = {
 adat<hero_info, 128> hero_data;
 bsdata hero_manager("hero", hero_data, hero_info::metadata);
 
-void hero_info::before_turn() {
-	if(wait > 0)
-		wait--;
-	if(wait==0) {
-		tactic = 0;
-		province = 0;
-		action = game.default_action;
+void hero_info::refresh_heroes() {
+	for(auto& e : hero_data) {
+		if(!e)
+			continue;
+		if(e.wait > 0)
+			e.wait--;
+		if(e.wait == 0) {
+			e.tactic = 0;
+			e.province = 0;
+			e.action = game.default_action;
+		}
 	}
 }
 
