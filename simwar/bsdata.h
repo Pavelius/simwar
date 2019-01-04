@@ -17,8 +17,7 @@ enum bsparse_error_s {
 struct bsdata : array {
 	struct parser {
 		bsdata**		custom;
-		bool			create_record_when_not_found;
-		constexpr parser() : custom(0), create_record_when_not_found(false) {}
+		constexpr parser() : custom(0) {}
 		bool			check_required(const std::initializer_list<const char*> requisits);
 		bool			check_required(const char* url, bsval source);
 		virtual void	error(bsparse_error_s id, const char* url, int line, int column, const char* format_param) {}

@@ -118,9 +118,6 @@
     <ClCompile Include="unit.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
-    <ClCompile Include="bsdata_log.cpp">
-      <Filter>Коллекции</Filter>
-    </ClCompile>
     <ClCompile Include="bslog.cpp">
       <Filter>Логика</Filter>
     </ClCompile>

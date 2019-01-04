@@ -8,5 +8,6 @@ white_harbor: Белая гавань. Важный портовый центр, откуда корабли уходят на юг.
 deadly_swamp: Гиблые болота.
 sunny_coast: Солнечное побережье.
 
+NoPlayer: Нет
 PlayerHuman: Человек
 PlayerComputer: Компьютер

@@ -123,8 +123,8 @@ bool province_info::battle(char* result, const char* result_max, player_info* at
 	attackers.applycasualty(zend(p), result_max);
 	defenders.applycasualty(zend(p), result_max);
 	if(!raid)
-		add(attacker_player, -1);
-	add(attacker_player, -1);
+		addsupport(attacker_player, -1);
+	addsupport(attacker_player, -1);
 	auto iswin = (&winner == &attackers);
 	if(iswin) {
 		retreat(defender_player);

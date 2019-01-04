@@ -3,6 +3,11 @@
 using namespace draw;
 using namespace draw::controls;
 
+struct cmdid {
+	callback_proc		proc;
+	int					param;
+	void clear() { memset(this, 0, sizeof(*this)); }
+};
 struct focusable_element {
 	int				id;
 	rect			rc;
@@ -11,8 +16,7 @@ struct focusable_element {
 static focusable_element	elements[96];
 static focusable_element*	render_control;
 static int				current_focus;
-static callback_proc	current_execute;
-static int				current_param;
+static cmdid			current_execute;
 static bool				keep_hot;
 static hotinfo			keep_hot_value;
 static bool				break_modal;
@@ -165,8 +169,8 @@ int draw::getfocus() {
 }
 
 void draw::execute(void(*proc)(), int param) {
-	current_execute = proc;
-	current_param = param;
+	current_execute.proc = proc;
+	current_execute.param = param;
 }
 
 void draw::execute(const hotinfo& value) {
@@ -255,8 +259,7 @@ static void before_render() {
 	hot.cursor = CursorArrow;
 	hot.hilite.clear();
 	render_control = elements;
-	current_execute = 0;
-	current_param = 0;
+	current_execute.clear();
 	current_hilite = 0;
 	current_focus_control = 0;
 	if(hot.mouse.x < 0 || hot.mouse.y < 0)
@@ -860,8 +863,11 @@ action_info* draw::getaction(player_info* player, hero_info* hero) {
 		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
 		auto y = gui.padding + gui.border;
 		y += render_hero(x, y, hero) + 1;
-		for(auto& e : action_data)
+		for(auto& e : action_data) {
+			if(!e)
+				continue;
 			y += windowb(x, y, gui.hero_window_width, e.getname(), cmd(breakparam, (int)&e), gui.border) + 1;
+		}
 		y += windowb(x, y, gui.hero_window_width, msg.cancel, cmd(breakparam, 0), 0, KeyEscape) + 1;
 		domodal();
 		control_standart();
@@ -1125,12 +1131,12 @@ TEXTPLUGIN(yesno) {
 }
 
 void draw::domodal() {
-	if(current_execute) {
-		auto proc = current_execute;
-		auto parm = current_param;
+	if(current_execute.proc) {
+		auto ev = current_execute;
 		before_render();
-		hot.param = parm;
-		proc();
+		hot.key = InputUpdate;
+		hot.param = ev.param;
+		ev.proc();
 		before_render();
 		hot.key = InputUpdate;
 		return;

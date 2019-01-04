@@ -4,6 +4,7 @@
 #game default_action(quest)
 #game support_minimum(-20)
 #game support_maximum(15)
+#game support_multiplier(4)
 
 #gui opacity(220)
 #gui opacity_disabled(50)
@@ -51,9 +52,6 @@
 #tactic careful_defence name("Тщательная защита") shield(1) text("%1 выстроили защитное построение и приготовились отражать удар.")
 #tactic messy_fighting name("Кровавая баня") cruelty(1) text("%1 ринулись в бой не щадя себя, чтобы нанести максимальный урон врагу.")
 
-#player red name("Имперцы") nameof("имперцев") gold(10)
-#player green name("Орки") nameof("орков") gold(100) type(PlayerComputer)
-
 #hero gordek name("Гордек") nameof("Гордека") avatar("art/portraits/gordek.bmp") traits(bloody, hireling) player(red)
 #hero antaris name("Антарис") nameof("Антариса") avatar("art/portraits/antaris.bmp") traits(bloody, diplomat) player(green)
 #hero mistra name("Мистра") nameof("Мистры") avatar("art/portraits/mistra.bmp") traits(carefull, diplomat) player(red)
@@ -64,14 +62,20 @@
 #unit swordmans name("мечники") nameof("мечников") attack(2) defend(2) gold(4) income(-2) level(2)
 #unit cavalry name("кавалерия") nameof("кавалерии") attack(3) defend(1) gold(5) income(-2) level(3)
 
+// Neutral army
 #troop type(swordmans) province(black_wood)
 #troop type(spearmans) province(black_wood)
 #troop type(spearmans) province(black_wood)
 #troop type(spearmans) province(black_wood)
 #troop type(spearmans) province(black_wood)
 
+// Army of red player
 #troop type(swordmans) province(sunrise_hills)
 #troop type(spearmans) province(sunrise_hills)
 
 #province elder_mountains player(green)
 #province sunrise_hills player(red)
+#province white_harbor player(red)
+
+#player red name("Имперцы") nameof("имперцев") gold(10) type(PlayerHuman)
+#player green name("Орки") nameof("орков") gold(100) type(PlayerComputer)

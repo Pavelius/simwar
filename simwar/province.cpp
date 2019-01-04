@@ -108,13 +108,13 @@ char* province_info::getinfo(char* result, const char* result_maximum, bool show
 }
 
 const char* province_info::getsupport(char* result, const char* result_maximum) const {
-	for(unsigned i = 0; i < player_data.count; i++) {
-		auto& e = player_data.data[i];
+	for(auto& e : player_data) {
 		if(!e)
 			continue;
-		if(support[i] == 0)
+		auto value = getsupport(&e);
+		if(value == 0)
 			continue;
-		szprint(zend(result), result_maximum, " %1: [%3%2i]", e.getname(), support[i], (support[i] >= 0) ? "+" : "-");
+		szprint(zend(result), result_maximum, " %1: [%3%2i]", e.getname(), value, (value >= 0) ? "+" : "-");
 	}
 	return result;
 }
@@ -133,6 +133,12 @@ void province_info::add(unit_info* unit) {
 }
 
 void province_info::change_support() {
+	auto support_maximum = game.support_maximum;
+	auto support_minimum = game.support_minimum;
+	if(game.support_multiplier) {
+		support_maximum *= game.support_multiplier;
+		support_minimum *= game.support_multiplier;
+	}
 	for(auto& e : province_data) {
 		if(!e)
 			continue;
@@ -140,9 +146,14 @@ void province_info::change_support() {
 		auto player_index = player_data.indexof(player);
 		for(auto i = 0; i < sizeof(support) / sizeof(support[0]); i++) {
 			auto value = e.support[i];
-			if(player_index != i) {
+			if(player_index == i) {
+				if(value < support_maximum)
+					value++;
+			} else {
 				if(value > 0)
 					value--;
+				else if(value < 0)
+					value++;
 			}
 			e.support[i] = value;
 		}
@@ -153,7 +164,10 @@ int	province_info::getsupport(const player_info* player) const {
 	auto player_index = player_data.indexof(player);
 	if(player_index == -1)
 		return 0;
-	return support[player_index];
+	auto value = support[player_index];
+	if(game.support_multiplier)
+		value /= game.support_multiplier;
+	return value;
 }
 
 void province_info::setsupport(const player_info* player, int value) {
@@ -164,6 +178,27 @@ void province_info::setsupport(const player_info* player, int value) {
 		value = game.support_maximum;
 	if(value < game.support_minimum)
 		value = game.support_minimum;
+	if(game.support_multiplier)
+		value *= game.support_multiplier;
+	support[player_index] = value;
+}
+
+void province_info::addsupport(const player_info* player, int value) {
+	auto player_index = player_data.indexof(player);
+	if(player_index == -1)
+		return;
+	auto support_minimum = game.support_minimum;
+	auto support_maximum = game.support_maximum;
+	if(game.support_multiplier) {
+		value *= game.support_multiplier;
+		support_minimum *= game.support_multiplier;
+		support_maximum *= game.support_multiplier;
+	}
+	value += support[player_index];
+	if(value > support_maximum)
+		value = support_maximum;
+	if(value < support_minimum)
+		value = support_minimum;
 	support[player_index] = value;
 }
 

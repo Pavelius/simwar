@@ -1,6 +1,7 @@
 #include "main.h"
 
-static name_info player_ai_data[] = {{"PlayerHuman"},
+static name_info player_ai_data[] = {{"NoPlayer"},
+{"PlayerHuman"},
 {"PlayerComputer"},
 };
 assert_enum(player_ai, PlayerComputer);

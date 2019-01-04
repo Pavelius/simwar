@@ -204,11 +204,6 @@ struct bsdata_serial : bsfile {
 		if(p[0] == '-' || (p[0] >= '0' && p[0] <= '9')) {
 			value = sz2num(p, &p);
 			value_type = number_type;
-		} else if(p[0] == '\'') {
-			p++;
-			readstring('\'');
-			value_type = text_type;
-			need_identifier = true;
 		} else if(p[0] == '\"') {
 			p++;
 			readstring('\"');
@@ -226,10 +221,12 @@ struct bsdata_serial : bsfile {
 				warning(ErrorNotFoundType);
 			// If not find create this
 			if(!value_object && value_data && create) {
-				auto f = value_data->fields->getkey();
-				if(f) {
-					value_object = value_data->add();
-					f->set(f->ptr(value_object), (int)szdup(buffer));
+				if(value_data->getcount() < value_data->getmaxcount()) {
+					auto f = value_data->fields->getkey();
+					if(f) {
+						value_object = value_data->add();
+						f->set(f->ptr(value_object), (int)szdup(buffer));
+					}
 				}
 			}
 			if(value_data)
@@ -268,8 +265,10 @@ struct bsdata_serial : bsfile {
 			}
 		} else if(req->type == number_type)
 			req->set(p, value);
-		else if(req->type->reference)
+		else if(req->reference)
 			req->set(p, (int)value_object);
+		else if(req->subtype==bsreq::Enum)
+			req->set(p, value);
 		else
 			storevalue((void*)req->ptr(object), req->type + index, 0);
 	}
@@ -277,13 +276,10 @@ struct bsdata_serial : bsfile {
 	bool readreq(void* object, const bsreq* req, unsigned index) {
 		if(!skip('('))
 			return false;
-		auto create_record_when_not_found = false;
-		if(parser)
-			create_record_when_not_found = parser->create_record_when_not_found;
 		while(*p) {
 			if(skip(')'))
 				break;
-			readvalue(req ? req->type : 0, create_record_when_not_found);
+			readvalue(req ? req->type : 0, true);
 			storevalue(object, req, index);
 			if(skip(','))
 				index++;

@@ -26,7 +26,6 @@ static bool initialize_map(const char* name) {
 	game.clear();
 	if(true) {
 		bslog log(url_errors);
-		log.create_record_when_not_found = true;
 		bsdata::read("script/test.txt", &log);
 		bsdata::readl("script/test_ru.txt");
 		result = result && !log.iserrors();

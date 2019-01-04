@@ -11,11 +11,12 @@ enum province_flag_s {
 	NoFriendlyProvince, FriendlyProvince, NeutralProvince,
 };
 enum player_ai_s : unsigned char {
+	NoPlayer,
 	PlayerHuman, PlayerComputer,
 };
 
 const int player_max = 8;
-const int province_max = player_max*16;
+const int province_max = player_max * 16;
 
 bsreq action_type[];
 bsreq character_type[];
@@ -86,11 +87,10 @@ struct landscape_info : name_info, combat_info, cost_info {
 };
 struct province_info : name_info {
 	void						add(unit_info* unit);
-	void						add(const player_info* player, int value) { setsupport(player, getsupport(player) + value); }
+	void						addsupport(const player_info* player, int value);
 	bool						battle(char* result, const char* result_max, player_info* attacker_player, player_info* defender_player, action_info* action, bool raid);
 	void						build(unit_info* unit, int wait = 1);
 	static void					change_support();
-	static void					create_province_order();
 	void						createwave();
 	int							getdefend() const;
 	int							geteconomy() const { return level; }
@@ -102,7 +102,6 @@ struct province_info : name_info {
 	landscape_info*				getlandscape() const { return landscape; }
 	int							getlevel() const { return level; }
 	province_info*				getneighbors(const player_info* player) const;
-	static province_info*		getnext();
 	province_flag_s				getstatus(const player_info* player) const;
 	int							getsupport(const player_info* player) const;
 	const char*					getsupport(char* result, const char* result_maximum) const;
@@ -114,11 +113,11 @@ struct province_info : name_info {
 	void						setplayer(player_info* value) { player = value; }
 	void						setsupport(const player_info* player, int value);
 private:
-	player_info * player;
-	landscape_info*				landscape;
 	char						level;
+	player_info*				player;
+	landscape_info*				landscape;
 	point						position;
-	short						support[player_max];
+	int							support[player_max];
 	province_info*				neighbors[8];
 };
 struct report_info {
@@ -130,7 +129,7 @@ struct report_info {
 	bool						is(const player_info* player) const;
 	void						set(player_info* player);
 private:
-	hero_info*					hero;
+	hero_info * hero;
 	player_info*				player;
 	province_info*				province;
 	const char*					text;
@@ -205,11 +204,12 @@ struct troop_info {
 	void						setprovince(province_info* value) { province = value; }
 	static void					sort(troop_info** source, unsigned count);
 private:
-	unit_info*					type;
+	unit_info * type;
 	province_info*				province;
 	province_info*				move;
 };
 struct player_info : name_info, cost_info {
+	explicit operator bool() const { return type != NoPlayer; }
 	operator cost_info&() { return *static_cast<cost_info*>(this); }
 	void						add(province_info* province, hero_info* hero, const char* text);
 	static void					gain_profit();
@@ -244,7 +244,7 @@ struct game_info {
 	const char*					map;
 	action_info*				default_action;
 	char						income_per_level, casualties;
-	char						support_maximum, support_minimum;
+	char						support_maximum, support_minimum, support_multiplier;
 	unsigned char				change_support_provinces;
 	int							turn;
 	void						after_load();
