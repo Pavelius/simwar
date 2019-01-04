@@ -50,6 +50,7 @@ bool bsdata::readl(const char* url, const char** requisits, unsigned requisits_c
 					if(count < 32)
 						count++;
 					strings[count] = pt;
+					continue;
 				}
 				pt++;
 			}

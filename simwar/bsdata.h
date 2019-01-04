@@ -11,14 +11,19 @@ enum bsparse_error_s {
 	NoParserError,
 	ErrorExpectedIdentifier, ErrorExpectedArrayField, ErrorExpectedSymbol1p, ErrorExpected1p,
 	ErrorNotFoundBase1p, ErrorNotFoundType, ErrorNotFoundIdentifier1p, ErrorNotFoundMember1pInBase2p, ErrorNotFoundFunction1p,
-	ErrorNotFilled1p, ErrorNotFilled1pIn2pRecord3p,
+	ErrorNotFilled1p, ErrorNotFilled1pIn2pRecord3p, ErrorValue1pIn2pRecord3pMustBeIn4pAnd5p,
 	ErrorFile2pNotFound,
 };
 struct bsdata : array {
+	struct requisit {
+		const char*		id;
+		bool			required;
+		int				values[2];
+	};
 	struct parser {
 		bsdata**		custom;
 		constexpr parser() : custom(0) {}
-		bool			check_required(const std::initializer_list<const char*> requisits);
+		bool			check_required(const requisit* requisits, unsigned requisits_count);
 		bool			check_required(const char* url, bsval source);
 		virtual void	error(bsparse_error_s id, const char* url, int line, int column, const char* format_param) {}
 		void			errornp(bsparse_error_s id, const char* url, int line, int column, ...);

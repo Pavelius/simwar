@@ -92,6 +92,12 @@ void hero_info::cancelaction() {
 		if(e.getplayer() == player && e.getmove() == province)
 			e.setmove(0);
 	}
+	for(auto& e : build_data) {
+		if(!e)
+			continue;
+		if(e.province==province)
+			e.clear();
+	}
 	if(player)
 		*player += pay;
 	pay.clear();

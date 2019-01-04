@@ -1,3 +1,9 @@
+#action raid order(1) raid(1)
+#action attack order(3) attack(1)
+#action defend defend(10)
+#action recruit recruit(2) wait(1)
+#action quest
+
 #game map("cradle.png")
 #game casualties(4)
 #game income_per_level(2)
@@ -19,12 +25,6 @@
 #gui hero_window_width(200)
 #gui opacity_hilighted(200)
 #gui opacity_hilighted_province(64)
-
-#action raid name("Совершить набег") order(1) raid(1) nameact("совершает набег")
-#action attack name("Захватить") order(2) attack(1) nameact("пытается захватить")
-#action defend name("Патрулировать") defend(1) nameact("патрулирует окресности")
-#action recruit name("Нанять") recruit(1) wait(1) nameact("нанимает войска")
-#action quest name("Искать приключения") nameact("ищет приключений")
 
 #landscape plains income(4)
 #landscape mountains income(1) defend(2)

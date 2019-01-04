@@ -252,6 +252,7 @@ struct game_info {
 	int							turn;
 	void						after_load();
 	void						clear();
+	bool						read(const char* name);
 };
 struct gui_info {
 	unsigned char				border, button_border;

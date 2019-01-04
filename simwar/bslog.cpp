@@ -6,13 +6,16 @@ static const char* bsparse_error_data[] = {"No errors",
 "Expected array or field",
 "Expected symbol %1",
 "Expected %1",
+//
 "Not found base %1",
 "Not found type",
 "Not found identifier %1",
 "Not found member %1 in base %2",
 "Not found function %1",
+//
 "Not filled %1",
 "Not filled %1 in base %2 record %3",
+"Requisit %1 in base %2 record %3 must be in interval %4i...%5i",
 "File %2 not found",
 };
 assert_enum(bsparse_error, ErrorFile2pNotFound);
@@ -36,7 +39,7 @@ void bslog::error(bsparse_error_s id, const char* url, int line, int column, con
 	} else {
 		char temp[4096];
 		head(url, line, column);
-		zprint(temp, bsparse_error_data[id], parameters[0], parameters[1], parameters[2], parameters[3]);
+		zprint(temp, bsparse_error_data[id], parameters[0], parameters[1], parameters[2], parameters[3], parameters[4]);
 		file << temp;
 	}
 	linefeed();

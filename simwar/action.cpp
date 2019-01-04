@@ -11,7 +11,7 @@ bsreq action_type[] = {
 	BSREQ(action_info, recruit, number_type),
 	BSREQ(action_info, support, number_type),
 	BSREQ(action_info, nameact, text_type),
-	BSREQ(action_info, order, text_type),
+	BSREQ(action_info, order, number_type),
 	BSREQ(action_info, wait, number_type),
 {}};
 adat<action_info, 32> action_data; BSMETA(action);
