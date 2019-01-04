@@ -521,6 +521,7 @@ static int render_province(int x, int y, const province_info* province) {
 		return 0;
 	zprint(temp, "###%1\n", province->getname());
 	province->getinfo(zend(temp), zendof(temp), true);
+	province->getsupport(zend(temp), zendof(temp));
 	if(province->text) {
 		szprint(zend(temp), zendof(temp), "\n");
 		szprint(zend(temp), zendof(temp), province->text);
@@ -932,6 +933,8 @@ bool draw::recruit(const player_info* player, hero_info* hero, const action_info
 }
 
 bool draw::conquer(const player_info* player, hero_info* hero, const action_info* action, const province_info* province, army& s1, army& s2, const army& a3) {
+	if(!s1.getcount())
+		return true;
 	army_list u1(s1); u1.id = 10;
 	army_list u2(s2); u2.id = 11;
 	auto th = texth() * 3 + 2;

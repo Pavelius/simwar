@@ -59,7 +59,7 @@ void hero_info::resolve() {
 		auto israid = (action->raid > 0);
 		auto enemy = province->getplayer();
 		if(enemy != player) {
-			province->battle(temp, zendof(temp), player, enemy, israid);
+			auto iswin = province->battle(temp, zendof(temp), player, enemy, action, israid);
 			player->add(province, this, temp);
 			enemy->add(province, province->gethero(enemy), temp);
 		}

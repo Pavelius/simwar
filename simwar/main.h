@@ -11,7 +11,7 @@ enum province_flag_s {
 };
 
 const int player_max = 8;
-const int province_max = 128;
+const int province_max = player_max*16;
 
 bsreq action_type[];
 bsreq character_type[];
@@ -82,9 +82,10 @@ struct landscape_info : name_info, combat_info, cost_info {
 struct province_info : name_info {
 	void						add(unit_info* unit);
 	void						add(const player_info* player, int value) { setsupport(player, getsupport(player) + value); }
-	bool						battle(char* result, const char* result_max, player_info* attacker_player, player_info* defender_player, bool raid);
+	bool						battle(char* result, const char* result_max, player_info* attacker_player, player_info* defender_player, action_info* action, bool raid);
 	void						build(unit_info* unit, int wait = 1);
 	static void					change_support();
+	static void					create_province_order();
 	void						createwave();
 	int							getdefend() const;
 	int							geteconomy() const { return level; }
@@ -95,12 +96,17 @@ struct province_info : name_info {
 	char*						getinfo(char* result, const char* result_maximum, bool show_landscape) const;
 	landscape_info*				getlandscape() const { return landscape; }
 	int							getlevel() const { return level; }
+	province_info*				getneighbors(const player_info* player) const;
+	static province_info*		getnext();
 	province_flag_s				getstatus(const player_info* player) const;
 	int							getsupport(const player_info* player) const;
+	const char*					getsupport(char* result, const char* result_maximum) const;
 	static bsreq				metadata[];
 	static unsigned				remove_hero_present(aref<province_info*> source, const player_info* player);
 	void						render_neighbors(const rect& rc) const;
+	void						retreat(const player_info* player);
 	static unsigned				select(province_info** source, unsigned maximum, const player_info* player = 0, province_flag_s state = AnyProvince);
+	void						setplayer(player_info* value) { player = value; }
 	void						setsupport(const player_info* player, int value);
 private:
 	player_info * player;
@@ -171,6 +177,7 @@ struct unit_info : name_info, combat_info, cost_info {
 struct troop_info {
 	explicit operator bool() const { return type != 0; }
 	static troop_info*			add(province_info* province, unit_info* type);
+	void						clear();
 	static int					compare(const void* p1, const void* p2);
 	int							fix(tip_info* ti, int value) const { return type->fix(ti, type->name, value); }
 	int							get(const char* id) const { return type->get(id); }
@@ -185,7 +192,9 @@ struct troop_info {
 	province_info*				getmove() const { return move; }
 	static bsreq				metadata[];
 	static unsigned				remove_moved(aref<troop_info*> source);
+	static unsigned				select(troop_info** result, unsigned result_maximum, const province_info* province, const player_info* player);
 	void						setmove(province_info* value) { move = value; }
+	void						setprovince(province_info* value) { province = value; }
 	static void					sort(troop_info** source, unsigned count);
 private:
 	unit_info*					type;
@@ -228,7 +237,9 @@ struct game_info {
 	action_info*				default_action;
 	char						income_per_level, casualties;
 	char						support_maximum, support_minimum;
+	unsigned char				change_support_provinces;
 	int							turn;
+	void						after_load();
 	void						clear();
 };
 struct msg_info {
@@ -238,6 +249,7 @@ struct msg_info {
 	const char* casualties;
 	const char* winner;
 	const char* lead;
+	const char* raid_spoils;
 	const char* attack;
 	const char* defend;
 	const char* raid;
@@ -318,6 +330,7 @@ extern msg_info					msg;
 extern adat<landscape_info, 32> landscape_data;
 extern adat<player_info, player_max> player_data;
 extern adat<province_info, province_max> province_data;
+extern unsigned char			province_order[province_max];
 extern adat<report_info, 2048>	report_data;
 extern tactic_info				tactic_data[];
 extern adat<troop_info, 256>	troop_data;

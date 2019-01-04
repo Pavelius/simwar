@@ -15,7 +15,8 @@ bsreq province_info::metadata[] = {
 	BSREQ(province_info, neighbors, metadata),
 {}};
 adat<province_info, province_max> province_data;
-bsdata province_manager("province", province_data, province_info::metadata);
+unsigned char			province_order[province_max];
+bsdata					province_manager("province", province_data, province_info::metadata);
 static unsigned short	province_movement[province_max];
 
 province_flag_s province_info::getstatus(const player_info* player) const {
@@ -106,6 +107,18 @@ char* province_info::getinfo(char* result, const char* result_maximum, bool show
 	return result;
 }
 
+const char* province_info::getsupport(char* result, const char* result_maximum) const {
+	for(unsigned i = 0; i < player_data.count; i++) {
+		auto& e = player_data.data[i];
+		if(!e)
+			continue;
+		if(support[i] == 0)
+			continue;
+		szprint(zend(result), result_maximum, " %1: [%3%2i]", e.getname(), support[i], (support[i] >= 0) ? "+" : "-");
+	}
+	return result;
+}
+
 void province_info::build(unit_info* unit, int turns) {
 	if(turns < 1)
 		turns = 1;
@@ -120,13 +133,15 @@ void province_info::add(unit_info* unit) {
 }
 
 void province_info::change_support() {
-	for(auto& e : province_data) {
-		if(!e)
-			continue;
-		auto player = e.player;
+	static unsigned current_counter;
+	for(auto i = game.change_support_provinces; i > 0; i--) {
+		if(current_counter >= province_data.count)
+			current_counter = 0;
+		auto p = province_data.data + province_order[current_counter];
+		auto player = p->player;
 		auto player_index = player_data.indexof(player);
-		for(auto i = 0; i < sizeof(e.support) / sizeof(e.support[0]); i++) {
-			auto value = e.support[i];
+		for(auto i = 0; i < sizeof(support) / sizeof(support[0]); i++) {
+			auto value = p->support[i];
 			if(player_index == i) {
 				if(value < game.support_maximum)
 					value++;
@@ -135,7 +150,7 @@ void province_info::change_support() {
 					value--;
 			} else if(value < 0)
 				value++;
-			e.support[i] = value;
+			p->support[i] = value;
 		}
 	}
 }
@@ -156,4 +171,50 @@ void province_info::setsupport(const player_info* player, int value) {
 	if(value < game.support_minimum)
 		value = game.support_minimum;
 	support[player_index] = value;
+}
+
+province_info* province_info::getneighbors(const player_info* player) const {
+	province_info* province_array[sizeof(neighbors) / sizeof(neighbors[0])];
+	auto ps = province_array;
+	for(auto p : neighbors) {
+		if(!p)
+			break;
+		if(!(*p))
+			continue;
+		if(p->player == player)
+			*ps++ = p;
+	}
+	auto count = ps - province_array;
+	if(!count)
+		return 0;
+	return province_array[rand() % count];
+}
+
+void province_info::retreat(const player_info* player) {
+	troop_info* objects[64];
+	auto count = troop_info::select(objects, sizeof(objects) / sizeof(objects[0]), this, player);
+	if(!count)
+		return;
+	// Вначале отступают те, кто перемещался туда, откуда пришли
+	for(auto p : objects) {
+		if(p->getmove()==this) {
+			auto province = p->getprovince();
+			p->setmove(0);
+			if(province->player != player)
+				p->setprovince(this);
+		}
+	}
+	// Потом, остатки отступают на соседнюю свою
+	auto province = getneighbors(player);
+	if(province) {
+		for(auto p : objects) {
+			if(p->getprovince() == this)
+				p->setprovince(province);
+		}
+	}
+	// Остальные в итоге умирают
+	for(auto p : objects) {
+		if(p->getprovince()==this)
+			p->clear();
+	}
 }

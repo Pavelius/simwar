@@ -14,3 +14,9 @@ bsdata			game_manager("game", game, game_type);
 void game_info::clear() {
 	memset(this, 0, sizeof(*this));
 }
+
+void game_info::after_load() {
+	change_support_provinces = 2;
+	if(change_support_provinces > province_data.count)
+		change_support_provinces = province_data.count;
+}

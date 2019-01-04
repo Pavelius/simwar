@@ -35,6 +35,7 @@ static bool initialize_map(const char* name) {
 	if(result) {
 		if(!draw::initializemap())
 			return false;
+		game.after_load();
 	}
 	if(result)
 		io::file::remove(url_errors);

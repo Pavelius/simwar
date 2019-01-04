@@ -8,8 +8,8 @@ bsreq player_info::metadata[] = {
 	BSREQ(player_info, gold, number_type),
 	BSREQ(player_info, fame, number_type),
 {}};
-adat<player_info, player_max> player_data;
-bsdata player_manager("player", player_data, player_info::metadata);
+adat<player_info, player_max>	player_data;
+bsdata			player_manager("player", player_data, player_info::metadata);
 
 int player_info::getincome(tip_info* ti) const {
 	auto result = 0, r = 0;
@@ -68,7 +68,7 @@ unsigned player_info::gettroops(troop_info** source, unsigned maximum_count, con
 }
 
 province_info* player_info::getbestprovince() const {
-	province_info* elements[province_max];
+	province_info* elements[player_max];
 	auto count = province_info::select(elements, sizeof(elements) / sizeof(elements[0]), this);
 	if(!count)
 		return 0;
@@ -133,7 +133,14 @@ void player_info::add(province_info* province, hero_info* hero, const char* text
 	report_info::add(this, province, hero, text);
 }
 
+static void create_province_order() {
+	for(unsigned i = 0; i < province_data.count; i++)
+		province_order[i] = i;
+	zshuffle(province_order, province_data.count);
+}
+
 void player_info::playgame() {
+	create_province_order();
 	while(true) {
 		hero_info::refresh_heroes();
 		for(auto& e : player_data) {
@@ -142,8 +149,8 @@ void player_info::playgame() {
 			e.makemove();
 		}
 		game.turn++;
-		player_info::resolve_actions();
-		player_info::gain_profit();
+		resolve_actions();
+		gain_profit();
 		province_info::change_support();
 	}
 }

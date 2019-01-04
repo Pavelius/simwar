@@ -108,7 +108,7 @@ public:
 
 };
 
-bool province_info::battle(char* result, const char* result_max, player_info* attacker_player, player_info* defender_player, bool raid) {
+bool province_info::battle(char* result, const char* result_max, player_info* attacker_player, player_info* defender_player, action_info* action, bool raid) {
 	auto p = result;
 	combatside attackers(this, attacker_player, true, raid);
 	combatside defenders(this, defender_player, false, raid);
@@ -117,10 +117,34 @@ bool province_info::battle(char* result, const char* result_max, player_info* at
 	attackers.setcasualty(zend(p), result_max, defenders);
 	defenders.setcasualty(zend(p), result_max, attackers);
 	auto& winner = (attackers.getstrenght() > defenders.getstrenght()) ? attackers : defenders;
-	zcat(result, " "); szprint(zend(result), result_max, msg.winner, winner.getside());
+	p = szprint(zend(p), result_max, " ");
+	p = szprint(zend(p), result_max, msg.winner, winner.getside());
 	attackers.applycasualty(zend(p), result_max);
 	defenders.applycasualty(zend(p), result_max);
-	draw::addbutton(zend(p), result_max, "accept");
+	if(!raid)
+		add(attacker_player, -1);
 	add(attacker_player, -1);
-	return &winner == &attackers;
+	auto iswin = (&winner == &attackers);
+	if(iswin) {
+		retreat(defender_player);
+		if(!raid)
+			player = attacker_player;
+		else {
+			auto spoils = 2;
+			if(attackers.general)
+				spoils += attackers.general->get("attack") + attackers.general->get("raid");
+			szprint(zend(p), result_max, "\n");
+			szprint(zend(p), result_max, msg.raid_spoils, spoils);
+			cost_info e; e.gold = spoils;
+			if(attacker_player)
+				*attacker_player += e;
+			if(defender_player)
+				*defender_player -= e;
+		}
+	}
+	else {
+		retreat(attacker_player);
+	}
+	draw::addbutton(zend(p), result_max, "accept");
+	return iswin;
 }

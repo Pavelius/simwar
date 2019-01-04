@@ -76,3 +76,23 @@ troop_info* troop_info::add(province_info* province, unit_info* type) {
 	p->type = type;
 	return p;
 }
+
+void troop_info::clear() {
+	memset(this, 0, sizeof(*this));
+}
+
+unsigned troop_info::select(troop_info** result, unsigned result_maximum, const province_info* province, const player_info* player) {
+	auto ps = result;
+	auto pe = ps + result_maximum;
+	for(auto& e : troop_data) {
+		if(!e)
+			continue;
+		if(e.player!=player)
+			continue;
+		if(e.province != province && e.move != province)
+			continue;
+		if(ps < pe)
+			*ps++ = &e;
+	}
+	return ps - result;
+}
