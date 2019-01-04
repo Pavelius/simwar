@@ -1,6 +1,7 @@
 #include "collection.h"
 #include "crt.h"
 #include "draw_control.h"
+#include "msg.h"
 #include "stringcreator.h"
 
 #pragma once
@@ -183,16 +184,19 @@ struct troop_info {
 	int							get(const char* id) const { return type->get(id); }
 	int							getbonus(const char* id) const { return 0; }
 	int							getincome() const { return type->income; }
+	province_info*				getmove() const { return move; }
 	const char*					getname() const { return type->name; }
 	const char*					getnameof() const { return type->nameof; }
-	player_info*				getplayer() const { return player; }
-	static const char*			getpresent(char* result, const char* result_maximum, troop_info** source, unsigned count);
+	player_info*				getplayer() const { return province->getplayer(); }
+	static const char*			getpresent(char* result, const char* result_maximum, troop_info** source, unsigned count, const player_info* player);
 	province_info*				getprovince() const { return province; }
 	province_info*				getprovince(const player_info* player) const;
-	province_info*				getmove() const { return move; }
+	int							getsort() const { return type->attack + type->defend; }
+	void						kill(player_info* player);
 	static bsreq				metadata[];
 	static unsigned				remove_moved(aref<troop_info*> source);
 	static unsigned				select(troop_info** result, unsigned result_maximum, const province_info* province, const player_info* player);
+	static unsigned				selectp(troop_info** result, unsigned result_maximum, const province_info* province, const player_info* player);
 	void						setmove(province_info* value) { move = value; }
 	void						setprovince(province_info* value) { province = value; }
 	static void					sort(troop_info** source, unsigned count);
@@ -200,7 +204,6 @@ private:
 	unit_info*					type;
 	province_info*				province;
 	province_info*				move;
-	player_info*				player;
 };
 struct player_info : name_info, cost_info {
 	operator cost_info&() { return *static_cast<cost_info*>(this); }
@@ -241,44 +244,6 @@ struct game_info {
 	int							turn;
 	void						after_load();
 	void						clear();
-};
-struct msg_info {
-	const char*	attacking_force;
-	const char*	defending_force;
-	const char*	neutral_army, *neutral_army_of;
-	const char* casualties;
-	const char* winner;
-	const char* lead;
-	const char* raid_spoils;
-	const char* attack;
-	const char* defend;
-	const char* raid;
-	const char* sword;
-	const char* shield;
-	const char* diplomacy;
-	const char* cruelty;
-	const char* nobility;
-	const char* will;
-	const char *total_strenght, *total;
-	const char *predict_fail, *predict_partial, *predict_success;
-	const char*	hero_wait;
-	const char* income;
-	const char* income_province;
-	const char* income_units;
-	const char* income_heroes;
-	const char* not_enought_gold;
-	const char* cost;
-	const char* squads;
-	const char* turns;
-	const char* title;
-	const char* exit;
-	const char* loadgame;
-	const char* newgame;
-	const char* savegame;
-	const char* accept;
-	const char* cancel;
-	const char* yes;
-	const char* no;
 };
 struct gui_info {
 	unsigned char				border, button_border;

@@ -319,8 +319,12 @@ static void render_province(rect rc, point mouse, const player_info* player, cal
 	if(!draw::font)
 		return;
 	draw::state push;
+	const int max_size = 128;
 	for(auto& e : province_data) {
 		if(!e)
+			continue;
+		auto pt = getscreen(rc, e.getposition());
+		if((rc.x1 > pt.x + max_size) || (rc.y1 > pt.y + max_size) || (rc.x2 < pt.x - max_size) || (rc.y2 < pt.y - max_size))
 			continue;
 		draw::font = metrics::h1;
 		fore = colors::black;
@@ -329,7 +333,6 @@ static void render_province(rect rc, point mouse, const player_info* player, cal
 		auto text_width = draw::textw(temp);
 		hero_info* hero_array[16];
 		count = hero_info::select(hero_array, lenghtof(hero_array), &e, player);
-		auto pt = getscreen(rc, e.getposition());
 		rect rc = {pt.x - text_width / 2, pt.y - draw::texth() / 2, pt.x + text_width / 2, pt.y + draw::texth() / 2};
 		auto status = e.getstatus(player);
 		auto inlist = selection.is(&e);
@@ -370,11 +373,11 @@ static void render_province(rect rc, point mouse, const player_info* player, cal
 			text(pt.x - textw(temp) / 2, pt.y, temp);
 			pt.y += texth();
 		}
-		troop_info* troop_array[8];
-		count = player_info::gettroops(troop_array, lenghtof(troop_array), &e, 0, player);
+		troop_info* troop_array[32];
+		count = troop_info::selectp(troop_array, lenghtof(troop_array), &e, player);
 		if(count) {
 			troop_info::sort(troop_array, count);
-			troop_info::getpresent(temp, zendof(temp), troop_array, count);
+			troop_info::getpresent(temp, zendof(temp), troop_array, count, player);
 			rect rc = {0, 0, 200, 0}; draw::textw(rc, temp);
 			pt.y += draw::text({pt.x - rc.width() / 2, pt.y, pt.x + rc.width() / 2 + 1, pt.y + rc.height()}, temp, AlignCenter);
 		}
@@ -1039,6 +1042,8 @@ static void end_turn() {
 static void show_reports() {
 	for(auto& e : report_data) {
 		if(e.getturn() != game.turn)
+			continue;
+		if(!e.is(current_player))
 			continue;
 		report(e.get());
 	}

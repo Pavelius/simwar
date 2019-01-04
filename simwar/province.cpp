@@ -196,7 +196,8 @@ void province_info::retreat(const player_info* player) {
 	if(!count)
 		return;
 	// Вначале отступают те, кто перемещался туда, откуда пришли
-	for(auto p : objects) {
+	for(unsigned i = 0; i < count; i++) {
+		auto p = objects[i];
 		if(p->getmove()==this) {
 			auto province = p->getprovince();
 			p->setmove(0);
@@ -207,13 +208,15 @@ void province_info::retreat(const player_info* player) {
 	// Потом, остатки отступают на соседнюю свою
 	auto province = getneighbors(player);
 	if(province) {
-		for(auto p : objects) {
+		for(unsigned i = 0; i < count; i++) {
+			auto p = objects[i];
 			if(p->getprovince() == this)
 				p->setprovince(province);
 		}
 	}
 	// Остальные в итоге умирают
-	for(auto p : objects) {
+	for(unsigned i = 0; i < count; i++) {
+		auto p = objects[i];
 		if(p->getprovince()==this)
 			p->clear();
 	}

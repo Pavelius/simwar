@@ -1,4 +1,5 @@
-#include "main.h"
+#include "bsdata.h"
+#include "msg.h"
 
 bsreq msg_type[] = {
 	BSREQ(msg_info, attacking_force, text_type),
@@ -8,6 +9,7 @@ bsreq msg_type[] = {
 	BSREQ(msg_info, neutral_army_of, text_type),
 	BSREQ(msg_info, winner, text_type),
 	BSREQ(msg_info, lead, text_type),
+	BSREQ(msg_info, moved, text_type),
 	BSREQ(msg_info, raid_spoils, text_type),
 	//
 	BSREQ(msg_info, attack, text_type),

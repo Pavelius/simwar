@@ -99,6 +99,7 @@ public:
 				if(ps[0])
 					zcat(ps, ", ");
 				zcat(result, data[count - 1]->getname());
+				data[count - 1]->kill(player);
 				count--;
 			}
 		}
@@ -127,6 +128,11 @@ bool province_info::battle(char* result, const char* result_max, player_info* at
 	auto iswin = (&winner == &attackers);
 	if(iswin) {
 		retreat(defender_player);
+		if(attacker_player) {
+			attacker_player->fame += 1;
+			if(attackers.general)
+				attacker_player->fame += imax(0, attackers.general->get("nobility"));
+		}
 		if(!raid)
 			player = attacker_player;
 		else {
@@ -142,9 +148,8 @@ bool province_info::battle(char* result, const char* result_max, player_info* at
 				*defender_player -= e;
 		}
 	}
-	else {
+	else
 		retreat(attacker_player);
-	}
 	draw::addbutton(zend(p), result_max, "accept");
 	return iswin;
 }

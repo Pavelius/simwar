@@ -64,14 +64,14 @@
 #unit swordmans name("мечники") nameof("мечников") attack(2) defend(2) gold(4) income(-2) level(2)
 #unit cavalry name("кавалерия") nameof("кавалерии") attack(3) defend(1) gold(5) income(-2) level(3)
 
-#troop type(spearmans) player(red) province(black_wood)
-#troop type(spearmans) player(red) province(black_wood)
-#troop type(swordmans) player(red) province(black_wood)
-#troop type(swordmans) player(red) province(sunrise_hills)
-#troop type(spearmans) player(red) province(sunrise_hills)
+#troop type(swordmans) province(black_wood)
+#troop type(spearmans) province(black_wood)
+#troop type(spearmans) province(black_wood)
+#troop type(spearmans) province(black_wood)
+#troop type(spearmans) province(black_wood)
 
-#troop type(spearmans) player(green) province(black_wood)
-#troop type(spearmans) player(green) province(black_wood)
+#troop type(swordmans) province(sunrise_hills)
+#troop type(spearmans) province(sunrise_hills)
 
-#province black_wood player(green)
+#province elder_mountains player(green)
 #province sunrise_hills player(red)

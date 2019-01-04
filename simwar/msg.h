@@ -1,0 +1,41 @@
+#pragma once
+
+struct msg_info {
+	const char*	attacking_force;
+	const char*	defending_force;
+	const char*	neutral_army, *neutral_army_of;
+	const char* casualties;
+	const char* winner;
+	const char* lead;
+	const char* moved;
+	const char* raid_spoils;
+	const char* attack;
+	const char* defend;
+	const char* raid;
+	const char* sword;
+	const char* shield;
+	const char* diplomacy;
+	const char* cruelty;
+	const char* nobility;
+	const char* will;
+	const char* total_strenght, *total;
+	const char* predict_fail, *predict_partial, *predict_success;
+	const char*	hero_wait;
+	const char* income;
+	const char* income_province;
+	const char* income_units;
+	const char* income_heroes;
+	const char* not_enought_gold;
+	const char* cost;
+	const char* squads;
+	const char* turns;
+	const char* title;
+	const char* exit;
+	const char* loadgame;
+	const char* newgame;
+	const char* savegame;
+	const char* accept;
+	const char* cancel;
+	const char* yes;
+	const char* no;
+};

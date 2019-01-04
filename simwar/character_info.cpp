@@ -12,5 +12,5 @@ bsreq character_type[] = {
 {}};
 
 int character_info::get(const char* id) const {
-	return bsval((void*)this, character_type).get(id).get();
+	return name_info::getnum(this, character_type, id);
 }

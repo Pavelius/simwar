@@ -10,7 +10,7 @@ void army::fill(const player_info* player, const province_info* province) {
 			continue;
 		if(player && e.getplayer() != player)
 			continue;
-		if(province && e.getprovince() != province)
+		if(province && e.getprovince(player) != province)
 			continue;
 		if(raid && e.get("raid")<=0)
 			continue;
