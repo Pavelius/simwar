@@ -25,9 +25,10 @@ static bool initialize_map(const char* name) {
 	auto url_errors = "errors.txt";
 	game.clear();
 	if(true) {
+		static const char* requisits[] = {"name", "nameof", "text"};
 		bslog log(url_errors);
 		bsdata::read("script/test.txt", &log);
-		bsdata::readl("script/test_ru.txt");
+		bsdata::readl("script/test_ru.txt", requisits, sizeof(requisits) / sizeof(requisits[0]));
 		result = result && !log.iserrors();
 		result = result && log.check_required(required_reqisits);
 	}

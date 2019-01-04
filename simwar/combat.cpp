@@ -125,6 +125,8 @@ bool province_info::battle(char* result, const char* result_max, player_info* at
 	if(!raid)
 		addsupport(attacker_player, -1);
 	addsupport(attacker_player, -1);
+	if(attackers.general)
+		addsupport(attacker_player, -1* attackers.general->get("cruelty"));
 	auto iswin = (&winner == &attackers);
 	if(iswin) {
 		retreat(defender_player);

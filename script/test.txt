@@ -26,12 +26,12 @@
 #action recruit name("Нанять") recruit(1) wait(1) nameact("нанимает войска")
 #action quest name("Искать приключения") nameact("ищет приключений")
 
-#landscape plains name("Равнина") income(4)
-#landscape mountains name("Горы") income(1) defend(2)
-#landscape swamp name("Болото") income(0) defend(2)
-#landscape forest name("Лес") income(2) defend(1)
-#landscape desert name("Пустыня") income(0)
-#landscape hills name("Холмы") income(3) defend(1)
+#landscape plains income(4)
+#landscape mountains income(1) defend(2)
+#landscape swamp income(0) defend(2)
+#landscape forest income(2) defend(1)
+#landscape desert income(0)
+#landscape hills income(3) defend(1)
 
 #province elder_mountains position(219, 132) landscape(mountains) neighbors(iron_peaks, black_wood, sunrise_hills) level(1)
 #province river_dale level(2) landscape(plains) position(796, 253) neighbors(deadly_swamp, iron_peaks, river_cross)
@@ -53,9 +53,9 @@
 #tactic careful_defence name("Тщательная защита") shield(1) text("%1 выстроили защитное построение и приготовились отражать удар.")
 #tactic messy_fighting name("Кровавая баня") cruelty(1) text("%1 ринулись в бой не щадя себя, чтобы нанести максимальный урон врагу.")
 
-#hero gordek name("Гордек") nameof("Гордека") avatar("art/portraits/gordek.bmp") traits(bloody, hireling) player(red)
-#hero antaris name("Антарис") nameof("Антариса") avatar("art/portraits/antaris.bmp") traits(bloody, diplomat) player(green)
-#hero mistra name("Мистра") nameof("Мистры") avatar("art/portraits/mistra.bmp") traits(carefull, diplomat) player(red)
+#hero gordek avatar("art/portraits/gordek.bmp") traits(bloody, hireling) player(red)
+#hero antaris avatar("art/portraits/antaris.bmp") traits(bloody, diplomat) player(green)
+#hero mistra avatar("art/portraits/mistra.bmp") traits(carefull, diplomat) player(red)
 
 //#unit barbarians name("варвары") nameof("варваров") attack(1) defend(1) cost(2) income(-1) recruit_count(3)
 #unit spearmans name("копейщики") nameof("копейщиков") attack(1) defend(2) gold(3) income(-1) recruit_count(2)
