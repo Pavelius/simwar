@@ -37,7 +37,9 @@ bsreq msg_type[] = {
 	BSREQ(msg_info, predict_fail, text_type),
 	BSREQ(msg_info, predict_partial, text_type),
 	BSREQ(msg_info, predict_success, text_type),
+	//
 	BSREQ(msg_info, not_enought_gold, text_type),
+	BSREQ(msg_info, not_choose_units, text_type),
 	//
 	BSREQ(msg_info, title, text_type),
 	BSREQ(msg_info, exit, text_type),

@@ -27,6 +27,7 @@ struct msg_info {
 	const char* income_units;
 	const char* income_heroes;
 	const char* not_enought_gold;
+	const char* not_choose_units;
 	const char* cost;
 	const char* squads;
 	const char* turns;

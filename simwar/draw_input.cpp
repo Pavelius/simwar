@@ -438,8 +438,8 @@ static void render_board(const rect& rco, const player_info* player, callback_pr
 		render_province(last_board, last_mouse, player, proc, selection, selection_color, set_current_province);
 }
 
-static void render_board() {
-	render_board({0, 0, draw::getwidth(), draw::getheight()}, current_player, 0, {}, colors::blue, true);
+static void render_board(bool set_current_province = false) {
+	render_board({0, 0, draw::getwidth(), draw::getheight()}, current_player, 0, {}, colors::blue, set_current_province);
 }
 
 static int render_hero(int x, int y, int width, hero_info* e, const char* error_text, callback_proc proc = 0) {
@@ -902,14 +902,12 @@ bool draw::recruit(const player_info* player, hero_info* hero, const action_info
 		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
 		auto y = gui.padding + gui.border;
 		y += render_hero(x, y, hero) + 1;
-		y += windowb(x, y, gui.hero_window_width, action->getname(), cmd(), gui.border) + 1;
-		auto isdisabled = false;
 		const char* error_info = 0;
-		if(cost > player_cost) {
-			isdisabled = true;
+		if(s2.getcount()==0)
+			error_info = msg.not_choose_units;
+		else if(cost > player_cost)
 			error_info = msg.not_enought_gold;
-		}
-		y += windowb(x, y, gui.hero_window_width, msg.accept, cmd(breakparam, 1, isdisabled), 0, KeyEnter, error_info) + 1;
+		y += windowb(x, y, gui.hero_window_width, action->getname(), cmd(breakparam, 1, error_info!=0), 0, KeyEnter, error_info) + 1;
 		y += windowb(x, y, gui.hero_window_width, msg.cancel, cmd(breakparam, 0), 0, KeyEscape) + 1;
 		x = gui.border * 2;
 		y = gui.padding + gui.border;
@@ -931,12 +929,16 @@ bool draw::recruit(const player_info* player, hero_info* hero, const action_info
 		control_standart();
 		if(hot.key == u1.id) {
 			auto p1 = u1.getcurrent();
-			u1.source.remove(u1.current);
-			u2.source.add(p1);
+			if(p1) {
+				u1.source.remove(u1.current);
+				u2.source.add(p1);
+			}
 		} else if(hot.key == u2.id) {
 			auto p1 = u2.getcurrent();
-			u2.source.remove(u2.current);
-			u1.source.add(p1);
+			if(p1) {
+				u2.source.remove(u2.current);
+				u1.source.add(p1);
+			}
 		}
 	}
 	return getresult() != 0;
@@ -1013,6 +1015,7 @@ static void choose_action() {
 		province = getprovince(player, hero, action, {provinces, count}, getcolor(choose_mode));
 		if(!province)
 			return;
+		current_province = province;
 	}
 	auto raid = action->raid > 0;
 	army troops_move(player, province, hero, true, raid);
@@ -1025,21 +1028,13 @@ static void choose_action() {
 		a3.fill(province->getplayer(), province);
 		if(!conquer(player, hero, action, province, a1, troops_move, a3))
 			return;
-	} else if(action->recruit) {
+	}
+	if(action->recruit) {
 		unit_set a1; a1.fill(player, province, hero, action);
 		if(!recruit(player, hero, action, province, a1, units_product, cost))
 			return;
 	}
-	hero->cancelaction();
-	hero->setaction(action);
-	hero->setprovince(province);
-	hero->pay = cost;
-	*current_player -= cost;
-	for(auto p : troops_move)
-		p->setmove(province);
-	for(auto p : units_product)
-		province->build(p, p->recruit_time);
-	current_province = province;
+	hero->setaction(action, province, cost, troops_move, units_product);
 }
 
 static void end_turn() {
@@ -1061,7 +1056,7 @@ void player_info::makemove() {
 	current_province = province_data.data + 0;
 	show_reports();
 	while(ismodal()) {
-		render_board();
+		render_board(true);
 		render_left_side(true);
 		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
 		auto y = render_right_side(choose_action);

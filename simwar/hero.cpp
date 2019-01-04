@@ -54,6 +54,20 @@ int	hero_info::getincome() const {
 	return result;
 }
 
+void hero_info::setaction(action_info* action, province_info* province, const cost_info& cost, const army& logistic, const unit_set& production) {
+	cancelaction();
+	setaction(action);
+	setprovince(province);
+	pay = cost;
+	pay += *action;
+	if(player)
+		*player -= pay;
+	for(auto p : logistic)
+		p->setmove(province);
+	for(auto p : production)
+		province->build(p, p->recruit_time);
+}
+
 void hero_info::resolve() {
 	char temp[8192]; temp[0] = 0;
 	if(action->attack || action->raid) {
@@ -65,6 +79,10 @@ void hero_info::resolve() {
 			enemy->add(province, province->gethero(enemy), temp);
 		}
 	}
+	if(action->support)
+		province->addsupport(player, action->support + get("diplomacy"));
+	if(action->profit)
+		province->addsupport(player, action->support + get("diplomacy"));
 }
 
 unsigned hero_info::select(hero_info** source, unsigned maximum_count, const province_info* province, const player_info* player) {

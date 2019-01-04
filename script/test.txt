@@ -1,7 +1,8 @@
 #action raid order(1) raid(1)
 #action attack order(3) attack(1)
 #action defend defend(10)
-#action recruit recruit(2) wait(1)
+#action recruit recruit(1) wait(1)
+#action support support(1)
 #action quest
 
 #game map("cradle.png")
@@ -10,7 +11,8 @@
 #game default_action(quest)
 #game support_minimum(-20)
 #game support_maximum(15)
-#game support_attack(2)
+#game support_attack(5)
+#game support_defend(5)
 #game support_multiplier(4)
 
 #gui opacity(220)

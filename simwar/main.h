@@ -30,7 +30,9 @@ bsreq unit_type[];
 
 struct hero_info;
 struct player_info;
+struct troop_info;
 struct unit_info;
+struct unit_set;
 
 struct tip_info {
 	char*						result;
@@ -139,6 +141,19 @@ struct trait_info : name_info, character_info {};
 struct tactic_info : name_info, combat_info {
 	constexpr tactic_info(const char* id) : name_info(id), combat_info() {}
 };
+struct army : adat<troop_info*, 32> {
+	hero_info*					general;
+	player_info*				player;
+	province_info*				province;
+	const tactic_info*			tactic;
+	bool						attack;
+	bool						raid;
+	constexpr army() : general(0), player(0), tactic(0), province(0), attack(false), raid(false) {}
+	army(player_info* player, province_info* province, hero_info* general, bool attack, bool raid);
+	void						fill(const player_info* player, const province_info* province);
+	int							get(const char* id, tip_info* ti, bool include_number = true) const;
+	int							getstrenght(tip_info* ti, bool include_number = true) const;
+};
 struct hero_info : name_info {
 	cost_info					pay;
 	void						cancelaction();
@@ -161,6 +176,7 @@ struct hero_info : name_info {
 	void						resolve();
 	static unsigned				select(hero_info** source, unsigned maximum_count, const province_info* province = 0, const player_info* player = 0);
 	void						setaction(action_info* value) { action = value; }
+	void						setaction(action_info* action, province_info* province, const cost_info& cost, const army& logistic, const unit_set& production);
 	void						setprovince(province_info* value) { province = value; }
 	void						setwait(int v) { wait = v; }
 	trait_info*					traits[4];
@@ -263,19 +279,6 @@ struct gui_info {
 struct unit_set : adat<unit_info*, 32> {
 	void						fill(const player_info* player, const province_info* province, const hero_info* hero, const action_info* action);
 	cost_info					getcost() const;
-};
-struct army : adat<troop_info*, 32> {
-	hero_info*					general;
-	player_info*				player;
-	province_info*				province;
-	const tactic_info*			tactic;
-	bool						attack;
-	bool						raid;
-	constexpr army() : general(0), player(0), tactic(0), province(0), attack(false), raid(false) {}
-	army(player_info* player, province_info* province, hero_info* general, bool attack, bool raid);
-	void						fill(const player_info* player, const province_info* province);
-	int							get(const char* id, tip_info* ti, bool include_number = true) const;
-	int							getstrenght(tip_info* ti, bool include_number = true) const;
 };
 namespace draw {
 void							addaccept(char* result, const char* result_max);

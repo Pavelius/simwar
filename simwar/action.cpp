@@ -19,11 +19,11 @@ adat<action_info, 32> action_data; BSMETA(action);
 province_flag_s action_info::getprovince() const {
 	if(attack > 0 || raid > 0)
 		return NoFriendlyProvince;
-	else if(defend > 0 || recruit > 0)
+	else if(defend > 0 || recruit > 0 || profit > 0)
 		return FriendlyProvince;
 	return AnyProvince;
 }
 
 bool action_info::isplaceable() const {
-	return attack > 0 || raid > 0 || defend > 0 || recruit > 0 || support > 0;
+	return attack > 0 || raid > 0 || defend > 0 || recruit > 0 || support > 0 || profit > 0;
 }
