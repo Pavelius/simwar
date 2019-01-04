@@ -5,11 +5,12 @@ bsreq player_info::metadata[] = {
 	BSREQ(player_info, name, text_type),
 	BSREQ(player_info, nameof, text_type),
 	BSREQ(player_info, text, text_type),
+	BSREQ(player_info, type, player_ai_type),
 	BSREQ(player_info, gold, number_type),
 	BSREQ(player_info, fame, number_type),
 {}};
 adat<player_info, player_max>	player_data;
-bsdata			player_manager("player", player_data, player_info::metadata);
+bsdata player_manager("player", player_data, player_info::metadata);
 
 int player_info::getincome(tip_info* ti) const {
 	auto result = 0, r = 0;
@@ -146,7 +147,13 @@ void player_info::playgame() {
 		for(auto& e : player_data) {
 			if(!e)
 				continue;
-			e.makemove();
+			switch(e.type) {
+			case PlayerHuman:
+				e.makemove();
+				break;
+			case PlayerComputer:
+				break;
+			}
 		}
 		game.turn++;
 		resolve_actions();

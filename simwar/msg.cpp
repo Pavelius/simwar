@@ -40,6 +40,7 @@ bsreq msg_type[] = {
 	//
 	BSREQ(msg_info, title, text_type),
 	BSREQ(msg_info, exit, text_type),
+	BSREQ(msg_info, end_turn, text_type),
 	BSREQ(msg_info, loadgame, text_type),
 	BSREQ(msg_info, newgame, text_type),
 	BSREQ(msg_info, savegame, text_type),

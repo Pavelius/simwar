@@ -155,6 +155,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="msg.cpp" />
     <ClCompile Include="player.cpp" />
+    <ClCompile Include="player_ai.cpp" />
     <ClCompile Include="png.cpp" />
     <ClCompile Include="point.cpp" />
     <ClCompile Include="province.cpp" />

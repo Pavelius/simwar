@@ -133,24 +133,18 @@ void province_info::add(unit_info* unit) {
 }
 
 void province_info::change_support() {
-	static unsigned current_counter;
-	for(auto i = game.change_support_provinces; i > 0; i--) {
-		if(current_counter >= province_data.count)
-			current_counter = 0;
-		auto p = province_data.data + province_order[current_counter];
-		auto player = p->player;
+	for(auto& e : province_data) {
+		if(!e)
+			continue;
+		auto player = e.getplayer();
 		auto player_index = player_data.indexof(player);
 		for(auto i = 0; i < sizeof(support) / sizeof(support[0]); i++) {
-			auto value = p->support[i];
-			if(player_index == i) {
-				if(value < game.support_maximum)
-					value++;
-			} else if(value > 0) {
-				if(value > game.support_minimum)
+			auto value = e.support[i];
+			if(player_index != i) {
+				if(value > 0)
 					value--;
-			} else if(value < 0)
-				value++;
-			p->support[i] = value;
+			}
+			e.support[i] = value;
 		}
 	}
 }

@@ -10,6 +10,9 @@ enum province_flag_s {
 	AnyProvince,
 	NoFriendlyProvince, FriendlyProvince, NeutralProvince,
 };
+enum player_ai_s : unsigned char {
+	PlayerHuman, PlayerComputer,
+};
 
 const int player_max = 8;
 const int province_max = player_max*16;
@@ -19,6 +22,7 @@ bsreq character_type[];
 bsreq landscape_type[];
 bsreq msg_type[];
 bsreq point_type[];
+bsreq player_ai_type[];
 bsreq tactic_type[];
 bsreq trait_type[];
 bsreq unit_type[];
@@ -222,6 +226,7 @@ struct player_info : name_info, cost_info {
 	static void					resolve_actions();
 private:
 	const char*					nameof;
+	player_ai_s					type;
 };
 struct build_info {
 	unit_info*					unit;

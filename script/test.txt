@@ -52,7 +52,7 @@
 #tactic messy_fighting name("Кровавая баня") cruelty(1) text("%1 ринулись в бой не щадя себя, чтобы нанести максимальный урон врагу.")
 
 #player red name("Имперцы") nameof("имперцев") gold(10)
-#player green name("Орки") nameof("орков") gold(100)
+#player green name("Орки") nameof("орков") gold(100) type(PlayerComputer)
 
 #hero gordek name("Гордек") nameof("Гордека") avatar("art/portraits/gordek.bmp") traits(bloody, hireling) player(red)
 #hero antaris name("Антарис") nameof("Антариса") avatar("art/portraits/antaris.bmp") traits(bloody, diplomat) player(green)

@@ -12,6 +12,7 @@ static focusable_element	elements[96];
 static focusable_element*	render_control;
 static int				current_focus;
 static callback_proc	current_execute;
+static int				current_param;
 static bool				keep_hot;
 static hotinfo			keep_hot_value;
 static bool				break_modal;
@@ -165,8 +166,7 @@ int draw::getfocus() {
 
 void draw::execute(void(*proc)(), int param) {
 	current_execute = proc;
-	hot.key = 0;
-	hot.param = param;
+	current_param = param;
 }
 
 void draw::execute(const hotinfo& value) {
@@ -256,6 +256,7 @@ static void before_render() {
 	hot.hilite.clear();
 	render_control = elements;
 	current_execute = 0;
+	current_param = 0;
 	current_hilite = 0;
 	current_focus_control = 0;
 	if(hot.mouse.x < 0 || hot.mouse.y < 0)
@@ -347,12 +348,12 @@ static void render_province(rect rc, point mouse, const player_info* player, cal
 			if(inlist) {
 				fore_stroke = selection_color;
 				hot.cursor = CursorHand;
-				if(hot.key == MouseLeft) {
+				if(hot.key == MouseLeft && hot.pressed) {
 					if(proc)
 						draw::execute(proc, (int)&e);
 				}
 			} else {
-				if(hot.key == MouseLeft)
+				if(hot.key == MouseLeft && hot.pressed)
 					draw::execute(choose_current_province, (int)&e);
 			}
 		}
@@ -1058,8 +1059,7 @@ void player_info::makemove() {
 		render_left_side(true);
 		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
 		auto y = render_right_side(choose_action);
-		y += buttonw(x, y, gui.hero_window_width, "Закончить ход", cmd(end_turn));
-		//current_player, current_player, 0, choose_action, current_province) + gui.padding * 3;
+		y += buttonw(x, y, gui.hero_window_width, msg.end_turn, cmd(end_turn), Ctrl + Alpha + 'E');
 		domodal();
 		control_standart();
 	}
@@ -1127,7 +1127,9 @@ TEXTPLUGIN(yesno) {
 void draw::domodal() {
 	if(current_execute) {
 		auto proc = current_execute;
+		auto parm = current_param;
 		before_render();
+		hot.param = parm;
 		proc();
 		before_render();
 		hot.key = InputUpdate;

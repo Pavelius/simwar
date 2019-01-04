@@ -160,6 +160,9 @@
     <ClCompile Include="msg.cpp">
       <Filter>Сообщения</Filter>
     </ClCompile>
+    <ClCompile Include="player_ai.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="draw.h">

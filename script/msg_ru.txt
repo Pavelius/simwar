@@ -35,6 +35,7 @@ predict_success: Вы выиграете эту битву.
 
 title: Прототип стратегии
 
+end_turn: Закончить ход
 newgame: Начать игру
 loadgame: Загрузить игру
 savegame: Записать игру
