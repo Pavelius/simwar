@@ -31,6 +31,7 @@ void hero_info::refresh_heroes() {
 
 int hero_info::get(const char* id) const {
 	auto r = 0;
+	assert(trait_type->find(id)!=0);
 	for(auto p : traits) {
 		if(!p)
 			continue;

@@ -143,13 +143,16 @@ struct hero_info : name_info {
 	cost_info					pay;
 	void						cancelaction();
 	int							get(const char* id) const;
-	const char*					getavatar() const { return avatar; }
 	action_info*				getaction() const { return action; }
+	int							getattack() const;
+	const char*					getavatar() const { return avatar; }
 	int							getbonus(const char* id) const;
+	int							getdefend() const;
 	int							getex(const char* id) const { return get(id) + getbonus(id); }
 	int							getincome() const;
 	player_info*				getplayer() const { return player; }
 	province_info*				getprovince() const { return province; }
+	int							getraid() const;
 	tactic_info*				gettactic() const { return tactic; }
 	int							getwait() const { return wait; }
 	static bsreq				metadata[];
