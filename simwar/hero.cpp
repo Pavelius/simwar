@@ -82,7 +82,7 @@ void hero_info::resolve() {
 	if(action->support)
 		province->addsupport(player, action->support + get("diplomacy"));
 	if(action->profit)
-		province->addsupport(player, action->support + get("diplomacy"));
+		province->addeconomy(action->profit);
 }
 
 unsigned hero_info::select(hero_info** source, unsigned maximum_count, const province_info* province, const player_info* player) {

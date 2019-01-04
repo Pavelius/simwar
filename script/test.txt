@@ -2,7 +2,7 @@
 #action attack order(3) attack(1)
 #action defend defend(10)
 #action recruit recruit(1) wait(1)
-#action support support(1)
+#action support support(1) profit(1) gold(7)
 #action quest
 
 #game map("cradle.png")
@@ -11,6 +11,8 @@
 #game default_action(quest)
 #game support_minimum(-20)
 #game support_maximum(15)
+#game economy_minimum(-3)
+#game economy_maximum(4)
 #game support_attack(5)
 #game support_defend(5)
 #game support_multiplier(4)

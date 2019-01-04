@@ -89,13 +89,14 @@ struct landscape_info : name_info, combat_info, cost_info {
 };
 struct province_info : name_info {
 	void						add(unit_info* unit);
+	void						addeconomy(int value);
 	void						addsupport(const player_info* player, int value);
 	bool						battle(char* result, const char* result_max, player_info* attacker_player, player_info* defender_player, action_info* action, bool raid);
 	void						build(unit_info* unit, int wait = 1);
 	static void					change_support();
 	void						createwave();
 	int							getdefend() const;
-	int							geteconomy() const { return level; }
+	int							geteconomy() const { return economy; }
 	hero_info*					gethero(const player_info* player) const;
 	player_info*				getplayer() const { return player; }
 	point						getposition() const { return position; }
@@ -120,6 +121,7 @@ private:
 	landscape_info*				landscape;
 	point						position;
 	int							support[player_max];
+	int							economy;
 	province_info*				neighbors[8];
 };
 struct report_info {
@@ -264,6 +266,7 @@ struct game_info {
 	action_info*				default_action;
 	char						income_per_level, casualties;
 	char						support_maximum, support_minimum, support_multiplier, support_attack, support_defend;
+	char						economy_minimum, economy_maximum;
 	unsigned char				change_support_provinces;
 	int							turn;
 	void						after_load();

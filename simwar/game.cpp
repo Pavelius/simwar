@@ -6,6 +6,8 @@ static bsreq game_type[] = {
 	BSREQ(game_info, casualties, number_type),
 	BSREQ(game_info, support_maximum, number_type),
 	BSREQ(game_info, support_minimum, number_type),
+	BSREQ(game_info, economy_maximum, number_type),
+	BSREQ(game_info, economy_minimum, number_type),
 	BSREQ(game_info, support_multiplier, number_type),
 	BSREQ(game_info, support_attack, number_type),
 	BSREQ(game_info, support_defend, number_type),

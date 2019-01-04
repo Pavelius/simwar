@@ -36,6 +36,7 @@ int province_info::getincome(tip_info* ti) const {
 	if(landscape)
 		result += landscape->getincome(ti);
 	result += level * game.income_per_level;
+	result += geteconomy();
 	return result;
 }
 
@@ -200,6 +201,15 @@ void province_info::addsupport(const player_info* player, int value) {
 	if(value < support_minimum)
 		value = support_minimum;
 	support[player_index] = value;
+}
+
+void province_info::addeconomy(int value) {
+	value += economy;
+	if(value > game.economy_maximum)
+		value = game.economy_maximum;
+	if(value < game.economy_minimum)
+		value = game.economy_minimum;
+	economy = value;
 }
 
 province_info* province_info::getneighbors(const player_info* player) const {
