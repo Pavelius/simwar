@@ -4,6 +4,7 @@
 #game default_action(quest)
 #game support_minimum(-20)
 #game support_maximum(15)
+#game support_attack(2)
 #game support_multiplier(4)
 
 #gui opacity(220)

@@ -17,6 +17,8 @@ diplomacy: Дипломатия
 cruelty: Жестокость
 nobility: Благородство
 will: Воля
+support: Поддержка
+
 income: Доход
 income_heroes: Расходы на героев
 income_province: Доход от провинций

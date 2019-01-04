@@ -21,6 +21,7 @@ bsreq msg_type[] = {
 	BSREQ(msg_info, cruelty, text_type),
 	BSREQ(msg_info, nobility, text_type),
 	BSREQ(msg_info, will, text_type),
+	BSREQ(msg_info, support, text_type),
 	//
 	BSREQ(msg_info, income, text_type),
 	BSREQ(msg_info, income_province, text_type),

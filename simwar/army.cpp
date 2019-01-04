@@ -12,7 +12,7 @@ void army::fill(const player_info* player, const province_info* province) {
 			continue;
 		if(province && e.getprovince(player) != province)
 			continue;
-		if(raid && e.get("raid")<=0)
+		if(raid && e.get("raid") <= 0)
 			continue;
 		add(&e);
 	}
@@ -38,9 +38,21 @@ int army::get(const char* id, tip_info* ti, bool include_number) const {
 			value += p->get("raid") + p->getbonus("raid");
 		r += p->fix(ti, value);
 	}
-	if(!attack) {
-		if(province)
+	if(province) {
+		if(!attack) {
 			r += province->fix(ti, province->getdefend());
+			if(game.support_defend) {
+				auto value = province->getsupport(player) / game.support_defend;
+				char temp[256]; zprint(temp, "%1 %2", msg.support, province->getname());
+				r += name_info::fix(ti, temp, value);
+			}
+		} else {
+			if(game.support_attack) {
+				auto value = province->getsupport(player) / game.support_attack;
+				char temp[256]; zprint(temp, "%1 %2", msg.support, province->getname());
+				r += name_info::fix(ti, temp, value);
+			}
+		}
 	}
 	if(tactic) {
 		auto value = tactic->get(id);

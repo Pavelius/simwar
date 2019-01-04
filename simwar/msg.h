@@ -18,6 +18,7 @@ struct msg_info {
 	const char* cruelty;
 	const char* nobility;
 	const char* will;
+	const char* support;
 	const char* total_strenght, *total;
 	const char* predict_fail, *predict_partial, *predict_success;
 	const char*	hero_wait;

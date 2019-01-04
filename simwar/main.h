@@ -244,7 +244,7 @@ struct game_info {
 	const char*					map;
 	action_info*				default_action;
 	char						income_per_level, casualties;
-	char						support_maximum, support_minimum, support_multiplier;
+	char						support_maximum, support_minimum, support_multiplier, support_attack, support_defend;
 	unsigned char				change_support_provinces;
 	int							turn;
 	void						after_load();
