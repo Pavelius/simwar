@@ -67,7 +67,7 @@
 
 #tactic lighting_attack attack(2) raid(1) defend(2)
 #tactic careful_defence shield(1)
-#tactic messy_fighting cruelty(1)
+#tactic messy_fighting sword(1)
 
 #hero gordek avatar("art/portraits/gordek.bmp") traits(bloody, hireling) player(red) best_tactic(lighting_attack)
 #hero antaris avatar("art/portraits/antaris.bmp") traits(bloody, diplomat) player(green) best_tactic(messy_fighting)

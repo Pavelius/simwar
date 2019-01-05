@@ -84,9 +84,13 @@ public:
 		if(game.casualties)
 			casualties += (enemy.strenght / game.casualties);
 		if(enemy.tactic)
-			casualties += enemy.tactic->cruelty;
+			casualties += enemy.tactic->sword;
+		if(enemy.general)
+			casualties += enemy.general->getsword();
 		if(tactic)
 			casualties -= tactic->shield;
+		if(general)
+			casualties -= general->getshield();
 		if(casualties > (int)count) {
 			wounds = casualties - count;
 			casualties = count;

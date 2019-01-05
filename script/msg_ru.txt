@@ -11,10 +11,10 @@ raid_spoils: Добыча рейда составила [%1i] золотых.
 attack: Атака
 defend: Защита
 raid: Рейд
-sword: Меч
+sword: Потери врага
 shield: Щит
 diplomacy: Дипломатия
-cruelty: Жестокость|Доброта
+cruelty: Злость|Доброта
 nobility: Благородство|Жадность
 will: Воля
 support: Поддержка

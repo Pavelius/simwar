@@ -52,7 +52,7 @@ struct tip_info {
 };
 struct combat_info {
 	char						attack, defend, raid;
-	char						cruelty, shield;
+	char						sword, shield;
 	int							get(const char* id) const;
 };
 struct cost_info {
@@ -96,6 +96,7 @@ struct action_info : name_info, combat_info, cost_info {
 };
 struct character_info : combat_info {
 	char						diplomacy;
+	char						cruelty;
 	char						nobility;
 	char						will;
 	int							get(const char* id) const;
@@ -196,6 +197,8 @@ struct hero_info : name_info {
 	player_info*				getplayer() const { return player; }
 	province_info*				getprovince() const { return province; }
 	int							getraid() const { return get("raid"); }
+	int							getshield() const { return get("shield"); }
+	int							getsword() const { return get("sword"); }
 	const tactic_info*			gettactic() const { return tactic; }
 	int							getwait() const { return wait; }
 	int							getwound() const { return wound; }
