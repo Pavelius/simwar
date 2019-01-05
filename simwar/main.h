@@ -16,6 +16,7 @@ enum player_ai_s : unsigned char {
 };
 
 const int player_max = 8;
+const int hero_max = player_max * 5;
 const int province_max = player_max * 16;
 
 bsreq action_type[];
@@ -28,6 +29,7 @@ bsreq tactic_type[];
 bsreq trait_type[];
 bsreq unit_type[];
 
+struct army;
 struct hero_info;
 struct player_info;
 struct troop_info;
@@ -52,6 +54,7 @@ struct cost_info {
 	char						fame;
 	constexpr cost_info() : gold(0), income(0), fame(0) {}
 	constexpr void operator+=(const cost_info& e) { gold += e.gold; fame += e.fame; }
+	constexpr void operator+=(const int value) { gold += value; }
 	constexpr void operator-=(const cost_info& e) { gold -= e.gold; fame -= e.fame; }
 	constexpr bool operator>(const cost_info& e) { return gold > e.gold || fame > e.fame; }
 	void						clear();
@@ -72,11 +75,14 @@ struct name_info {
 };
 struct action_info : name_info, combat_info, cost_info {
 	const char*					nameact;
-	char						recruit, support, profit;
+	char						recruit, support, rule, hire, movement;
 	char						order;
 	char						wait;
+	//
+	static int					compare(const void* p1, const void* p2);
 	bool						isplaceable() const;
 	province_flag_s				getprovince() const;
+	static void					sort(action_info** source, unsigned count);
 };
 struct character_info : combat_info {
 	char						diplomacy;
@@ -101,7 +107,7 @@ struct province_info : name_info {
 	player_info*				getplayer() const { return player; }
 	point						getposition() const { return position; }
 	int							getincome(tip_info* ti = 0) const;
-	char*						getinfo(char* result, const char* result_maximum, bool show_landscape) const;
+	char*						getinfo(char* result, const char* result_maximum, bool show_landscape, const army* support_units = 0) const;
 	landscape_info*				getlandscape() const { return landscape; }
 	int							getlevel() const { return level; }
 	province_info*				getneighbors(const player_info* player) const;
@@ -158,37 +164,47 @@ struct army : adat<troop_info*, 32> {
 };
 struct hero_info : name_info {
 	cost_info					pay;
+	trait_info*					traits[2];
+	//
 	void						cancelaction();
 	int							get(const char* id) const;
-	action_info*				getaction() const { return action; }
-	int							getattack() const;
+	int							getattack() const { return get("attack"); }
+	const action_info*			getaction() const { return action; }
 	const char*					getavatar() const { return avatar; }
+	const tactic_info*			getbesttactic() const { return best_tactic; }
 	int							getbonus(const char* id) const;
-	int							getdefend() const;
+	int							getcruelty() const { return get("cruelty"); }
+	int							getdefend() const { return get("defend"); }
+	int							getdiplomacy() const { return get("diplomacy"); }
 	int							getex(const char* id) const { return get(id) + getbonus(id); }
 	int							getincome() const;
+	int							getnobility() const { return get("nobility"); }
 	player_info*				getplayer() const { return player; }
 	province_info*				getprovince() const { return province; }
-	int							getraid() const;
-	tactic_info*				gettactic() const { return tactic; }
+	int							getraid() const { return get("raid"); }
+	const tactic_info*			gettactic() const { return tactic; }
 	int							getwait() const { return wait; }
 	static bsreq				metadata[];
+	bool						isallow(const action_info* action) const;
 	bool						isready() const { return (wait == 0); }
 	static void					refresh_heroes();
+	unsigned					remove_this(hero_info** source, unsigned count) const;
 	void						resolve();
+	unsigned					select(action_info** source, unsigned maximum) const;
 	static unsigned				select(hero_info** source, unsigned maximum_count, const province_info* province = 0, const player_info* player = 0);
+	static unsigned				select(hero_info** source, unsigned maximum_count, const player_info* player, const action_info* action, const hero_info* exclude = 0);
 	void						setaction(action_info* value) { action = value; }
 	void						setaction(action_info* action, province_info* province, const cost_info& cost, const army& logistic, const unit_set& production);
 	void						setprovince(province_info* value) { province = value; }
 	void						setwait(int v) { wait = v; }
-	trait_info*					traits[4];
 private:
 	action_info * action;
 	const char*					avatar;
 	const char*					nameof;
 	player_info*				player;
 	province_info*				province;
-	tactic_info*				tactic;
+	const tactic_info*			tactic;
+	const tactic_info*			best_tactic;
 	char						wait;
 };
 struct unit_info : name_info, combat_info, cost_info {
@@ -212,15 +228,16 @@ struct troop_info {
 	const char*					getname() const { return type->name; }
 	const char*					getnameof() const { return type->nameof; }
 	player_info*				getplayer() const { return province->getplayer(); }
-	static const char*			getpresent(char* result, const char* result_maximum, troop_info** source, unsigned count, const player_info* player);
+	static const char*			getpresent(char* result, const char* result_maximum, troop_info** source, unsigned count, const char* addition_text);
 	province_info*				getprovince() const { return province; }
 	province_info*				getprovince(const player_info* player) const;
 	int							getsort() const { return type->attack + type->defend; }
 	void						kill(player_info* player);
 	static bsreq				metadata[];
-	static unsigned				remove_moved(aref<troop_info*> source);
-	static unsigned				select(troop_info** result, unsigned result_maximum, const province_info* province, const player_info* player);
-	static unsigned				selectp(troop_info** result, unsigned result_maximum, const province_info* province, const player_info* player);
+	static unsigned				remove_moved(troop_info** source, unsigned count);
+	static void					retreat(const province_info* province, const player_info* player);
+	static unsigned				select(troop_info** result, unsigned result_maximum, const province_info* province);
+	static unsigned				select_move(troop_info** result, unsigned result_maximum, const province_info* province, const player_info* player);
 	void						setmove(province_info* value) { move = value; }
 	void						setprovince(province_info* value) { province = value; }
 	static void					sort(troop_info** source, unsigned count);
@@ -265,11 +282,9 @@ struct game_info {
 	const char*					map;
 	action_info*				default_action;
 	char						income_per_level, casualties;
-	char						support_maximum, support_minimum, support_multiplier, support_attack, support_defend;
+	char						support_maximum, support_minimum, support_attack, support_defend, support_change;
 	char						economy_minimum, economy_maximum;
-	unsigned char				change_support_provinces;
 	int							turn;
-	void						after_load();
 	void						clear();
 	bool						read(const char* name);
 };
@@ -305,7 +320,7 @@ extern adat<action_info, 32>	action_data;
 extern adat<build_info, 256>	build_data;
 extern game_info				game;
 extern gui_info					gui;
-extern adat<hero_info, 128>		hero_data;
+extern adat<hero_info, hero_max> hero_data;
 extern msg_info					msg;
 extern adat<landscape_info, 32> landscape_data;
 extern adat<player_info, player_max> player_data;

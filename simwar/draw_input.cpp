@@ -335,8 +335,9 @@ static void render_province(rect rc, point mouse, const player_info* player, cal
 		fore_stroke = colors::white.mix(selection_color);
 		zprint(temp, e.getname());
 		auto text_width = draw::textw(temp);
-		hero_info* hero_array[16];
-		count = hero_info::select(hero_array, lenghtof(hero_array), &e, player);
+		army defenders;
+		defenders.province = &e;
+		defenders.count = troop_info::select(defenders.data, defenders.getmaximum(), &e);
 		rect rc = {pt.x - text_width / 2, pt.y - draw::texth() / 2, pt.x + text_width / 2, pt.y + draw::texth() / 2};
 		auto status = e.getstatus(player);
 		auto inlist = selection.is(&e);
@@ -363,12 +364,20 @@ static void render_province(rect rc, point mouse, const player_info* player, cal
 		draw::text(pt.x - text_width / 2, pt.y - draw::texth() / 2, temp, -1, TextStroke);
 		pt.y += draw::texth() / 2;
 		draw::font = metrics::font;
-		e.getinfo(temp, zendof(temp), false);
+		auto hero = e.gethero(player);
+		if(status == FriendlyProvince)
+			defenders.general = hero;
+		e.getinfo(temp, zendof(temp), false, &defenders);
 		auto w = textfw(temp);
 		textf(pt.x - w / 2, pt.y, w, temp);
 		pt.y += texth();
-		if(count) {
-			auto hero = hero_array[0];
+		if(defenders) {
+			troop_info::sort(defenders.data, defenders.getcount());
+			troop_info::getpresent(temp, zendof(temp), defenders.data, defenders.getcount(), 0);
+			rect rc = {0, 0, 200, 0}; draw::textw(rc, temp);
+			pt.y += draw::text({pt.x - rc.width() / 2, pt.y, pt.x + rc.width() / 2 + 1, pt.y + rc.height()}, temp, AlignCenter);
+		}
+		if(hero) {
 			auto action = hero->getaction();
 			if(action)
 				zprint(temp, "%1 %2", hero->getname(), action->nameact);
@@ -377,18 +386,17 @@ static void render_province(rect rc, point mouse, const player_info* player, cal
 			text(pt.x - textw(temp) / 2, pt.y, temp);
 			pt.y += texth();
 		}
-		troop_info* troop_array[32];
-		count = troop_info::selectp(troop_array, lenghtof(troop_array), &e, player);
-		if(count) {
-			troop_info::sort(troop_array, count);
-			troop_info::getpresent(temp, zendof(temp), troop_array, count, player);
+		defenders.count = troop_info::select_move(defenders.data, defenders.getmaximum(), &e, player);
+		if(defenders) {
+			troop_info::sort(defenders.data, count);
+			troop_info::getpresent(temp, zendof(temp), defenders.data, defenders.count, msg.moved);
 			rect rc = {0, 0, 200, 0}; draw::textw(rc, temp);
 			pt.y += draw::text({pt.x - rc.width() / 2, pt.y, pt.x + rc.width() / 2 + 1, pt.y + rc.height()}, temp, AlignCenter);
 		}
 		if(status == FriendlyProvince) {
+			fore = fore.mix(colors::blue);
 			build_info* build_array[16];
 			count = build_info::select(build_array, lenghtof(build_array), &e);
-			fore = fore.mix(colors::blue);
 			if(count) {
 				build_info::sort(build_array, count);
 				build_info::getpresent(temp, zendof(temp), build_array, count);
@@ -399,7 +407,7 @@ static void render_province(rect rc, point mouse, const player_info* player, cal
 	}
 }
 
-static void render_board(const rect& rco, const player_info* player, callback_proc proc, aref<province_info*> selection, color selection_color, bool set_current_province) {
+static void render_board(const rect& rco, const player_info* player, callback_proc proc, aref<province_info*> selection, color selection_color, bool set_current_province, bool show_lines) {
 	auto rc = rco;
 	draw::state push;
 	draw::area(rc); // Drag and drop analize this result
@@ -432,37 +440,36 @@ static void render_board(const rect& rco, const player_info* player, callback_pr
 		draw::rectf(last_board, colors::gray);
 	if(rc.width() > 0 && rc.height() > 0)
 		blit(*draw::canvas, rc.x1, rc.y1, rc.width(), rc.height(), 0, map, x1, y1);
-	if(current_province)
+	if(current_province && show_lines)
 		current_province->render_neighbors(rco);
 	if(player)
 		render_province(last_board, last_mouse, player, proc, selection, selection_color, set_current_province);
 }
 
-static void render_board(bool set_current_province = false) {
-	render_board({0, 0, draw::getwidth(), draw::getheight()}, current_player, 0, {}, colors::blue, set_current_province);
+static void render_board(bool set_current_province = false, bool show_lines = false) {
+	render_board({0, 0, draw::getwidth(), draw::getheight()}, current_player, 0, {}, colors::blue, set_current_province, show_lines);
 }
 
-static int render_hero(int x, int y, int width, hero_info* e, const char* error_text, callback_proc proc = 0) {
+static int render_hero(int x, int y, int width, const hero_info* e, const char* error_text, callback_proc proc = 0) {
 	char temp[2048]; temp[0] = 0;
+	stringcreator sc;
+	stringbuilder sb(sc, temp);
 	draw::state push;
 	draw::font = metrics::font;
 	auto pa = e->getavatar();
 	int height = gui.hero_width;
-	szprint(zend(temp), zendof(temp), "###%1\n", e->getname());
+	sb.addn("###%1", e->getname());
 	for(auto p : e->traits) {
 		if(!p)
 			continue;
-		zcat(temp, p->getname());
-		zcat(temp, "\n");
+		sb.addn(p->getname());
 	}
-	auto owner = e->getplayer();
+	sb.addn(e->getbesttactic()->getname());
 	rect rc = {x, y, x + width, y + height};
-	areas hittest = window(rc, error_text!=0, true);
-	//if(owner)
-	//	draw::shield(x + drw.hero_width - 20, y + 18, owner->getimage());
+	areas hittest = window(rc, error_text!=0, proc!=0);
 	int x1 = x;
 	if(pa) {
-		int y1 = y;
+		auto y1 = y;
 		avatar(x, y1, pa);
 		rectb({x, y1, x + gui.hero_width, y1 + gui.hero_width}, colors::border);
 		x1 += gui.hero_width + gui.padding;
@@ -499,8 +506,8 @@ static int render_hero(int x, int y, int width, hero_info* e, const char* error_
 	return height + gui.border * 2;
 }
 
-static int render_hero(int x, int y, hero_info* e) {
-	return render_hero(x, y, gui.hero_window_width, e, false, 0);
+static int render_hero(int x, int y, const hero_info* e) {
+	return render_hero(x, y, gui.hero_window_width, e, 0, 0);
 }
 
 static int render_heroes(int x, int y, const player_info* player, callback_proc proc) {
@@ -650,15 +657,21 @@ areas draw::window(rect rc, bool disabled, bool hilight, int border) {
 	return rs;
 }
 
+static int render_text(int x, int y, int width, const char* string) {
+	draw::link[0] = 0;
+	auto result = textf(x, y, width, string);
+	if(draw::link[0])
+		tooltips(x, y, width, draw::link);
+	return result;
+}
+
 int draw::window(int x, int y, int width, const char* string) {
 	rect rc = {x, y, x + width, y};
 	draw::state push;
 	draw::font = metrics::font;
 	auto height = textf(rc, string);
 	window(rc, false);
-	link[0] = 0; textf(x, y, rc.width(), string);
-	if(link[0])
-		tooltips(x, y, rc.width(), link);
+	render_text(x, y, rc.width(), string);
 	return height + gui.border * 2 + gui.padding;
 }
 
@@ -857,15 +870,17 @@ static void breakparam() {
 }
 
 action_info* draw::getaction(player_info* player, hero_info* hero) {
+	action_info* source[16];
+	auto count = hero->select(source, lenghtof(source));
+	action_info::sort(source, count);
 	while(ismodal()) {
-		render_board();
+		render_board(false, true);
 		render_left_side();
 		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
 		auto y = gui.padding + gui.border;
 		y += render_hero(x, y, hero) + 1;
-		for(auto& e : action_data) {
-			if(!e)
-				continue;
+		for(unsigned i = 0; i < count; i++) {
+			auto& e = *source[i];
 			y += windowb(x, y, gui.hero_window_width, e.getname(), cmd(breakparam, (int)&e), gui.border) + 1;
 		}
 		y += windowb(x, y, gui.hero_window_width, msg.cancel, cmd(breakparam, 0), 0, KeyEscape) + 1;
@@ -878,7 +893,7 @@ action_info* draw::getaction(player_info* player, hero_info* hero) {
 province_info* draw::getprovince(player_info* player, hero_info* hero, action_info* action, aref<province_info*> selection, color selection_color) {
 	while(ismodal()) {
 		rect rc = {0, 0, draw::getwidth(), draw::getheight()};
-		render_board(rc, player, breakparam, selection, selection_color, false);
+		render_board(rc, player, breakparam, selection, selection_color, false, false);
 		render_left_side(false);
 		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
 		auto y = gui.padding + gui.border;
@@ -891,42 +906,80 @@ province_info* draw::getprovince(player_info* player, hero_info* hero, action_in
 	return (province_info*)getresult();
 }
 
+static void render_two_window(const player_info* player, hero_info* hero, const action_info* action, list& u1, list& u2, const char* error_text, const char* footer) {
+	auto th = 0;
+	if(footer) {
+		rect rt = {0, 0, gui.window_width, 0};
+		th = textf(rt, footer) + gui.padding;
+	}
+	render_board(false, true);
+	auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
+	auto y = gui.padding + gui.border;
+	y += render_hero(x, y, hero) + 1;
+	y += windowb(x, y, gui.hero_window_width, action->getname(), cmd(breakparam, 1, error_text != 0), 0, KeyEnter, error_text) + 1;
+	y += windowb(x, y, gui.hero_window_width, msg.cancel, cmd(breakparam, 0), 0, KeyEscape) + 1;
+	x = gui.border * 2;
+	y = gui.padding + gui.border;
+	auto x1 = x;
+	auto w = gui.window_width / 2;
+	auto pw = gui.padding / 2;
+	y += render_player(x, y, player);
+	auto y2 = getheight() - gui.padding * 2 - gui.border;
+	auto y3 = y2 - th;
+	draw::window({x, y, x + gui.window_width, y2});
+	u1.view({x, y, x + w - pw, y3});
+	x = x + w + gui.padding;
+	u2.view({x, y, x + w - pw, y3});
+	x = x1; y = y3 + gui.padding;
+	y += render_text(x, y, gui.window_width, footer);
+	domodal();
+	control_standart();
+}
+
+static bool choose_hire(const hero_info* hero, const action_info* action, hero_info** source, unsigned source_count) {
+	auto player = hero->getplayer();
+	auto origin = 0;
+	while(ismodal()) {
+		render_board();
+		auto x = gui.border * 2;
+		auto y = gui.padding + gui.border;
+		y += render_player(x, y, player);
+		auto y1 = y;
+		auto y2 = getheight() - gui.border * 2 - gui.hero_width;
+		auto column = 1;
+		for(unsigned i = origin; i < source_count; i++) {
+			if(y > y2) {
+				y = y1;
+				x += gui.hero_width * 2;
+				column++;
+			}
+			y += render_hero(x, y, source[i]) + gui.padding;
+		}
+		const char* error_text = 0;
+		x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
+		y = gui.padding + gui.border;
+		y += render_hero(x, y, hero) + 1;
+		y += windowb(x, y, gui.hero_window_width, msg.cancel, cmd(breakparam, 0), 0, KeyEscape) + 1;
+		domodal();
+		control_standart();
+	}
+	return (hero_info*)getresult();
+}
+
 bool draw::recruit(const player_info* player, hero_info* hero, const action_info* action, const province_info* province, unit_set& s1, unit_set& s2, cost_info& cost) {
 	unit_list u1(s1); u1.id = 10;
 	unit_list u2(s2); u2.id = 11;
-	auto th = texth() * 1 + gui.padding;
+	auto player_cost = player->getcost();
 	while(ismodal()) {
-		render_board();
-		auto player_cost = player->getcost();
 		cost = s2.getcost();
-		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
-		auto y = gui.padding + gui.border;
-		y += render_hero(x, y, hero) + 1;
 		const char* error_info = 0;
 		if(s2.getcount()==0)
 			error_info = msg.not_choose_units;
 		else if(cost > player_cost)
 			error_info = msg.not_enought_gold;
-		y += windowb(x, y, gui.hero_window_width, action->getname(), cmd(breakparam, 1, error_info!=0), 0, KeyEnter, error_info) + 1;
-		y += windowb(x, y, gui.hero_window_width, msg.cancel, cmd(breakparam, 0), 0, KeyEscape) + 1;
-		x = gui.border * 2;
-		y = gui.padding + gui.border;
-		auto x1 = x;
-		auto w = gui.window_width / 2;
-		auto pw = gui.padding / 2;
-		y += render_player(x, y, player);
-		auto y2 = getheight() - gui.padding * 2 - gui.border;
-		auto y3 = y2 - th;
-		draw::window({x, y, x + gui.window_width, y2});
-		u1.view({x, y, x + w - pw, y3});
-		x = x + w + gui.padding;
-		u2.view({x, y, x + w - pw, y3});
-		x = x1; y = y3 + gui.padding;
 		char tem1[1024]; cost.get(tem1, zendof(tem1));
-		char temp[1024]; zprint(temp, "%1: %2", msg.total, tem1);
-		y += textf(x, y, gui.window_width, temp);
-		domodal();
-		control_standart();
+		char footer[1024]; zprint(footer, "%1: %2", msg.total, tem1);
+		render_two_window(player, hero, action, u1, u2, error_info, footer);
 		if(hot.key == u1.id) {
 			auto p1 = u1.getcurrent();
 			if(p1) {
@@ -949,41 +1002,21 @@ bool draw::conquer(const player_info* player, hero_info* hero, const action_info
 		return true;
 	army_list u1(s1); u1.id = 10;
 	army_list u2(s2); u2.id = 11;
+	char tips_defend[2048]; tip_info tid(tips_defend, zendof(tips_defend));
+	char tips_attack[2048]; tip_info tia(tips_attack, zendof(tips_attack));
 	auto th = texth() * 3 + 2;
-	auto defender_strenght = a3.getstrenght(0);
+	auto defender_strenght = a3.getstrenght(&tid, true);
 	while(ismodal()) {
-		render_board();
-		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
-		auto y = gui.padding + gui.border;
-		y += render_hero(x, y, hero) + 1;
-		y += windowb(x, y, gui.hero_window_width, action->getname(), cmd(), gui.border) + 1;
-		y += windowb(x, y, gui.hero_window_width, msg.accept, cmd(breakparam, 1), 0, KeyEnter) + 1;
-		y += windowb(x, y, gui.hero_window_width, msg.cancel, cmd(breakparam, 0), 0, KeyEscape) + 1;
-		x = gui.border * 2;
-		y = gui.padding + gui.border;
-		auto x1 = x;
-		auto w = gui.window_width / 2;
-		auto pw = gui.padding / 2;
-		y += render_player(x, y, player);
-		auto y2 = getheight() - gui.padding * 2 - gui.border;
-		auto y3 = y2 - th;
-		draw::window({x, y, x + gui.window_width, y2});
-		u1.view({x, y, x + w - pw, y3});
-		x = x + w + gui.padding;
-		u2.view({x, y, x + w - pw, y3});
-		x = x1; y = y3 + 2;
-		auto attacker_strenght = s2.getstrenght(0);
-		char temp[4096]; zprint(temp, msg.total_strenght, attacker_strenght);
-		szprint(zend(temp), zendof(temp), " ");
+		auto attacker_strenght = s2.getstrenght(&tia, true);
+		char footer[4096]; zprint(footer, msg.total_strenght, tips_attack, tips_defend);
+		szprint(zend(footer), zendof(footer), " ");
 		if(attacker_strenght < defender_strenght)
-			szprint(zend(temp), zendof(temp), msg.predict_fail);
+			szprint(zend(footer), zendof(footer), msg.predict_fail);
 		else if(attacker_strenght <= defender_strenght + 1)
-			szprint(zend(temp), zendof(temp), msg.predict_partial);
+			szprint(zend(footer), zendof(footer), msg.predict_partial);
 		else
-			szprint(zend(temp), zendof(temp), msg.predict_success);
-		y += textf(x, y, gui.window_width, temp);
-		domodal();
-		control_standart();
+			szprint(zend(footer), zendof(footer), msg.predict_success);
+		render_two_window(player, hero, action, u1, u2, 0, footer);
 		if(hot.key == u1.id) {
 			auto p1 = u1.getcurrent();
 			u1.source.remove(u1.current);
@@ -1024,7 +1057,7 @@ static void choose_action() {
 		army a1(player, province, hero, true, raid);
 		army a3(0, province, 0, false, raid);
 		a1.fill(player, 0);
-		a1.count = troop_info::remove_moved(a1);
+		a1.count = troop_info::remove_moved(a1.data, a1.count);
 		a3.fill(province->getplayer(), province);
 		if(!conquer(player, hero, action, province, a1, troops_move, a3))
 			return;
@@ -1032,6 +1065,13 @@ static void choose_action() {
 	if(action->recruit) {
 		unit_set a1; a1.fill(player, province, hero, action);
 		if(!recruit(player, hero, action, province, a1, units_product, cost))
+			return;
+	}
+	if(action->hire) {
+		hero_info* a1[hero_max];
+		auto count = hero_info::select(a1, lenghtof(a1), player, action);
+		count = hero->remove_this(a1, count);
+		if(!choose_hire(hero, action, a1, count))
 			return;
 	}
 	hero->setaction(action, province, cost, troops_move, units_product);
@@ -1056,7 +1096,7 @@ void player_info::makemove() {
 	current_province = province_data.data + 0;
 	show_reports();
 	while(ismodal()) {
-		render_board(true);
+		render_board(true, true);
 		render_left_side(true);
 		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
 		auto y = render_right_side(choose_action);

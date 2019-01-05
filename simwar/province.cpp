@@ -99,12 +99,15 @@ unsigned province_info::remove_hero_present(aref<province_info*> source, const p
 	return ps - source.data;
 }
 
-char* province_info::getinfo(char* result, const char* result_maximum, bool show_landscape) const {
+char* province_info::getinfo(char* result, const char* result_maximum, bool show_landscape, const army* defenders) const {
 	result[0] = 0;
 	if(show_landscape)
 		szprint(zend(result), result_maximum, "%1 ", landscape->name);
+	auto value = getdefend();
+	if(defenders)
+		value = defenders->get("defend", 0);
 	szprint(zend(result), result_maximum, ":gold:%1i :house:%2i :shield_grey:%3i",
-		getincome(), getlevel(), getdefend());
+		getincome(), getlevel(), value);
 	return result;
 }
 
@@ -136,10 +139,6 @@ void province_info::add(unit_info* unit) {
 void province_info::change_support() {
 	auto support_maximum = game.support_maximum;
 	auto support_minimum = game.support_minimum;
-	if(game.support_multiplier) {
-		support_maximum *= game.support_multiplier;
-		support_minimum *= game.support_multiplier;
-	}
 	for(auto& e : province_data) {
 		if(!e)
 			continue;
@@ -165,10 +164,7 @@ int	province_info::getsupport(const player_info* player) const {
 	auto player_index = player_data.indexof(player);
 	if(player_index == -1)
 		return 0;
-	auto value = support[player_index];
-	if(game.support_multiplier)
-		value /= game.support_multiplier;
-	return value;
+	return support[player_index];
 }
 
 void province_info::setsupport(const player_info* player, int value) {
@@ -179,8 +175,6 @@ void province_info::setsupport(const player_info* player, int value) {
 		value = game.support_maximum;
 	if(value < game.support_minimum)
 		value = game.support_minimum;
-	if(game.support_multiplier)
-		value *= game.support_multiplier;
 	support[player_index] = value;
 }
 
@@ -188,18 +182,11 @@ void province_info::addsupport(const player_info* player, int value) {
 	auto player_index = player_data.indexof(player);
 	if(player_index == -1)
 		return;
-	auto support_minimum = game.support_minimum;
-	auto support_maximum = game.support_maximum;
-	if(game.support_multiplier) {
-		value *= game.support_multiplier;
-		support_minimum *= game.support_multiplier;
-		support_maximum *= game.support_multiplier;
-	}
 	value += support[player_index];
-	if(value > support_maximum)
-		value = support_maximum;
-	if(value < support_minimum)
-		value = support_minimum;
+	if(value > game.support_maximum)
+		value = game.support_maximum;
+	if(value < game.support_minimum)
+		value = game.support_minimum;
 	support[player_index] = value;
 }
 
@@ -230,33 +217,27 @@ province_info* province_info::getneighbors(const player_info* player) const {
 }
 
 void province_info::retreat(const player_info* player) {
-	troop_info* objects[64];
-	auto count = troop_info::select(objects, sizeof(objects) / sizeof(objects[0]), this, player);
+	troop_info* source[64];
+	if(getplayer() != player) {
+		// ≈сли игрок атаковал, оступают все нападающие.
+		// ≈ли в этот момент захватили их провинцию, они сдаютс€ победителю.
+		troop_info::retreat(this, player);
+		return;
+	}
+	auto count = troop_info::select(source, sizeof(source) / sizeof(source[0]), this);
 	if(!count)
 		return;
-	// ¬начале отступают те, кто перемещалс€ туда, откуда пришли
-	for(unsigned i = 0; i < count; i++) {
-		auto p = objects[i];
-		if(p->getmove()==this) {
-			auto province = p->getprovince();
-			p->setmove(0);
-			if(province->player != player)
-				p->setprovince(this);
-		}
-	}
 	// ѕотом, остатки отступают на соседнюю свою
 	auto province = getneighbors(player);
 	if(province) {
-		for(unsigned i = 0; i < count; i++) {
-			auto p = objects[i];
-			if(p->getprovince() == this)
-				p->setprovince(province);
-		}
+		for(unsigned i = 0; i < count; i++)
+			source[i]->setprovince(province);
+		return;
 	}
 	// ќстальные в итоге умирают
 	for(unsigned i = 0; i < count; i++) {
-		auto p = objects[i];
-		if(p->getprovince()==this)
+		auto p = source[i];
+		if(p->getprovince() == this)
 			p->clear();
 	}
 }

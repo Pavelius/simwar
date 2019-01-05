@@ -11,7 +11,7 @@ enum bsparse_error_s {
 	NoParserError,
 	ErrorExpectedIdentifier, ErrorExpectedArrayField, ErrorExpectedSymbol1p, ErrorExpected1p,
 	ErrorNotFoundBase1p, ErrorNotFoundType, ErrorNotFoundIdentifier1p, ErrorNotFoundMember1pInBase2p, ErrorNotFoundFunction1p,
-	ErrorNotFilled1p, ErrorNotFilled1pIn2pRecord3p, ErrorValue1pIn2pRecord3pMustBeIn4pAnd5p,
+	ErrorNotFilled1pIn2pRecord3p, ErrorValue1pIn2pRecord3pMustBeIn4pAnd5p,
 	ErrorFile2pNotFound,
 };
 struct bsdata : array {

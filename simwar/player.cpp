@@ -118,7 +118,7 @@ static int compare_heroes_by_order(const void* p1, const void* p2) {
 void player_info::resolve_actions() {
 	hero_info* heroes[64];
 	build_info::build_units();
-	for(auto i = 0; i < 10; i++) {
+	for(auto i = 1; i <= 5; i++) {
 		auto count = getactions(heroes, sizeof(heroes) / sizeof(heroes[0]), i);
 		if(!count)
 			continue;

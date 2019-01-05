@@ -26,6 +26,7 @@ struct adat {
 	T*						end() { return data + count; }
 	const T*				end() const { return data + count; }
 	int						getcount() const { return count; }
+	int						getmaximum() const { return count_max; }
 	int						indexof(const T* e) const { if(e >= data && e < data + count) return e - data; return -1; }
 	int						indexof(const T t) const { for(unsigned i = 0; i < count; i++) if(data[i] == t) return i; return -1; }
 	bool					is(const T t) const { return indexof(t) != -1; }

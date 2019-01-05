@@ -95,7 +95,7 @@ public:
 				szprint(result, result_max, "\n%1 %2: ", msg.casualties, getsideof());
 				ps = zend(result);
 			}
-			if(getcount()>0) {
+			if(getcount() > 0) {
 				if(ps[0])
 					zcat(ps, ", ");
 				zcat(result, data[count - 1]->getname());
@@ -123,24 +123,22 @@ bool province_info::battle(char* result, const char* result_max, player_info* at
 	attackers.applycasualty(zend(p), result_max);
 	defenders.applycasualty(zend(p), result_max);
 	if(!raid)
-		addsupport(attacker_player, -1);
-	addsupport(attacker_player, -1);
-	if(attackers.general)
-		addsupport(attacker_player, -1* attackers.general->get("cruelty"));
+		addsupport(attacker_player, -1 * game.support_change);
+	addsupport(attacker_player, -1 * game.support_change);
 	auto iswin = (&winner == &attackers);
 	if(iswin) {
 		retreat(defender_player);
-		if(attacker_player) {
-			attacker_player->fame += 1;
-			if(attackers.general)
-				attacker_player->fame += imax(0, attackers.general->get("nobility"));
-		}
-		if(!raid)
+		if(!raid) {
+			if(attacker_player) {
+				attacker_player->fame += 1;
+				if(attackers.general)
+					attacker_player->fame += imax(0, attackers.general->getnobility());
+			}
 			player = attacker_player;
-		else {
+		} else {
 			auto spoils = 2;
 			if(attackers.general)
-				spoils += attackers.general->get("attack") + attackers.general->get("raid");
+				spoils += attackers.general->getattack() + attackers.general->getraid();
 			szprint(zend(p), result_max, "\n");
 			szprint(zend(p), result_max, msg.raid_spoils, spoils);
 			cost_info e; e.gold = spoils;
@@ -149,9 +147,11 @@ bool province_info::battle(char* result, const char* result_max, player_info* at
 			if(defender_player)
 				*defender_player -= e;
 		}
-	}
-	else
+	} else {
 		retreat(attacker_player);
+		if(defender_player && defenders.general)
+			defender_player->fame += imax(0, defenders.general->getnobility());
+	}
 	draw::addbutton(zend(p), result_max, "accept");
 	return iswin;
 }

@@ -38,7 +38,7 @@ struct control {
 	virtual bool			isfocusable() const { return true; }
 	bool					isfocused() const;
 	bool					ishilited() const;
-	virtual bool			keyinput(unsigned id); // Default behaivor call shortcut function
+	virtual bool			keyinput(unsigned id) { return false; }
 	virtual void			mouseinput(unsigned id, point mouse); // Default behaivor set focus
 	virtual void			mousewheel(unsigned id, point mouse, int value) {}
 	virtual void			redraw() {}
@@ -85,90 +85,6 @@ struct list : control {
 	void					treemark(rect rc, int index, int level) const;
 	virtual bool			treemarking(bool run) { return true; }
 	void					view(const rect& rc) override;
-};
-struct visual;
-struct column {
-	const visual*			method;
-	const char*				id;
-	const char*				title;
-	int						width;
-	const char*				tips;
-	column_size_s			size;
-	bool operator==(const char* value) const { return value && strcmp(id, value) == 0; }
-	explicit operator bool() const { return method != 0; }
-	bool					isvisible() const { return true; }
-};
-struct table : list {
-	arem<column>			columns;
-	int						current_column, current_hilite_column, current_column_maximum, maximum_width;
-	bool					no_change_count;
-	bool					no_change_order;
-	bool					read_only;
-	select_mode_s			select_mode;
-	bool					show_totals;
-	constexpr table() : current_column(0), current_column_maximum(0), current_hilite_column(-1), maximum_width(0),
-		show_totals(false), no_change_order(false), no_change_count(false), read_only(false),
-		select_mode(SelectCell) {}
-	virtual column*			addcol(const char* id, const char* name, const char* type, column_size_s size = SizeDefault, int width = 0);
-	void					cellbox(const rect& rc, int line, int column);
-	void					cellimage(const rect& rc, int line, int column);
-	void					cellhilite(const rect& rc, int line, int columen, const char* text, image_flag_s aling) const;
-	void					cellnumber(const rect& rc, int line, int column);
-	void					cellpercent(const rect& rc, int line, int column);
-	void					celltext(const rect& rc, int line, int column);
-	bool					change(bool run);
-	virtual bool			changing(int line, int column, const char* name) { return false; }
-	void					changecheck(const rect& rc, int line, int column);
-	bool					changefield(const rect& rc, unsigned flags, char* result, const char* result_maximum);
-	void					changenumber(const rect& rc, int line, int column);
-	void					changetext(const rect& rc, int line, int column);
-	virtual void			clickcolumn(int column) const {}
-	virtual void			ensurevisible() override;
-	virtual int				getcolumn() const override { return current_column; }
-	virtual aref<column>	getcolumns() const { return aref<column>(); }
-	virtual const char*		getheader(char* result, const char* result_maximum, int column) const { return columns[column].title; }
-	virtual int				getnumber(int line, int column) const { return 0; }
-	virtual int				getmaximumwidth() const { return maximum_width; }
-	rect					getrect(int row, int column) const;
-	virtual int				gettotal(int column) const { return 0; }
-	virtual const char*		gettotal(char* result, const char* result_maximum, int column) const { return 0; }
-	int						getvalid(int column, int direction = 1) const;
-	virtual const visual*	getvisuals() const;
-	bool					keyinput(unsigned id) override;
-	void					mouseselect(int id, bool pressed) override;
-	virtual void			row(const rect& rc, int index) override; // Draw single row - part of list
-	virtual int				rowheader(const rect& rc) const override; // Draw header row
-	virtual void			rowtotal(const rect& rc) const; // Draw header row
-	void					select(int index, int column = 0) override;
-	void					view(const rect& rc) override;
-private:
-	void					update_columns(const rect& rc);
-};
-struct visual {
-	typedef void			(table::*proc_render)(const rect& rc, int line, int column);
-	const char*				id;
-	const char*				name;
-	int						minimal_width, default_width;
-	column_size_s			size;
-	union {
-		proc_render			render;
-		const visual*		child;
-	};
-	proc_render				change;
-	visual() = default;
-	template<typename T, typename U> visual(const char* id, const char* name, int mw, int dw, column_size_s sz,
-		void (T::*pr)(const rect& rc, int line, int column),
-		void (U::*pc)(const rect& rc, int line, int column)) : id(id), name(name),
-		render((proc_render)pr), change((proc_render)pc),
-		size(sz), minimal_width(mw), default_width(dw) {}
-	template<typename T> visual(const char* id, const char* name, int mw, int dw, column_size_s sz,
-		void (T::*pr)(const rect& rc, int line, int column)) : id(id), name(name),
-		render((proc_render)pr), change((proc_render)0),
-		size(sz), minimal_width(mw), default_width(dw) {}
-	constexpr visual(const visual* vs) : id("*"), name(""), change(0), minimal_width(0),
-		default_width(0), child(vs), size(SizeDefault) {}
-	explicit operator bool() const { return render != 0; }
-	const visual*			find(const char* id) const;
 };
 }
 }

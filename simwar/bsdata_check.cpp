@@ -11,7 +11,7 @@ bool bsdata::parser::check_required(const char* url, bsval source) {
 		if(pf->type == text_type) {
 			auto value = pf->get(pf->ptr(source.data));
 			if(!value) {
-				errornp(ErrorNotFilled1p, url, 0, 0, pf->id);
+				errornp(ErrorNotFilled1pIn2pRecord3p, url, 0, 0, pf->id, "", "");
 				result = false;
 			}
 		}
@@ -40,7 +40,7 @@ bool bsdata::parser::check_required(const bsdata::requisit* requisits, unsigned 
 					continue;
 				auto value = pf->get(pf->ptr(p));
 				if(pr->required && !value) {
-					errornp(ErrorNotFilled1p, "localization", 0, 0, id);
+					errornp(ErrorNotFilled1pIn2pRecord3p, "localization", 0, 0, pf->id, pb->id, id);
 					result = false;
 				}
 				if(pr->values[0] != pr->values[1]) {

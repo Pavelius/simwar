@@ -8,7 +8,7 @@ static bsreq game_type[] = {
 	BSREQ(game_info, support_minimum, number_type),
 	BSREQ(game_info, economy_maximum, number_type),
 	BSREQ(game_info, economy_minimum, number_type),
-	BSREQ(game_info, support_multiplier, number_type),
+	BSREQ(game_info, support_change, number_type),
 	BSREQ(game_info, support_attack, number_type),
 	BSREQ(game_info, support_defend, number_type),
 	BSREQ(game_info, default_action, action_type),
@@ -21,16 +21,11 @@ void game_info::clear() {
 	memset(this, 0, sizeof(*this));
 }
 
-void game_info::after_load() {
-	change_support_provinces = 2;
-	if(change_support_provinces > province_data.count)
-		change_support_provinces = province_data.count;
-}
-
 static const char* requisits[] = {"name", "nameof", "nameact", "text"};
 static bsdata::requisit required_reqisits[] = {{"name", true},
 {"nameact", true},
-{"order", false, {0, 10}},
+{"order", false, {1, 5}},
+{"bonus_tactic", true},
 };
 
 bool game_info::read(const char* name) {
@@ -50,7 +45,6 @@ bool game_info::read(const char* name) {
 	if(result) {
 		if(!draw::initializemap())
 			return false;
-		game.after_load();
 	}
 	if(result)
 		io::file::remove(url_errors);
