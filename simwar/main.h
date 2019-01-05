@@ -96,7 +96,7 @@ struct action_info : name_info, combat_info, cost_info {
 };
 struct character_info : combat_info {
 	char						diplomacy;
-	char						cruelty;
+	char						good;
 	char						nobility;
 	char						will;
 	int							get(const char* id) const;
@@ -187,7 +187,7 @@ struct hero_info : name_info {
 	const char*					getavatar() const { return avatar; }
 	const tactic_info*			getbesttactic() const { return best_tactic; }
 	int							getbonus(const char* id) const;
-	int							getcruelty() const { return get("cruelty"); }
+	int							getgood() const { return get("good"); }
 	int							getdefend() const { return get("defend"); }
 	int							getdiplomacy() const { return get("diplomacy"); }
 	int							getex(const char* id) const { return get(id) + getbonus(id); }

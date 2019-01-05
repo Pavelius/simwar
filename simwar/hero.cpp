@@ -111,9 +111,9 @@ void hero_info::resolve() {
 		if(province->getsupport(player) > 0)
 			province->setsupport(player, 0);
 	}
-	// Ћюбое действие жестокого геро€ снижает вли€ние
+	// Ћюбое действие доброго геро€ повышают вли€ние
 	if(province)
-		province->addsupport(player, -getcruelty());
+		province->addsupport(player, getgood());
 }
 
 unsigned hero_info::select(hero_info** source, unsigned maximum_count, const province_info* province, const player_info* player) {

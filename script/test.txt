@@ -59,19 +59,21 @@
 #province holy_mountain position(1231, 351) landscape(plains) level(2) nation(northerners)
 #province druid_hills position(1336, 206) landscape(hills) nation(northerners)
 
-#trait general name("Генерал") defend(1) attack(1)
-#trait diplomat name("Дипломат") defend(1) diplomacy(1)
-#trait hireling name("Наемник") raid(2) nobility(-1)
-#trait carefull name("Осторожный") shield(1)
-#trait bloody name("Кровожадный") attack(1) cruelty(1)
+#trait general defend(1) attack(1)
+#trait diplomat defend(1) diplomacy(1)
+#trait hireling raid(2) nobility(-1)
+#trait carefull shield(1)
+#trait bloody attack(2) good(-1)
+#trait cunning attack(1) raid(1)
 
 #tactic lighting_attack attack(2) raid(1) defend(2)
 #tactic careful_defence shield(1)
 #tactic messy_fighting sword(1)
 
 #hero gordek avatar("art/portraits/gordek.bmp") traits(bloody, hireling) player(red) best_tactic(lighting_attack)
-#hero antaris avatar("art/portraits/antaris.bmp") traits(bloody, diplomat) player(green) best_tactic(messy_fighting)
 #hero mistra avatar("art/portraits/mistra.bmp") traits(carefull, diplomat) player(red) best_tactic(careful_defence)
+#hero antaris avatar("art/portraits/antaris.bmp") traits(bloody, diplomat) player(green) best_tactic(messy_fighting)
+#hero groomsh avatar("art/portraits/groomsh.bmp") traits(cunning, general) player(green) best_tactic(careful_defence)
 
 #unit barbarians attack(1) defend(1) gold(1) income(-1) recruit_count(3) nation(northerners)
 #unit orcs attack(1) defend(1) raid(1) gold(2) income(-1) recruit_count(2) nation(orcs)

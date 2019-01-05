@@ -58,6 +58,8 @@ static void set_all_bsdata(const char* id, const char** requisits, unsigned requ
 }
 
 static bool read_localization(const char* url, const char** requisits, unsigned requisits_count, void* object, bsreq* type, bslocal_proc proc) {
+	if(!requisits_count)
+		return false;
 	auto pb = (const char*)loadt(url);
 	if(!pb)
 		return false;
@@ -78,11 +80,10 @@ static bool read_localization(const char* url, const char** requisits, unsigned 
 		auto pt = value;
 		strings[0] = pt;
 		while(pt[0]) {
-			if(pt[0] == '.') {
+			if(pt[0] == '.' && requisits_count>1) {
 				pt[0] = 0;
 				pt = zskipsp(pt + 1);
-				if(requisits_count > 1)
-					strings[requisits_count - 1] = pt;
+				strings[requisits_count - 1] = pt;
 				break;
 			} else if(pt[0] == '|') {
 				pt[0] = 0;

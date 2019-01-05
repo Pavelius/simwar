@@ -14,8 +14,8 @@ raid: Рейд
 sword: Потери врага
 shield: Щит
 diplomacy: Дипломатия
-cruelty: Злость|Доброта
-nobility: Благородство|Жадность
+good: Доброта|Злость
+nobility: Власть|Жадность
 will: Воля
 support: Поддержка
 
