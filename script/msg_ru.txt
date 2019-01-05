@@ -1,4 +1,4 @@
-attacking_force: Армия %1с общей силой %2 вторглась в провинцию [%3].
+attacking_force: Армия %1 с общей силой %2 вторглась в провинцию [%3].
 defending_force: В защите находилась армия %1 с общей силой %2.
 neutral_army: местные силы
 neutral_army_of: местных сил
@@ -14,8 +14,8 @@ raid: Рейд
 sword: Меч
 shield: Щит
 diplomacy: Дипломатия
-cruelty: Жестокость
-nobility: Благородство
+cruelty: Жестокость|Доброта
+nobility: Благородство|Жадность
 will: Воля
 support: Поддержка
 

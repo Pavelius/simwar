@@ -16,7 +16,9 @@ struct msg_info {
 	const char* shield;
 	const char* diplomacy;
 	const char* cruelty;
+	const char* cruelty_negative;
 	const char* nobility;
+	const char* nobility_negative;
 	const char* will;
 	const char* support;
 	const char* total_strenght, *total;

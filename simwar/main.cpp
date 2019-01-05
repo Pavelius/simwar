@@ -3,7 +3,7 @@
 #include "main.h"
 
 static bool initialize_messages(std::initializer_list<const char*> files) {
-	static const char* requisits[] = {"", "s", "_of"};
+	static const char* requisits[] = {"", "s", "_of", "_negative"};
 	auto result = true;
 	auto url_errors = "errors.txt";
 	if(true) {

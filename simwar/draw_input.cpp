@@ -509,6 +509,14 @@ static int render_hero(int x, int y, int width, const hero_info* e, const char* 
 			auto value = e->get(ppf->id);
 			if(!value)
 				continue;
+			if(value < 0) {
+				char name[64]; ;
+				auto pf1 = msg_type->find(zprint(name, "%1_negative", pf->id));
+				if(pf1) {
+					pn = (const char*)pf1->get(pf1->ptr(&msg));
+					value = -value;
+				}
+			}
 			if(ps[0])
 				zcat(temp, "\n");
 			szprint(zend(temp), zendof(temp), "%+2i %1", pn, value);

@@ -1,6 +1,8 @@
 #include "bsdata.h"
 #include "crt.h"
 
+typedef void(*bslocal_proc)(const char* id, const char** requisits, unsigned requisits_count, const char** strings, void* object, const bsreq* type);
+
 static const char* read_string(const char* p, char* ps, const char* pe) {
 	while(p[0] && p[0] != '\n' && p[0] != '\r') {
 		if(ps < pe)
@@ -15,12 +17,19 @@ static const char* read_string(const char* p, char* ps, const char* pe) {
 	return p;
 }
 
-typedef void (*bslocal_proc)(const char* id, const char** requisits, unsigned requisits_count, const char** strings, void* object, const bsreq* type);
-
 static void set_req_object(const char* id, const char** requisits, unsigned requisits_count, const char** strings, void* object, const bsreq* type) {
-	auto pf = type->find(id, text_type);
-	if(pf)
-		type->set(pf->ptr(object), (int)szdup(strings[0]));
+	char name[128];
+	auto index = 0;
+	for(unsigned i = 0; i < requisits_count; i++) {
+		zprint(name, "%1%2", id, requisits[i]);
+		auto pf = type->find(name, text_type);
+		if(!pf)
+			continue;
+		if(!strings[index] || strings[index][0] == 0)
+			break;
+		type->set(pf->ptr(object), (int)szdup(strings[index]));
+		index++;
+	}
 }
 
 static void set_all_bsdata(const char* id, const char** requisits, unsigned requisits_count, const char** strings, void* object, const bsreq* type) {
