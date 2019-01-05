@@ -1,5 +1,7 @@
 #pragma once
 
+#define xva_start(v) ((const char*)&v + sizeof(v))
+
 struct stringcreator {
 	const char*			parseformat(char* result, const char* result_max, const char* format, const char* format_param);
 	virtual void		parseidentifier(char* result, const char* result_max, const char* identifier);
@@ -16,8 +18,10 @@ struct stringbuilder {
 	explicit operator bool() const { return p>result; }
 	void				add(const char* format, ...);
 	void				addh(const char* format, ...);
+	void				addn(const char* format, ...) { addx("\n", format, xva_start(format)); }
+	void				adds(const char* format, ...) { addx(" ", format, xva_start(format)); }
 	void				addv(const char* format, const char* format_param);
-	void				addn(const char* format, ...);
+	void				addx(const char* separator, const char* format, const char* format_param);
 	void				clear() { result[0] = 0; p = result; }
 	const char*			getpos() const { return p; }
 	bool				ispos(const char* v) const { return p == v; }

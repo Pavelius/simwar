@@ -29,6 +29,7 @@ static point			tooltips_point;
 static short			tooltips_width;
 static char				tooltips_text[4096];
 static surface			map;
+static sprite*			sprite_shields;
 static rect				hilite_rect;
 const int				map_normal = 1000;
 static int				map_scale = map_normal;
@@ -317,6 +318,17 @@ void province_info::render_neighbors(const rect& rc) const {
 	}
 }
 
+static void render_shield(int x, int y, const player_info* player) {
+	if(!player)
+		return;
+	auto old_stroke = fore;
+	fore = (current_player == player) ? colors::gray : colors::red;
+	auto index = player->getindex();
+	stroke(x, y, sprite_shields, index, 0, 2);
+	image(x, y, sprite_shields, index, 0);
+	fore = old_stroke;
+}
+
 static void render_province(rect rc, point mouse, const player_info* player, callback_proc proc, aref<province_info*> selection, color selection_color, bool set_current_province) {
 	unsigned count;
 	char temp[1024];
@@ -361,6 +373,7 @@ static void render_province(rect rc, point mouse, const player_info* player, cal
 					draw::execute(choose_current_province, (int)&e);
 			}
 		}
+		render_shield(pt.x - text_width / 2 - 20, pt.y, e.getplayer());
 		draw::text(pt.x - text_width / 2, pt.y - draw::texth() / 2, temp, -1, TextStroke);
 		pt.y += draw::texth() / 2;
 		draw::font = metrics::font;
@@ -369,7 +382,7 @@ static void render_province(rect rc, point mouse, const player_info* player, cal
 			defenders.general = hero;
 		e.getinfo(temp, zendof(temp), false, &defenders);
 		auto w = textfw(temp);
-		textf(pt.x - w / 2, pt.y, w, temp);
+		textf(pt.x - w / 2, pt.y, w, temp, 0, 0, 0, 0, 0, TextStroke);
 		pt.y += texth();
 		if(defenders) {
 			troop_info::sort(defenders.data, defenders.getcount());
@@ -754,11 +767,21 @@ void draw::initialize() {
 	set(draw_icon);
 }
 
+static bool read_sprite(sprite** result, const char* name) {
+	char temp[260];
+	if(*result)
+		delete *result;
+	*result = (sprite*)loadb(szurl(temp, "art/sprites", name, "pma"));
+	return (*result) != 0;
+}
+
 bool draw::initializemap() {
 	if(!game.map || !game.map[0])
 		return false;
 	char temp[260];
 	if(!map.read(szurl(temp, "maps", game.map)))
+		return false;
+	if(!read_sprite(&sprite_shields, "shields"))
 		return false;
 	return true;
 }
@@ -997,9 +1020,10 @@ bool draw::recruit(const player_info* player, hero_info* hero, const action_info
 	return getresult() != 0;
 }
 
-bool draw::conquer(const player_info* player, hero_info* hero, const action_info* action, const province_info* province, army& s1, army& s2, const army& a3) {
+static bool choose_conquer(const player_info* player, hero_info* hero, const action_info* action, const province_info* province, army& s1, army& s2, const army& a3, int minimal_count) {
 	if(!s1.getcount())
 		return true;
+	stringcreator sc;
 	army_list u1(s1); u1.id = 10;
 	army_list u2(s2); u2.id = 11;
 	char tips_defend[2048]; tip_info tid(tips_defend, zendof(tips_defend));
@@ -1007,16 +1031,22 @@ bool draw::conquer(const player_info* player, hero_info* hero, const action_info
 	auto th = texth() * 3 + 2;
 	auto defender_strenght = a3.getstrenght(&tid, true);
 	while(ismodal()) {
-		auto attacker_strenght = s2.getstrenght(&tia, true);
-		char footer[4096]; zprint(footer, msg.total_strenght, tips_attack, tips_defend);
-		szprint(zend(footer), zendof(footer), " ");
-		if(attacker_strenght < defender_strenght)
-			szprint(zend(footer), zendof(footer), msg.predict_fail);
-		else if(attacker_strenght <= defender_strenght + 1)
-			szprint(zend(footer), zendof(footer), msg.predict_partial);
-		else
-			szprint(zend(footer), zendof(footer), msg.predict_success);
-		render_two_window(player, hero, action, u1, u2, 0, footer);
+		const char* error_info = 0;
+		char footer[4096]; footer[0] = 0;
+		stringbuilder sb(sc, footer);
+		if(s1.attack) {
+			auto attacker_strenght = s2.getstrenght(&tia, true);
+			sb.adds(msg.total_strenght, tips_attack, tips_defend);
+			if(attacker_strenght <= defender_strenght)
+				sb.adds(msg.predict_fail);
+			else if(attacker_strenght <= defender_strenght + 2)
+				sb.adds(msg.predict_partial);
+			else
+				sb.adds(msg.predict_success);
+		}
+		if(minimal_count && s2.getcount() < minimal_count)
+			error_info = msg.not_choose_units;
+		render_two_window(player, hero, action, u1, u2, error_info, footer);
 		if(hot.key == u1.id) {
 			auto p1 = u1.getcurrent();
 			u1.source.remove(u1.current);
@@ -1059,7 +1089,15 @@ static void choose_action() {
 		a1.fill(player, 0);
 		a1.count = troop_info::remove_moved(a1.data, a1.count);
 		a3.fill(province->getplayer(), province);
-		if(!conquer(player, hero, action, province, a1, troops_move, a3))
+		if(!choose_conquer(player, hero, action, province, a1, troops_move, a3, 0))
+			return;
+	} else if(action->movement) {
+		army a1(player, province, hero, false, false);
+		army a3;
+		a1.fill(player, 0);
+		a1.count = troop_info::remove(a1.data, a1.count, province);
+		a1.count = troop_info::remove_moved(a1.data, a1.count);
+		if(!choose_conquer(player, hero, action, province, a1, troops_move, a3, 1))
 			return;
 	}
 	if(action->recruit) {

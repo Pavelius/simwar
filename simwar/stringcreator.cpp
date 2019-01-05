@@ -158,10 +158,10 @@ void stringbuilder::add(const char* format, ...) {
 	p = driver.printv(p, result_maximum, format, xva_start(format));
 }
 
-void stringbuilder::addn(const char* format, ...) {
+void stringbuilder::addx(const char* separator, const char* format, const char* format_param) {
 	if(p != result)
-		p = driver.printv(p, result_maximum, "\n", 0);
-	p = driver.printv(p, result_maximum, format, xva_start(format));
+		p = driver.printv(p, result_maximum, separator, 0);
+	p = driver.printv(p, result_maximum, format, format_param);
 }
 
 void stringbuilder::addh(const char* format, ...) {
@@ -169,17 +169,6 @@ void stringbuilder::addh(const char* format, ...) {
 		p = driver.printv(p, result_maximum, "\n", 0);
 	p = driver.printv(p, result_maximum, "###", 0);
 	p = driver.printv(p, result_maximum, format, xva_start(format));
-}
-
-void stringbuilder::addv(const char* format, const char* format_param) {
-	p = driver.printv(p, result_maximum, format, format_param);
-}
-
-void stringbuilder::sep(const char* header, const char* p) {
-	if(ispos(p))
-		add(header);
-	else
-		add(", ");
 }
 
 char* szprintvs(char* result, const char* result_maximum, const char* src, const char* vl) {

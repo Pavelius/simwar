@@ -1,6 +1,6 @@
 #action raid order(2) raid(1)
 #action attack order(4) attack(1)
-#action defend order(5)
+#action defend order(5) defend(1)
 #action recruit order(3) recruit(1) wait(1)
 #action support order(3) support(1) rule(1) gold(7)
 #action hire order(3) hire(1)
@@ -71,7 +71,6 @@
 
 //#unit barbarians name("варвары") nameof("варваров") attack(1) defend(1) cost(2) income(-1) recruit_count(3)
 #unit spearmans name("копейщики") nameof("копейщиков") attack(1) defend(2) gold(3) income(-1) recruit_count(2)
-#unit archers name("лучники") nameof("лучников") attack(2) defend(1) gold(3) income(-1) level(1)
 #unit swordmans name("мечники") nameof("мечников") attack(2) defend(2) gold(4) income(-2) level(2)
 #unit cavalry name("кавалерия") nameof("кавалерии") attack(3) defend(1) gold(5) income(-2) level(3)
 
@@ -90,5 +89,5 @@
 #province sunrise_hills player(red)
 #province white_harbor player(red)
 
-#player red name("Имперцы") nameof("имперцев") gold(10) type(PlayerHuman)
-#player green name("Орки") nameof("орков") gold(100) type(PlayerHuman)
+#player red gold(10) type(PlayerHuman)
+#player green gold(100) type(PlayerHuman)

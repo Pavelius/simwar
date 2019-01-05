@@ -118,7 +118,7 @@ const char* province_info::getsupport(char* result, const char* result_maximum) 
 		auto value = getsupport(&e);
 		if(value == 0)
 			continue;
-		szprint(zend(result), result_maximum, " %1: [%3%2i]", e.getname(), value, (value >= 0) ? "+" : "-");
+		szprint(zend(result), result_maximum, " %1:[%2i]", e.getname(), value);
 	}
 	return result;
 }
@@ -143,7 +143,7 @@ void province_info::change_support() {
 		if(!e)
 			continue;
 		auto player = e.getplayer();
-		auto player_index = player_data.indexof(player);
+		auto player_index = player->getindex();
 		for(auto i = 0; i < sizeof(support) / sizeof(support[0]); i++) {
 			auto value = e.support[i];
 			if(player_index == i) {
@@ -161,14 +161,14 @@ void province_info::change_support() {
 }
 
 int	province_info::getsupport(const player_info* player) const {
-	auto player_index = player_data.indexof(player);
+	auto player_index = player->getindex();
 	if(player_index == -1)
 		return 0;
 	return support[player_index];
 }
 
 void province_info::setsupport(const player_info* player, int value) {
-	auto player_index = player_data.indexof(player);
+	auto player_index = player->getindex();
 	if(player_index == -1)
 		return;
 	if(value > game.support_maximum)
@@ -179,7 +179,7 @@ void province_info::setsupport(const player_info* player, int value) {
 }
 
 void province_info::addsupport(const player_info* player, int value) {
-	auto player_index = player_data.indexof(player);
+	auto player_index = player->getindex();
 	if(player_index == -1)
 		return;
 	value += support[player_index];
@@ -214,6 +214,10 @@ province_info* province_info::getneighbors(const player_info* player) const {
 	if(!count)
 		return 0;
 	return province_array[rand() % count];
+}
+
+void province_info::arrival(const player_info* player) {
+	troop_info::arrival(this, player);
 }
 
 void province_info::retreat(const player_info* player) {

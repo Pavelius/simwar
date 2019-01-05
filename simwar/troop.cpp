@@ -72,6 +72,18 @@ unsigned troop_info::remove_moved(troop_info** source, unsigned count) {
 	return ps - source;
 }
 
+unsigned troop_info::remove(troop_info** source, unsigned count, const province_info* province) {
+	auto ps = source;
+	auto pe = source + count;
+	for(auto pb = source; pb < pe; pb++) {
+		auto p = *pb;
+		if(p->province==province)
+			continue;
+		*ps++ = p;
+	}
+	return ps - source;
+}
+
 troop_info* troop_info::add(province_info* province, unit_info* type) {
 	auto p = troop_data.add();
 	memset(p, 0, sizeof(*p));
@@ -126,6 +138,19 @@ void troop_info::retreat(const province_info* province, const player_info* playe
 			continue;
 		if(e.getplayer() != player)
 			continue;
+		e.move = 0;
+	}
+}
+
+void troop_info::arrival(const province_info* province, const player_info* player) {
+	for(auto& e : troop_data) {
+		if(!e)
+			continue;
+		if(!e.move || e.move != province)
+			continue;
+		if(e.getplayer() != player)
+			continue;
+		e.province = e.move;
 		e.move = 0;
 	}
 }

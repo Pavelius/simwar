@@ -107,6 +107,15 @@ public:
 			zcat(result, ".");
 	}
 
+	int getspoils(tip_info* ti) const {
+		auto result = name_info::fix(ti, msg.raid, 2);
+		if(general) {
+			auto value = general->getattack() + general->getraid();
+			result += general->fix(ti, value);
+		}
+		return result;
+	}
+
 };
 
 bool province_info::battle(char* result, const char* result_max, player_info* attacker_player, player_info* defender_player, action_info* action, bool raid) {
@@ -128,6 +137,7 @@ bool province_info::battle(char* result, const char* result_max, player_info* at
 	auto iswin = (&winner == &attackers);
 	if(iswin) {
 		retreat(defender_player);
+		arrival(attacker_player);
 		if(!raid) {
 			if(attacker_player) {
 				attacker_player->fame += 1;

@@ -51,8 +51,13 @@ int	hero_info::getincome() const {
 		if(p)
 			result--;
 	}
-	result += getex("nobility");
 	return result;
+}
+
+bool hero_info::isallow(const action_info* action) const {
+	if(action->raid)
+		return (getattack() + getraid()) > 0;
+	return true;
 }
 
 void hero_info::setaction(action_info* action, province_info* province, const cost_info& cost, const army& logistic, const unit_set& production) {
@@ -69,14 +74,13 @@ void hero_info::setaction(action_info* action, province_info* province, const co
 		province->build(p, p->recruit_time);
 }
 
-bool hero_info::isallow(const action_info* action) const {
-	if(action->raid)
-		return (getattack() + getraid()) > 0;
-	return true;
-}
-
 void hero_info::resolve() {
 	char temp[8192]; temp[0] = 0;
+	// Любое действие благородного героя повышает доход
+	*player += getnobility();
+	// Далее идут действия, которые действуют на провинцию
+	if(!province)
+		return;
 	if(action->attack || action->raid) {
 		auto israid = (action->raid > 0);
 		auto enemy = province->getplayer();
@@ -88,26 +92,26 @@ void hero_info::resolve() {
 	}
 	if(action->support)
 		province->addsupport(player, action->support);
+	auto criminal_negation = 0;
 	if(action->rule) {
 		// Повышает экономику
 		province->addeconomy(action->rule);
 		// Защита позволяет эффективно бороться с криминалом
-		auto value = getdefend() * game.support_change;
-		if(value > 0 && province->getsupport(player) < 0) {
-			province->addsupport(player, value);
-			if(province->getsupport(player) > 0)
-				province->setsupport(player, 0);
-		}
-		// Дипломатия существенно повышают влияние
+		criminal_negation += getdefend() * game.support_change;
+		// Дипломатия существенно повышает влияние
 		province->addsupport(player, getdiplomacy()*game.support_change);
 		// Благородство дает дополнительный доход
 		*player += getnobility();
 	}
+	// Борьба с анархистами
+	if(criminal_negation && province->getsupport(player) < 0) {
+		province->addsupport(player, criminal_negation);
+		if(province->getsupport(player) > 0)
+			province->setsupport(player, 0);
+	}
 	// Любое действие жестокого героя снижает влияние
 	if(province)
-		province->addsupport(player, getcruelty());
-	// Любое действие благородного героя повышает доход
-	*player += getnobility();
+		province->addsupport(player, -getcruelty());
 }
 
 unsigned hero_info::select(hero_info** source, unsigned maximum_count, const province_info* province, const player_info* player) {

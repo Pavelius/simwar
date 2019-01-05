@@ -23,6 +23,7 @@ bsreq action_type[];
 bsreq character_type[];
 bsreq landscape_type[];
 bsreq msg_type[];
+bsreq nation_type[];
 bsreq point_type[];
 bsreq player_ai_type[];
 bsreq tactic_type[];
@@ -67,11 +68,14 @@ struct name_info {
 	constexpr name_info() : id(0), name(0), text(0) {}
 	constexpr name_info(const char* id) : id(id), name(0), text(0) {}
 	explicit operator bool() const { return id != 0; }
+	int							compare(const void* p1, const void* p2);
 	const char*					getid() const { return id; }
 	const char*					getname() const { return name; }
 	static int					getnum(const void* object, const bsreq* type, const char* id);
 	static int					fix(tip_info* ti, const char* name, int value);
 	int							fix(tip_info* ti, int value) const { return fix(ti, name, value); }
+};
+struct nation_info : name_info {
 };
 struct action_info : name_info, combat_info, cost_info {
 	const char*					nameact;
@@ -97,6 +101,7 @@ struct province_info : name_info {
 	void						add(unit_info* unit);
 	void						addeconomy(int value);
 	void						addsupport(const player_info* player, int value);
+	void						arrival(const player_info* player);
 	bool						battle(char* result, const char* result_max, player_info* attacker_player, player_info* defender_player, action_info* action, bool raid);
 	void						build(unit_info* unit, int wait = 1);
 	static void					change_support();
@@ -110,6 +115,7 @@ struct province_info : name_info {
 	char*						getinfo(char* result, const char* result_maximum, bool show_landscape, const army* support_units = 0) const;
 	landscape_info*				getlandscape() const { return landscape; }
 	int							getlevel() const { return level; }
+	nation_info*				getnation() const { return nation; }
 	province_info*				getneighbors(const player_info* player) const;
 	province_flag_s				getstatus(const player_info* player) const;
 	int							getsupport(const player_info* player) const;
@@ -125,6 +131,7 @@ private:
 	char						level;
 	player_info*				player;
 	landscape_info*				landscape;
+	nation_info*				nation;
 	point						position;
 	int							support[player_max];
 	int							economy;
@@ -178,6 +185,7 @@ struct hero_info : name_info {
 	int							getdiplomacy() const { return get("diplomacy"); }
 	int							getex(const char* id) const { return get(id) + getbonus(id); }
 	int							getincome() const;
+	int							getloyalty() const { return loyalty; }
 	int							getnobility() const { return get("nobility"); }
 	player_info*				getplayer() const { return player; }
 	province_info*				getprovince() const { return province; }
@@ -196,6 +204,7 @@ struct hero_info : name_info {
 	void						setaction(action_info* value) { action = value; }
 	void						setaction(action_info* action, province_info* province, const cost_info& cost, const army& logistic, const unit_set& production);
 	void						setprovince(province_info* value) { province = value; }
+	void						setloyalty(int value) { loyalty = value; }
 	void						setwait(int v) { wait = v; }
 private:
 	action_info * action;
@@ -205,19 +214,20 @@ private:
 	province_info*				province;
 	const tactic_info*			tactic;
 	const tactic_info*			best_tactic;
-	char						wait;
+	char						wait, wound, loyalty;
 };
 struct unit_info : name_info, combat_info, cost_info {
 	const char*					nameof;
 	char						level;
+	nation_info*				nation;
 	char						recruit_count, recruit_time;
 	landscape_info*				recruit_landscape;
-	static int					compare(const void* p1, const void* p2);
 	int							get(const char* id) const;
 };
 struct troop_info {
 	explicit operator bool() const { return type != 0; }
 	static troop_info*			add(province_info* province, unit_info* type);
+	static void					arrival(const province_info* province, const player_info* player);
 	void						clear();
 	static int					compare(const void* p1, const void* p2);
 	int							fix(tip_info* ti, int value) const { return type->fix(ti, type->name, value); }
@@ -234,6 +244,7 @@ struct troop_info {
 	int							getsort() const { return type->attack + type->defend; }
 	void						kill(player_info* player);
 	static bsreq				metadata[];
+	static unsigned				remove(troop_info** source, unsigned count, const province_info* province);
 	static unsigned				remove_moved(troop_info** source, unsigned count);
 	static void					retreat(const province_info* province, const player_info* player);
 	static unsigned				select(troop_info** result, unsigned result_maximum, const province_info* province);
@@ -255,6 +266,7 @@ struct player_info : name_info, cost_info {
 	province_info*				getbestprovince() const;
 	cost_info					getcost() const { return *static_cast<const cost_info*>(this); }
 	int							getincome(tip_info* ti = 0) const;
+	int							getindex() const;
 	const char*					getnameof() const { return nameof; }
 	int							getsupport(tip_info* ti = 0) const;
 	static unsigned				gettroops(troop_info** source, unsigned maximum_count, const province_info* province = 0, const player_info* player = 0, const player_info* player_move = 0);
@@ -304,7 +316,6 @@ void							addbutton(char* result, const char* result_max, const char* name);
 void							avatar(int x, int y, const char* id);
 int								button(int x, int y, int width, const char* label, const runable& e, unsigned key = 0);
 int								buttonw(int x, int y, int width, const char* label, const runable& e, unsigned key = 0, const char* tips = 0);
-bool							conquer(const player_info* player, hero_info* hero, const action_info* action, const province_info* province, army& s1, army& s2, const army& a3);
 action_info*					getaction(player_info* player, hero_info* hero);
 color							getcolor(province_flag_s id);
 province_info*					getprovince(player_info* player, hero_info* hero, action_info* action, aref<province_info*> selection, color selection_color);

@@ -31,6 +31,10 @@ int army::get(const char* id, tip_info* ti, bool include_number) const {
 		if(attack && raid)
 			value += general->get("raid") + general->getbonus("raid");
 		r += general->fix(ti, value);
+		if(!attack) {
+			auto action = general->getaction();
+			r += action->fix(ti, action->defend);
+		}
 	}
 	for(auto p : *this) {
 		auto value = p->get(id) + p->getbonus(id);

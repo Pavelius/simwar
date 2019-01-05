@@ -135,13 +135,13 @@ static const char* word(const char* text) {
 	return text;
 }
 
-static int textfln(int x0, int y0, int width, const char** string, color c1, int* max_width, int tab_width) {
+static int textfln(int x0, int y0, int width, const char** string, color c1, int* max_width, int tab_width, unsigned text_flags) {
 	char temp[4096];
 	int y = y0;
 	int x = x0;
 	int x2 = x0 + width;
 	const char* p = *string;
-	unsigned flags = 0;
+	unsigned flags = text_flags;
 	draw::fore = c1;
 	if(max_width)
 		*max_width = 0;
@@ -261,7 +261,7 @@ static int textfln(int x0, int y0, int width, const char** string, color c1, int
 }
 
 int draw::textf(int x, int y, int width, const char* string, int* max_width,
-	int min_height, int* cashe_height, const char** cashe_string, int tab_width) {
+	int min_height, int* cashe_height, const char** cashe_string, int tab_width, unsigned text_flags) {
 	state push;
 	color color_text = fore;
 	const char* p = string;
@@ -282,17 +282,17 @@ int draw::textf(int x, int y, int width, const char* string, int* max_width,
 		{
 			p = zskipsp(p);
 			font = metrics::h3;
-			y += textfln(x, y, width, &p, colors::h3, &mw2, tab_width);
+			y += textfln(x, y, width, &p, colors::h3, &mw2, tab_width, text_flags);
 		} else if(match(&p, "##")) // Header 2
 		{
 			p = zskipsp(p);
 			font = metrics::h2;
-			y += textfln(x, y, width, &p, colors::h2, &mw2, tab_width);
+			y += textfln(x, y, width, &p, colors::h2, &mw2, tab_width, text_flags);
 		} else if(match(&p, "#")) // Header 1
 		{
 			p = zskipsp(p);
 			font = metrics::h1;
-			y += textfln(x, y, width, &p, colors::h1, &mw2, tab_width);
+			y += textfln(x, y, width, &p, colors::h1, &mw2, tab_width, text_flags);
 		} else if(match(&p, "...")) // Без форматирования
 		{
 			p = szskipcr(p);
@@ -319,12 +319,12 @@ int draw::textf(int x, int y, int width, const char* string, int* max_width,
 			int rd = texth() / 6;
 			circlef(x + dx + 2, y + dx, rd, color_text);
 			circle(x + dx + 2, y + dx, rd, color_text);
-			y += textfln(x + texth(), y, width - texth(), &p, color_text, &mw2, tab_width);
+			y += textfln(x + texth(), y, width - texth(), &p, color_text, &mw2, tab_width, text_flags);
 		} else if(p[0] == '$' && p[1] == '(') {
 			p = zskipsp(p + 2);
 			y += render_control(&p, x, y, width);
 		} else
-			y += textfln(x, y, width, &p, color_text, &mw2, tab_width);
+			y += textfln(x, y, width, &p, color_text, &mw2, tab_width, text_flags);
 		// Возвратим стандартные настройки блока
 		font = metrics::font;
 		fore = color_text;

@@ -34,7 +34,7 @@ void bslog::error(bsparse_error_s id, const char* url, int line, int column, con
 	if(id == ErrorNotFilled1pIn2pRecord3p && strcmp(parameters[0], "name") == 0) {
 		if(last_error != id)
 			file << "In file " << url << " you need add next lines" << "\r\n";
-		file << parameters[0] << ":";
+		file << parameters[2] << ":";
 	} else {
 		char temp[4096];
 		head(url, line, column);
