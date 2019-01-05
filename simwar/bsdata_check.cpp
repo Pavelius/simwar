@@ -5,13 +5,13 @@ void bsdata::parser::errornp(bsparse_error_s id, const char* url, int line, int 
 	error(id, url, line, column, xva_start(column));
 }
 
-bool bsdata::parser::check_required(const char* url, bsval source) {
+bool bsdata::parser::check(const char* url, bsval source) {
 	auto result = true;
 	for(auto pf = source.type; *pf; pf++) {
 		if(pf->type == text_type) {
 			auto value = pf->get(pf->ptr(source.data));
 			if(!value) {
-				errornp(ErrorNotFilled1pIn2pRecord3p, url, 0, 0, pf->id, "", "");
+				errornp(ErrorNotFilled1pIn2pRecord3p, url, 0, 0, "", "", pf->id);
 				result = false;
 			}
 		}
@@ -27,17 +27,20 @@ const bsdata::requisit* findr(const bsdata::requisit* requisits, unsigned requis
 	return 0;
 }
 
-bool bsdata::parser::check_required(const bsdata::requisit* requisits, unsigned requisits_count) {
+bool bsdata::parser::check(const bsdata::requisit* requisits, unsigned requisits_count) {
 	auto result = true;
-	for(auto pb = bsdata::first; pb; pb = pb->next) {
-		for(unsigned index = 0; index < pb->getcount(); index++) {
-			auto p = pb->get(index);
-			bsval bv = {p, pb->fields};
-			auto id = bv.getid();
-			for(auto pf = pb->fields; *pf; pf++) {
-				auto pr = findr(requisits, requisits_count, pf->id);
-				if(!pr)
-					continue;
+	auto pte = requisits + requisits_count;
+	for(auto pr = requisits; pr < pte; pr++) {
+		for(auto pb = bsdata::first; pb; pb = pb->next) {
+			if(pr->type && pr->type != pb->fields)
+				continue;
+			auto pf = pb->fields->find(pr->id);
+			if(!pf)
+				continue;
+			for(unsigned index = 0; index < pb->getcount(); index++) {
+				auto p = pb->get(index);
+				bsval bv = {p, pb->fields};
+				auto id = bv.getid();
 				auto value = pf->get(pf->ptr(p));
 				if(pr->required && !value) {
 					errornp(ErrorNotFilled1pIn2pRecord3p, "localization", 0, 0, pf->id, pb->id, id);

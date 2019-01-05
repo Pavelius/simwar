@@ -32,6 +32,7 @@ bsreq msg_type[] = {
 	BSREQ(msg_info, turns, text_type),
 	//
 	BSREQ(msg_info, hero_wait, text_type),
+	BSREQ(msg_info, hero_wound, text_type),
 	BSREQ(msg_info, total_strenght, text_type),
 	BSREQ(msg_info, total, text_type),
 	BSREQ(msg_info, predict_fail, text_type),
@@ -51,6 +52,10 @@ bsreq msg_type[] = {
 	BSREQ(msg_info, cancel, text_type),
 	BSREQ(msg_info, yes, text_type),
 	BSREQ(msg_info, no, text_type),
+	//
+	BSREQ(msg_info, wound, text_type),
+	BSREQ(msg_info, wounds, text_type),
+	BSREQ(msg_info, wounds_of, text_type),
 {}};
 msg_info msg;
 bsdata msg_manager("msg", msg, msg_type);

@@ -1,3 +1,7 @@
+#nation orcs
+#nation northerners
+#nation southerners
+
 #action raid order(2) raid(1)
 #action attack order(4) attack(1)
 #action defend order(5) defend(1)
@@ -39,21 +43,21 @@
 #landscape desert income(0)
 #landscape hills income(3) defend(1)
 
-#province elder_mountains position(219, 132) landscape(mountains) neighbors(iron_peaks, black_wood, sunrise_hills) level(1)
-#province river_dale level(2) landscape(plains) position(796, 253) neighbors(deadly_swamp, iron_peaks, river_cross)
-#province river_cross position(759, 52) landscape(plains) neighbors(iron_peaks, river_dale) level(1)
-#province iron_peaks position(567, 85) landscape(mountains) neighbors(elder_mountains, river_dale, river_cross, deadly_swamp)
-#province sunrise_hills position(476, 400) landscape(hills) neighbors(black_wood, deadly_swamp, white_harbor) level(2)
-#province black_wood level(1) position(204, 495) landscape(forest) neighbors(elder_mountains, sunrise_hills, white_harbor) level(1)
-#province white_harbor level(2) position(668, 673) landscape(plains) neighbors(black_wood, sunrise_hills)
-#province deadly_swamp position(509, 276) landscape(swamp) neighbors(iron_peaks, sunrise_hills, river_dale)
-#province sunny_coast position(487, 975) landscape(desert)
-#province blessed_hills position(909, 411) landscape(hills) level(1)
-#province iron_mountains position(1094, 127) landscape(mountains)
-#province north_forest position(1315, 65) landscape(forest) level(1)
-#province eastern_hills position(1513, 124) landscape(hills)
-#province holy_mountain position(1231, 351) landscape(plains) level(2)
-#province druid_hills position(1336, 206) landscape(hills)
+#province elder_mountains position(219, 132) landscape(mountains) neighbors(iron_peaks, black_wood, sunrise_hills) level(1) nation(orcs)
+#province river_dale level(2) landscape(plains) position(796, 253) neighbors(deadly_swamp, iron_peaks, river_cross) nation(northerners)
+#province river_cross position(759, 52) landscape(plains) neighbors(iron_peaks, river_dale) level(1) nation(northerners)
+#province iron_peaks position(567, 85) landscape(mountains) neighbors(elder_mountains, river_dale, river_cross, deadly_swamp) nation(orcs)
+#province sunrise_hills position(476, 400) landscape(hills) neighbors(black_wood, deadly_swamp, white_harbor) level(2) nation(northerners)
+#province black_wood level(1) position(204, 495) landscape(forest) neighbors(elder_mountains, sunrise_hills, white_harbor) level(1) nation(orcs)
+#province white_harbor level(2) position(668, 673) landscape(plains) neighbors(black_wood, sunrise_hills) nation(northerners)
+#province deadly_swamp position(509, 276) landscape(swamp) neighbors(iron_peaks, sunrise_hills, river_dale) nation(orcs)
+#province sunny_coast position(487, 975) landscape(desert) nation(southerners)
+#province blessed_hills position(909, 411) landscape(hills) level(1) nation(northerners)
+#province iron_mountains position(1094, 127) landscape(mountains) nation(northerners)
+#province north_forest position(1315, 65) landscape(forest) level(1) nation(orcs)
+#province eastern_hills position(1513, 124) landscape(hills) nation(orcs)
+#province holy_mountain position(1231, 351) landscape(plains) level(2) nation(northerners)
+#province druid_hills position(1336, 206) landscape(hills) nation(northerners)
 
 #trait general name("Генерал") defend(1) attack(1)
 #trait diplomat name("Дипломат") defend(1) diplomacy(1)
@@ -61,33 +65,32 @@
 #trait carefull name("Осторожный") shield(1)
 #trait bloody name("Кровожадный") attack(1) cruelty(1)
 
-#tactic lighting_attack name("Внезапная атака") attack(2) raid(1) defend(2) text("%1 применили внезапную атаку в надежде рассеять противника.")
-#tactic careful_defence name("Тщательная защита") shield(1) text("%1 выстроили защитное построение и приготовились отражать удар.")
-#tactic messy_fighting name("Кровавая баня") cruelty(1) text("%1 ринулись в бой не щадя себя, чтобы нанести максимальный урон врагу.")
+#tactic lighting_attack attack(2) raid(1) defend(2)
+#tactic careful_defence shield(1)
+#tactic messy_fighting cruelty(1)
 
 #hero gordek avatar("art/portraits/gordek.bmp") traits(bloody, hireling) player(red) best_tactic(lighting_attack)
 #hero antaris avatar("art/portraits/antaris.bmp") traits(bloody, diplomat) player(green) best_tactic(messy_fighting)
 #hero mistra avatar("art/portraits/mistra.bmp") traits(carefull, diplomat) player(red) best_tactic(careful_defence)
 
-//#unit barbarians name("варвары") nameof("варваров") attack(1) defend(1) cost(2) income(-1) recruit_count(3)
-#unit spearmans name("копейщики") nameof("копейщиков") attack(1) defend(2) gold(3) income(-1) recruit_count(2)
-#unit swordmans name("мечники") nameof("мечников") attack(2) defend(2) gold(4) income(-2) level(2)
-#unit cavalry name("кавалерия") nameof("кавалерии") attack(3) defend(1) gold(5) income(-2) level(3)
+#unit barbarians attack(1) defend(1) gold(1) income(-1) recruit_count(3) nation(northerners)
+#unit orcs attack(1) defend(1) raid(1) gold(2) income(-1) recruit_count(2) nation(orcs)
+#unit spearmans attack(1) defend(2) gold(3) income(-1) recruit_count(2)
+#unit black_orcs attack(2) defend(2) gold(4) income(-2) level(2) nation(orcs)
+#unit cavalry attack(2) raid(1) defend(1) gold(6) income(-2) level(2) nation(southerners)
 
-// Neutral army
-#troop type(swordmans) province(black_wood)
-#troop type(spearmans) province(black_wood)
-#troop type(spearmans) province(black_wood)
-#troop type(spearmans) province(black_wood)
-#troop type(spearmans) province(black_wood)
-
-// Army of red player
-#troop type(swordmans) province(sunrise_hills)
-#troop type(spearmans) province(sunrise_hills)
-
-#province elder_mountains player(green)
+// Red player start
+#player red gold(10) type(PlayerHuman)
 #province sunrise_hills player(red)
 #province white_harbor player(red)
+#troop type(barbarians) province(sunrise_hills)
+#troop type(barbarians) province(white_harbor)
+#troop type(spearmans) province(white_harbor)
 
-#player red gold(10) type(PlayerHuman)
+// Green player start
 #player green gold(100) type(PlayerHuman)
+#province elder_mountains player(green)
+#province black_wood player(green)
+#troop type(orcs) province(elder_mountains)
+#troop type(orcs) province(black_wood)
+#troop type(black_orcs) province(black_wood)

@@ -22,6 +22,7 @@ struct msg_info {
 	const char* total_strenght, *total;
 	const char* predict_fail, *predict_partial, *predict_success;
 	const char*	hero_wait;
+	const char*	hero_wound;
 	const char* income;
 	const char* income_province;
 	const char* income_units;
@@ -41,4 +42,7 @@ struct msg_info {
 	const char* cancel;
 	const char* yes;
 	const char* no;
+	const char* wound;
+	const char* wounds;
+	const char* wounds_of;
 };

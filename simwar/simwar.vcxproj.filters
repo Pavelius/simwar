@@ -79,9 +79,6 @@
     <ClCompile Include="bsdata_serial.cpp">
       <Filter>Коллекции</Filter>
     </ClCompile>
-    <ClCompile Include="bsreq_req.cpp">
-      <Filter>Коллекции</Filter>
-    </ClCompile>
     <ClCompile Include="action.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
@@ -158,6 +155,12 @@
       <Filter>Логика</Filter>
     </ClCompile>
     <ClCompile Include="bslog.cpp">
+      <Filter>Коллекции</Filter>
+    </ClCompile>
+    <ClCompile Include="nation.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
+    <ClCompile Include="bsreq_locale.cpp">
       <Filter>Коллекции</Filter>
     </ClCompile>
   </ItemGroup>

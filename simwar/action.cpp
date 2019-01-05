@@ -3,6 +3,7 @@
 bsreq action_type[] = {
 	BSREQ(action_info, id, text_type),
 	BSREQ(action_info, name, text_type),
+	BSREQ(action_info, nameof, text_type),
 	BSREQ(action_info, text, text_type),
 	BSREQ(action_info, attack, number_type),
 	BSREQ(action_info, raid, number_type),
@@ -12,7 +13,6 @@ bsreq action_type[] = {
 	BSREQ(action_info, support, number_type),
 	BSREQ(action_info, hire, number_type),
 	BSREQ(action_info, movement, number_type),
-	BSREQ(action_info, nameact, text_type),
 	BSREQ(action_info, order, number_type),
 	BSREQ(action_info, gold, number_type),
 	BSREQ(action_info, fame, number_type),

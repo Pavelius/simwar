@@ -10,7 +10,7 @@ static bool initialize_messages(std::initializer_list<const char*> files) {
 		for(auto e : files) {
 			char temp[260]; zprint(temp, "script/%1_%2.txt", e, "ru");
 			msg_type->readl(temp, &msg);
-			result = result && log.check_required(temp, {&msg, msg_type});
+			result = result && log.check(temp, {&msg, msg_type});
 		}
 	}
 	if(result)

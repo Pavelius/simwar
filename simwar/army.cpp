@@ -28,7 +28,7 @@ int army::get(const char* id, tip_info* ti, bool include_number) const {
 		zcpy(ti->result, "[\"");
 	if(general) {
 		auto value = general->get(id) + general->getbonus(id);
-		if(attack && raid)
+		if(raid)
 			value += general->get("raid") + general->getbonus("raid");
 		r += general->fix(ti, value);
 		if(!attack) {
@@ -38,7 +38,7 @@ int army::get(const char* id, tip_info* ti, bool include_number) const {
 	}
 	for(auto p : *this) {
 		auto value = p->get(id) + p->getbonus(id);
-		if(attack && raid)
+		if(raid)
 			value += p->get("raid") + p->getbonus("raid");
 		r += p->fix(ti, value);
 	}

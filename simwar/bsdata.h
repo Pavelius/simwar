@@ -19,12 +19,13 @@ struct bsdata : array {
 		const char*		id;
 		bool			required;
 		int				values[2];
+		bsreq*			type;
 	};
 	struct parser {
 		bsdata**		custom;
 		constexpr parser() : custom(0) {}
-		bool			check_required(const requisit* requisits, unsigned requisits_count);
-		bool			check_required(const char* url, bsval source);
+		bool			check(const requisit* requisits, unsigned requisits_count);
+		bool			check(const char* url, bsval source);
 		virtual void	error(bsparse_error_s id, const char* url, int line, int column, const char* format_param) {}
 		void			errornp(bsparse_error_s id, const char* url, int line, int column, ...);
 	};

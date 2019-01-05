@@ -31,7 +31,8 @@ void bslog::linefeed() {
 
 void bslog::error(bsparse_error_s id, const char* url, int line, int column, const char* format_param) {
 	auto parameters = (const char**)format_param;
-	if(id == ErrorNotFilled1pIn2pRecord3p && strcmp(parameters[0], "name") == 0) {
+	if(id == ErrorNotFilled1pIn2pRecord3p
+		&& (strcmp(parameters[0], "name") == 0 || (parameters[0][0]==0 && parameters[1][0] == 0))) {
 		if(last_error != id)
 			file << "In file " << url << " you need add next lines" << "\r\n";
 		file << parameters[2] << ":";

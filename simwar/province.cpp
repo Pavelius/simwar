@@ -13,6 +13,7 @@ bsreq province_info::metadata[] = {
 	BSREQ(province_info, level, number_type),
 	BSREQ(province_info, position, point_type),
 	BSREQ(province_info, neighbors, metadata),
+	BSREQ(province_info, nation, nation_type),
 {}};
 adat<province_info, province_max> province_data;
 unsigned char			province_order[province_max];

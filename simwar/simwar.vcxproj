@@ -125,7 +125,7 @@
     <ClCompile Include="bsdata_check.cpp" />
     <ClCompile Include="bsdata_locale.cpp" />
     <ClCompile Include="bslog.cpp" />
-    <ClCompile Include="bsreq_req.cpp" />
+    <ClCompile Include="bsreq_locale.cpp" />
     <ClCompile Include="bsdata_serial.cpp" />
     <ClCompile Include="bsreq.cpp" />
     <ClCompile Include="bstream.cpp" />
@@ -153,6 +153,7 @@
     <ClCompile Include="landscape.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="msg.cpp" />
+    <ClCompile Include="nation.cpp" />
     <ClCompile Include="player.cpp" />
     <ClCompile Include="player_ai.cpp" />
     <ClCompile Include="png.cpp" />

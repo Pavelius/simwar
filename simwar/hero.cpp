@@ -22,6 +22,8 @@ void hero_info::refresh_heroes() {
 			continue;
 		if(e.wait > 0)
 			e.wait--;
+		if(e.wound > 0)
+			e.wound--;
 		if(e.wait == 0) {
 			e.tactic = 0;
 			e.province = 0;
@@ -75,7 +77,7 @@ void hero_info::setaction(action_info* action, province_info* province, const co
 }
 
 void hero_info::resolve() {
-	char temp[8192]; temp[0] = 0;
+	string sb;
 	// Ћюбое действие благородного геро€ повышает доход
 	*player += getnobility();
 	// ƒалее идут действи€, которые действуют на провинцию
@@ -85,9 +87,9 @@ void hero_info::resolve() {
 		auto israid = (action->raid > 0);
 		auto enemy = province->getplayer();
 		if(enemy != player) {
-			auto iswin = province->battle(temp, zendof(temp), player, enemy, action, israid);
-			player->add(province, this, temp);
-			enemy->add(province, province->gethero(enemy), temp);
+			auto iswin = province->battle(sb, player, enemy, action, israid);
+			player->add(province, this, sb);
+			enemy->add(province, province->gethero(enemy), sb);
 		}
 	}
 	if(action->support)

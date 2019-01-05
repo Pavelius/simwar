@@ -26,6 +26,7 @@ static bsdata::requisit required_reqisits[] = {{"name", true},
 {"nameact", true},
 {"order", false, {1, 5}},
 {"bonus_tactic", true},
+{"nation", true, {}, province_info::metadata},
 };
 
 bool game_info::read(const char* name) {
@@ -39,7 +40,7 @@ bool game_info::read(const char* name) {
 		if(log.iserrors())
 			result = false;
 		bsdata::readl(zprint(temp, "script/%1_%2.txt", name, "ru"), requisits, sizeof(requisits) / sizeof(requisits[0]));
-		if(!log.check_required(required_reqisits, sizeof(required_reqisits)/ sizeof(required_reqisits[0])))
+		if(!log.check(required_reqisits, sizeof(required_reqisits)/ sizeof(required_reqisits[0])))
 			result = false;
 	}
 	if(result) {

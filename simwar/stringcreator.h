@@ -22,12 +22,15 @@ struct stringbuilder {
 	void				adds(const char* format, ...) { addx(" ", format, xva_start(format)); }
 	void				addv(const char* format, const char* format_param);
 	void				addx(const char* separator, const char* format, const char* format_param);
+	const char*			begin() const { return result; }
 	void				clear() { result[0] = 0; p = result; }
-	const char*			getpos() const { return p; }
+	char*				get() const { return p; }
+	const char*			end() const { return result_maximum; }
 	bool				ispos(const char* v) const { return p == v; }
 	void				sep(const char* header, const char* p);
 private:
-	stringcreator & driver;
-	char				*p, *result;
+	stringcreator&		driver;
+	char*				p;
+	char*				result;
 	const char*			result_maximum;
 };

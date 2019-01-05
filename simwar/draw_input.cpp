@@ -288,7 +288,7 @@ static int render_player(int x, int y, const player_info* player) {
 	tip_info ti(tips);
 	stringcreator sc;
 	stringbuilder sb(sc, temp);
-	sb.add("###%1\n", player->getname());
+	sb.add("###%+1\n", player->getname());
 	auto cost = player->getcost();
 	auto income = player->getincome(&ti);
 	sb.add(":gold:%1i[%4\"%3\"%+2i]", cost.gold, income, tips, (income>=0) ? "+" : "-");
@@ -318,19 +318,24 @@ void province_info::render_neighbors(const rect& rc) const {
 	}
 }
 
-static void render_shield(int x, int y, const player_info* player) {
-	if(!player)
+static void render_shield(int x, int y, const province_info* province, const player_info* player) {
+	auto province_player = province->getplayer();
+	if(!province_player)
 		return;
 	auto old_stroke = fore;
-	fore = (current_player == player) ? colors::gray : colors::red;
-	auto index = player->getindex();
+	auto value = province->getsupport(player);
+	fore = colors::gray;
+	if(value > 0)
+		fore = colors::yellow;
+	else if(value<0)
+		fore = colors::red;
+	auto index = province_player->getindex();
 	stroke(x, y, sprite_shields, index, 0, 2);
 	image(x, y, sprite_shields, index, 0);
 	fore = old_stroke;
 }
 
 static void render_province(rect rc, point mouse, const player_info* player, callback_proc proc, aref<province_info*> selection, color selection_color, bool set_current_province) {
-	unsigned count;
 	char temp[1024];
 	if(!draw::font)
 		return;
@@ -373,14 +378,15 @@ static void render_province(rect rc, point mouse, const player_info* player, cal
 					draw::execute(choose_current_province, (int)&e);
 			}
 		}
-		render_shield(pt.x - text_width / 2 - 20, pt.y, e.getplayer());
+		render_shield(pt.x - text_width / 2 - 20, pt.y, &e, player);
 		draw::text(pt.x - text_width / 2, pt.y - draw::texth() / 2, temp, -1, TextStroke);
 		pt.y += draw::texth() / 2;
 		draw::font = metrics::font;
 		auto hero = e.gethero(player);
 		if(status == FriendlyProvince)
 			defenders.general = hero;
-		e.getinfo(temp, zendof(temp), false, &defenders);
+		zprint(temp, "%+1 ", e.getnation()->getname());
+		e.getinfo(zend(temp), zendof(temp), false, &defenders);
 		auto w = textfw(temp);
 		textf(pt.x - w / 2, pt.y, w, temp, 0, 0, 0, 0, 0, TextStroke);
 		pt.y += texth();
@@ -393,7 +399,7 @@ static void render_province(rect rc, point mouse, const player_info* player, cal
 		if(hero) {
 			auto action = hero->getaction();
 			if(action)
-				zprint(temp, "%1 %2", hero->getname(), action->nameact);
+				zprint(temp, "%1 %2", hero->getname(), action->nameof);
 			else
 				zprint(temp, "%1", hero->getname());
 			text(pt.x - textw(temp) / 2, pt.y, temp);
@@ -401,7 +407,7 @@ static void render_province(rect rc, point mouse, const player_info* player, cal
 		}
 		defenders.count = troop_info::select_move(defenders.data, defenders.getmaximum(), &e, player);
 		if(defenders) {
-			troop_info::sort(defenders.data, count);
+			troop_info::sort(defenders.data, defenders.getcount());
 			troop_info::getpresent(temp, zendof(temp), defenders.data, defenders.count, msg.moved);
 			rect rc = {0, 0, 200, 0}; draw::textw(rc, temp);
 			pt.y += draw::text({pt.x - rc.width() / 2, pt.y, pt.x + rc.width() / 2 + 1, pt.y + rc.height()}, temp, AlignCenter);
@@ -409,7 +415,7 @@ static void render_province(rect rc, point mouse, const player_info* player, cal
 		if(status == FriendlyProvince) {
 			fore = fore.mix(colors::blue);
 			build_info* build_array[16];
-			count = build_info::select(build_array, lenghtof(build_array), &e);
+			auto count = build_info::select(build_array, lenghtof(build_array), &e);
 			if(count) {
 				build_info::sort(build_array, count);
 				build_info::getpresent(temp, zendof(temp), build_array, count);
@@ -532,10 +538,14 @@ static int render_heroes(int x, int y, const player_info* player, callback_proc 
 			continue;
 		char temp[260]; temp[0] = 0;
 		const char* error_text = 0;
-		if(!e.isready()) {
+		if(e.getwait()) {
 			zprint(temp, msg.hero_wait, e.getwait());
 			error_text = temp;
-		}
+		} else if(e.getwound()) {
+			zprint(temp, msg.hero_wound, e.getwound());
+			error_text = temp;
+		} else if(!e.isready())
+			error_text = "Unknown error";
 		y += render_hero(x, y, gui.hero_window_width, &e, error_text, proc);
 		y += gui.padding;
 	}
@@ -1021,7 +1031,7 @@ bool draw::recruit(const player_info* player, hero_info* hero, const action_info
 }
 
 static bool choose_conquer(const player_info* player, hero_info* hero, const action_info* action, const province_info* province, army& s1, army& s2, const army& a3, int minimal_count) {
-	if(!s1.getcount())
+	if(!s1.getcount() && minimal_count==0)
 		return true;
 	stringcreator sc;
 	army_list u1(s1); u1.id = 10;
