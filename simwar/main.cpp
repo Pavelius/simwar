@@ -3,13 +3,14 @@
 #include "main.h"
 
 static bool initialize_messages(std::initializer_list<const char*> files) {
+	static const char* requisits[] = {"", "s", "_of"};
 	auto result = true;
 	auto url_errors = "errors.txt";
 	if(true) {
 		bslog log(url_errors);
 		for(auto e : files) {
 			char temp[260]; zprint(temp, "script/%1_%2.txt", e, "ru");
-			msg_type->readl(temp, &msg);
+			bsdata::readl(temp, requisits, sizeof(requisits) / sizeof(requisits[0]), &msg, msg_type);
 			result = result && log.check(temp, {&msg, msg_type});
 		}
 	}

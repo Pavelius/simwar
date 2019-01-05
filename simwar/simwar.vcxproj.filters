@@ -160,9 +160,6 @@
     <ClCompile Include="nation.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
-    <ClCompile Include="bsreq_locale.cpp">
-      <Filter>Коллекции</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="draw.h">

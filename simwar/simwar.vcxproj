@@ -125,7 +125,6 @@
     <ClCompile Include="bsdata_check.cpp" />
     <ClCompile Include="bsdata_locale.cpp" />
     <ClCompile Include="bslog.cpp" />
-    <ClCompile Include="bsreq_locale.cpp" />
     <ClCompile Include="bsdata_serial.cpp" />
     <ClCompile Include="bsreq.cpp" />
     <ClCompile Include="bstream.cpp" />

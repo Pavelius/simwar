@@ -47,6 +47,7 @@ struct bsdata : array {
 	static bsval		findbyid(const char* value);
 	static void			read(const char* url, parser* callback = 0);
 	static bool			readl(const char* url, const char** requisits, unsigned requisits_count);
+	static bool			readl(const char* url, const char** requisits, unsigned requisits_count, void* object, bsreq* type);
 	static void			write(const char* url, const char** baseids, bool(*comparer)(void* object, const bsreq* type) = 0);
 	static void			write(const char* url, const char* baseid);
 	static void			write(const char* url, const array& source, const bsreq* fields);
