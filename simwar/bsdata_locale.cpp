@@ -2,6 +2,26 @@
 #include "crt.h"
 
 typedef void(*bslocal_proc)(const char* id, const char** requisits, unsigned requisits_count, const char** strings, void* object, const bsreq* type);
+typedef bool(*bslocal_test)(const char* id, const char** requisits, unsigned requisits_count, void* object, const bsreq* type);
+
+static bool test_true(const char* id, const char** requisits, unsigned requisits_count, void* object, const bsreq* type) {
+	return true;
+}
+
+static bool test_req(const char* id, const char** requisits, unsigned requisits_count, void* object, const bsreq* type) {
+	if(requisits_count < 2)
+		return false;
+	char name[128];
+	auto index = 0;
+	for(unsigned i = 1; i < requisits_count; i++) {
+		zprint(name, "%1%2", id, requisits[i]);
+		auto pf = type->find(name, text_type);
+		if(!pf)
+			continue;
+		return true;
+	}
+	return false;
+}
 
 static const char* read_string(const char* p, char* ps, const char* pe) {
 	while(p[0] && p[0] != '\n' && p[0] != '\r') {
@@ -57,7 +77,7 @@ static void set_all_bsdata(const char* id, const char** requisits, unsigned requ
 	}
 }
 
-static bool read_localization(const char* url, const char** requisits, unsigned requisits_count, void* object, bsreq* type, bslocal_proc proc) {
+static bool read_localization(const char* url, const char** requisits, unsigned requisits_count, void* object, bsreq* type, bslocal_proc proc, bslocal_test multi_strings) {
 	if(!requisits_count)
 		return false;
 	auto pb = (const char*)loadt(url);
@@ -79,21 +99,23 @@ static bool read_localization(const char* url, const char** requisits, unsigned 
 		auto count = 0;
 		auto pt = value;
 		strings[0] = pt;
-		while(pt[0]) {
-			if(pt[0] == '.' && requisits_count>1) {
-				pt[0] = 0;
-				pt = zskipsp(pt + 1);
-				strings[requisits_count - 1] = pt;
-				break;
-			} else if(pt[0] == '|') {
-				pt[0] = 0;
-				pt = zskipsp(pt + 1);
-				if(count < 32)
-					count++;
-				strings[count] = pt;
-				continue;
+		if(multi_strings(name, requisits, requisits_count, object, type)) {
+			while(pt[0]) {
+				if(pt[0] == '.' && requisits_count>1) {
+					pt[0] = 0;
+					pt = zskipsp(pt + 1);
+					strings[requisits_count - 1] = pt;
+					break;
+				} else if(pt[0] == '|') {
+					pt[0] = 0;
+					pt = zskipsp(pt + 1);
+					if(count < 32)
+						count++;
+					strings[count] = pt;
+					continue;
+				}
+				pt++;
 			}
-			pt++;
 		}
 		proc(name, requisits, requisits_count, strings, object, type);
 	}
@@ -102,9 +124,9 @@ static bool read_localization(const char* url, const char** requisits, unsigned 
 }
 
 bool bsdata::readl(const char* url, const char** requisits, unsigned requisits_count) {
-	return read_localization(url, requisits, requisits_count, 0, 0, set_all_bsdata);
+	return read_localization(url, requisits, requisits_count, 0, 0, set_all_bsdata, test_true);
 }
 
 bool bsdata::readl(const char* url, const char** requisits, unsigned requisits_count, void* object, bsreq* type) {
-	return read_localization(url, requisits, requisits_count, object, type, set_req_object);
+	return read_localization(url, requisits, requisits_count, object, type, set_req_object, test_req);
 }
