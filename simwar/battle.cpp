@@ -33,12 +33,11 @@ public:
 	}
 
 	char* getlead(char* result, const char* result_max) const {
-		zcpy(result, getsideof());
-		if(result[0])
-			zcat(result, " ");
+		szprint(result, result_max, getsideof());
 		if(general) {
+			if(result[0])
+				szprint(zend(result), result_max, " ");
 			szprint(zend(result), result_max, msg.lead, general->getnameof());
-			zcat(result, " ");
 		}
 		return result;
 	}

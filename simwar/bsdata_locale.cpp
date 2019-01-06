@@ -1,19 +1,19 @@
 #include "bsdata.h"
 #include "crt.h"
 
-typedef void(*bslocal_proc)(const char* id, const char** requisits, unsigned requisits_count, const char** strings, void* object, const bsreq* type);
-typedef bool(*bslocal_test)(const char* id, const char** requisits, unsigned requisits_count, void* object, const bsreq* type);
+typedef void(*bslocal_proc)(const char* id, const char** requisits, const char** strings, void* object, const bsreq* type);
+typedef bool(*bslocal_test)(const char* id, const char** requisits, void* object, const bsreq* type);
 
-static bool test_true(const char* id, const char** requisits, unsigned requisits_count, void* object, const bsreq* type) {
+static bool test_true(const char* id, const char** requisits, void* object, const bsreq* type) {
 	return true;
 }
 
-static bool test_req(const char* id, const char** requisits, unsigned requisits_count, void* object, const bsreq* type) {
-	if(requisits_count < 2)
+static bool test_req(const char* id, const char** requisits, void* object, const bsreq* type) {
+	if(!requisits[0] || !requisits[1])
 		return false;
 	char name[128];
 	auto index = 0;
-	for(unsigned i = 1; i < requisits_count; i++) {
+	for(unsigned i = 1; requisits[i]; i++) {
 		zprint(name, "%1%2", id, requisits[i]);
 		auto pf = type->find(name, text_type);
 		if(!pf)
@@ -37,10 +37,10 @@ static const char* read_string(const char* p, char* ps, const char* pe) {
 	return p;
 }
 
-static void set_req_object(const char* id, const char** requisits, unsigned requisits_count, const char** strings, void* object, const bsreq* type) {
+static void set_req_object(const char* id, const char** requisits, const char** strings, void* object, const bsreq* type) {
 	char name[128];
 	auto index = 0;
-	for(unsigned i = 0; i < requisits_count; i++) {
+	for(unsigned i = 0; requisits[i]; i++) {
 		zprint(name, "%1%2", id, requisits[i]);
 		auto pf = type->find(name, text_type);
 		if(!pf)
@@ -52,12 +52,12 @@ static void set_req_object(const char* id, const char** requisits, unsigned requ
 	}
 }
 
-static void set_all_bsdata(const char* id, const char** requisits, unsigned requisits_count, const char** strings, void* object, const bsreq* type) {
+static void set_all_bsdata(const char* id, const char** requisits, const char** strings, void* object, const bsreq* type) {
 	for(auto pb = bsdata::first; pb; pb = pb->next) {
 		auto pfid = pb->fields->find("id", text_type);
 		if(!pfid)
 			continue;
-		for(unsigned i = 0; i < requisits_count; i++) {
+		for(unsigned i = 0; requisits[i]; i++) {
 			auto pf = pb->fields->find(requisits[i], text_type);
 			if(!pf)
 				continue;
@@ -77,15 +77,14 @@ static void set_all_bsdata(const char* id, const char** requisits, unsigned requ
 	}
 }
 
-static bool read_localization(const char* url, const char** requisits, unsigned requisits_count, void* object, bsreq* type, bslocal_proc proc, bslocal_test multi_strings) {
-	if(!requisits_count)
+static bool read_localization(const char* url, const char** requisits, void* object, const bsreq* type, bslocal_proc proc, bslocal_test multi_strings) {
+	if(!requisits || requisits[0] == 0)
 		return false;
 	auto pb = (const char*)loadt(url);
 	if(!pb)
 		return false;
+	auto requisits_count = zlen(requisits);
 	const int maximum_strings = 32;
-	if(requisits_count > maximum_strings)
-		requisits_count = maximum_strings;
 	auto p = pb;
 	while(*p) {
 		char name[128];
@@ -99,9 +98,9 @@ static bool read_localization(const char* url, const char** requisits, unsigned 
 		auto count = 0;
 		auto pt = value;
 		strings[0] = pt;
-		if(multi_strings(name, requisits, requisits_count, object, type)) {
+		if(multi_strings(name, requisits, object, type)) {
 			while(pt[0]) {
-				if(pt[0] == '.' && requisits_count>1) {
+				if(pt[0] == '.' && requisits_count > 1) {
 					pt[0] = 0;
 					pt = zskipsp(pt + 1);
 					strings[requisits_count - 1] = pt;
@@ -117,16 +116,48 @@ static bool read_localization(const char* url, const char** requisits, unsigned 
 				pt++;
 			}
 		}
-		proc(name, requisits, requisits_count, strings, object, type);
+		proc(name, requisits, strings, object, type);
 	}
 	delete pb;
 	return true;
 }
 
-bool bsdata::readl(const char* url, const char** requisits, unsigned requisits_count) {
-	return read_localization(url, requisits, requisits_count, 0, 0, set_all_bsdata, test_true);
+bool bsdata::readl(const char* url, const char** requisits) {
+	return read_localization(url, requisits, 0, 0, set_all_bsdata, test_true);
 }
 
-bool bsdata::readl(const char* url, const char** requisits, unsigned requisits_count, void* object, bsreq* type) {
-	return read_localization(url, requisits, requisits_count, object, type, set_req_object, test_req);
+bool bsdata::readl(const char* url, const char** requisits, void* object, const bsreq* type) {
+	return read_localization(url, requisits, object, type, set_req_object, test_req);
+}
+
+static bool inlist(const char* id, const char** list) {
+	for(auto pb = list; *pb; pb++) {
+		if(strcmp(id, *pb) == 0)
+			return true;
+	}
+	return false;
+}
+
+bool bsdata::readl(const char* url, const char* locale_name, parser& errors, const char** prefix, const char** requisits_names, const char** skip_name) {
+	char file[260];
+	if(!locale_name || locale_name[0] == 0)
+		return false;
+	const char* error_url = "reading localizations";
+	for(auto pb = first; pb; pb = pb->next) {
+		if(!pb->isconst())
+			continue;
+		if(inlist(pb->id, skip_name))
+			continue;
+		zprint(file, "%1/%2_%3.txt", url, pb->id, locale_name);
+		if(pb->getcount() == 1) {
+			if(!readl(file, prefix, pb->get(0), pb->fields))
+				errors.add(ErrorFile1pNotFound, error_url, 0, 0, file);
+			else
+				errors.check(file, {pb->get(0), pb->fields});
+		} else {
+			if(!readl(file, requisits_names))
+				errors.add(ErrorFile1pNotFound, error_url, 0, 0, file);
+		}
+	}
+	return errors.getcount() == 0;
 }

@@ -2,17 +2,15 @@
 #include "initializer_list.h"
 #include "main.h"
 
-static bool initialize_messages(std::initializer_list<const char*> files) {
-	static const char* requisits[] = {"", "s", "_of", "_negative"};
+static bool initialize_messages() {
+	static const char* prefixs[] = {"", "s", "s_of", "_negative", 0};
+	static const char* requisits[] = {"name", "nameof", "nameact", "text", 0};
+	static const char* skip_name[] = {"gui", "game", 0};
 	auto result = true;
 	auto url_errors = "errors.txt";
 	if(true) {
-		bslog log(url_errors);
-		for(auto e : files) {
-			char temp[260]; zprint(temp, "script/%1_%2.txt", e, "ru");
-			bsdata::readl(temp, requisits, sizeof(requisits) / sizeof(requisits[0]), &msg, msg_type);
-			result = result && log.check(temp, {&msg, msg_type});
-		}
+		bslog errors(url_errors);
+		result = bsdata::readl("text/core", "ru", errors, prefixs, requisits, skip_name);
 	}
 	if(result)
 		io::file::remove(url_errors);
@@ -20,7 +18,7 @@ static bool initialize_messages(std::initializer_list<const char*> files) {
 }
 
 int main(int argc, char* argv[]) {
-	if(!initialize_messages({"msg"}))
+	if(!initialize_messages())
 		return 0;
 	srand(clock());
 	draw::initialize();

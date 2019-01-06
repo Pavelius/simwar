@@ -132,7 +132,7 @@
     <ClCompile Include="character_info.cpp" />
     <ClCompile Include="collection.cpp" />
     <ClCompile Include="color.cpp" />
-    <ClCompile Include="combat.cpp" />
+    <ClCompile Include="battle.cpp" />
     <ClCompile Include="combat_info.cpp" />
     <ClCompile Include="converter.cpp" />
     <ClCompile Include="cost_info.cpp" />
@@ -196,9 +196,11 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\errors.txt" />
-    <Text Include="..\script\msg_ru.txt" />
     <Text Include="..\script\test.txt" />
     <Text Include="..\script\test_ru.txt" />
+    <Text Include="..\text\core\msg_ru.txt" />
+    <Text Include="..\text\core\player_ai_ru.txt" />
+    <Text Include="..\text\core\tactic_ru.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

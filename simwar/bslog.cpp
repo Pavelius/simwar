@@ -15,9 +15,9 @@ static const char* bsparse_error_data[] = {"No errors",
 //
 "Not filled %1 in %2 %3",
 "Requisit %1 in %2 %3 must be in interval of %4i...%5i",
-"File %2 not found",
+"File '%1' not found",
 };
-assert_enum(bsparse_error, ErrorFile2pNotFound);
+assert_enum(bsparse_error, ErrorFile1pNotFound);
 
 void bslog::head(const char* url, int line, int column) {
 	if(line == 0 && column == 0)

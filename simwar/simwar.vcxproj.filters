@@ -115,9 +115,6 @@
     <ClCompile Include="unit.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
-    <ClCompile Include="combat.cpp">
-      <Filter>Логика</Filter>
-    </ClCompile>
     <ClCompile Include="combat_info.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
@@ -149,7 +146,7 @@
       <Filter>Логика</Filter>
     </ClCompile>
     <ClCompile Include="msg.cpp">
-      <Filter>Сообщения</Filter>
+      <Filter>Ядро</Filter>
     </ClCompile>
     <ClCompile Include="player_ai.cpp">
       <Filter>Логика</Filter>
@@ -158,6 +155,9 @@
       <Filter>Коллекции</Filter>
     </ClCompile>
     <ClCompile Include="nation.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
+    <ClCompile Include="battle.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
   </ItemGroup>
@@ -220,7 +220,7 @@
       <Filter>Графика</Filter>
     </ClInclude>
     <ClInclude Include="msg.h">
-      <Filter>Сообщения</Filter>
+      <Filter>Ядро</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -242,7 +242,7 @@
     <Filter Include="Скрипты">
       <UniqueIdentifier>{b624f981-bee4-4734-8126-8f5b3062d0c4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Сообщения">
+    <Filter Include="Ядро">
       <UniqueIdentifier>{e98689ec-d57f-410c-9ef7-fc28f62e4d3e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -254,10 +254,16 @@
       <Filter>Скрипты</Filter>
     </Text>
     <Text Include="..\errors.txt">
-      <Filter>Сообщения</Filter>
+      <Filter>Ядро</Filter>
     </Text>
-    <Text Include="..\script\msg_ru.txt">
-      <Filter>Сообщения</Filter>
+    <Text Include="..\text\core\msg_ru.txt">
+      <Filter>Ядро</Filter>
+    </Text>
+    <Text Include="..\text\core\player_ai_ru.txt">
+      <Filter>Ядро</Filter>
+    </Text>
+    <Text Include="..\text\core\tactic_ru.txt">
+      <Filter>Ядро</Filter>
     </Text>
   </ItemGroup>
 </Project>

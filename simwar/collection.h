@@ -148,6 +148,7 @@ struct array {
 	int						indexof(const void* element) const;
 	void*					insert(int index, const void* element);
 	bool					isgrowable() const { return can_grow; }
+	bool					isconst() const { return count_value == count_maximum && !can_grow; }
 	void					remove(int index, int elements_count);
 	void					setcount(unsigned value) { count = value; }
 	void					setup(unsigned size);

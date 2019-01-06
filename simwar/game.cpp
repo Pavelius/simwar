@@ -21,7 +21,7 @@ void game_info::clear() {
 	memset(this, 0, sizeof(*this));
 }
 
-static const char* requisits[] = {"name", "nameof", "nameact", "text"};
+static const char* requisits[] = {"name", "nameof", "nameact", "text", 0};
 static bsdata::requisit required_reqisits[] = {{"name", true},
 {"nameact", true},
 {"order", false, {1, 5}},
@@ -39,7 +39,7 @@ bool game_info::read(const char* name) {
 		bsdata::read(zprint(temp, "script/%1.txt", name), &log);
 		if(log.iserrors())
 			result = false;
-		bsdata::readl(zprint(temp, "script/%1_%2.txt", name, "ru"), requisits, sizeof(requisits) / sizeof(requisits[0]));
+		bsdata::readl(zprint(temp, "script/%1_%2.txt", name, "ru"), requisits);
 		if(!log.check(required_reqisits, sizeof(required_reqisits)/ sizeof(required_reqisits[0])))
 			result = false;
 	}

@@ -52,6 +52,4 @@ cancel: Отменить
 yes: Да
 no: Нет
 
-wound: рана
-wounds: раны
-wounds_of: раны
+wound: рана|раны|ран

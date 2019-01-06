@@ -1,8 +1,9 @@
 #include "bsdata.h"
 #include "crt.h"
 
-void bsdata::parser::errornp(bsparse_error_s id, const char* url, int line, int column, ...) {
+void bsdata::parser::add(bsparse_error_s id, const char* url, int line, int column, ...) {
 	error(id, url, line, column, xva_start(column));
+	count++;
 }
 
 bool bsdata::parser::check(const char* url, bsval source) {
@@ -11,7 +12,7 @@ bool bsdata::parser::check(const char* url, bsval source) {
 		if(pf->type == text_type) {
 			auto value = pf->get(pf->ptr(source.data));
 			if(!value) {
-				errornp(ErrorNotFilled1pIn2pRecord3p, url, 0, 0, "", "", pf->id);
+				add(ErrorNotFilled1pIn2pRecord3p, url, 0, 0, "", "", pf->id);
 				result = false;
 			}
 		}
@@ -43,12 +44,12 @@ bool bsdata::parser::check(const bsdata::requisit* requisits, unsigned requisits
 				auto id = bv.getid();
 				auto value = pf->get(pf->ptr(p));
 				if(pr->required && !value) {
-					errornp(ErrorNotFilled1pIn2pRecord3p, "localization", 0, 0, pf->id, pb->id, id);
+					add(ErrorNotFilled1pIn2pRecord3p, "localization", 0, 0, pf->id, pb->id, id);
 					result = false;
 				}
 				if(pr->values[0] != pr->values[1]) {
 					if(value<pr->values[0] || value>pr->values[1]) {
-						errornp(ErrorValue1pIn2pRecord3pMustBeIn4pAnd5p, "localization", 0, 0, pf->id, pb->id, id, pr->values[0], pr->values[1]);
+						add(ErrorValue1pIn2pRecord3pMustBeIn4pAnd5p, "localization", 0, 0, pf->id, pb->id, id, pr->values[0], pr->values[1]);
 						result = false;
 					}
 				}

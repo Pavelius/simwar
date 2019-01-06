@@ -12,7 +12,7 @@ enum bsparse_error_s {
 	ErrorExpectedIdentifier, ErrorExpectedArrayField, ErrorExpectedSymbol1p, ErrorExpected1p,
 	ErrorNotFoundBase1p, ErrorNotFoundType, ErrorNotFoundIdentifier1p, ErrorNotFoundMember1pInBase2p, ErrorNotFoundFunction1p,
 	ErrorNotFilled1pIn2pRecord3p, ErrorValue1pIn2pRecord3pMustBeIn4pAnd5p,
-	ErrorFile2pNotFound,
+	ErrorFile1pNotFound,
 };
 struct bsdata : array {
 	struct requisit {
@@ -23,11 +23,14 @@ struct bsdata : array {
 	};
 	struct parser {
 		bsdata**		custom;
-		constexpr parser() : custom(0) {}
+		constexpr parser() : custom(0), count(0) {}
+		void			add(bsparse_error_s id, const char* url, int line, int column, ...);
 		bool			check(const requisit* requisits, unsigned requisits_count);
 		bool			check(const char* url, bsval source);
 		virtual void	error(bsparse_error_s id, const char* url, int line, int column, const char* format_param) {}
-		void			errornp(bsparse_error_s id, const char* url, int line, int column, ...);
+		int				getcount() const { return count; }
+	private:
+		int				count;
 	};
 	const char*			id;
 	const bsreq*		fields;
@@ -46,8 +49,9 @@ struct bsdata : array {
 	static bsdata*		findbyptr(const void* object);
 	static bsval		findbyid(const char* value);
 	static void			read(const char* url, parser* callback = 0);
-	static bool			readl(const char* url, const char** requisits, unsigned requisits_count);
-	static bool			readl(const char* url, const char** requisits, unsigned requisits_count, void* object, bsreq* type);
+	static bool			readl(const char* url, const char** requisits);
+	static bool			readl(const char* url, const char** requisits, void* object, const bsreq* type);
+	static bool			readl(const char* url, const char* locale_name, parser& log, const char** prefixs, const char** requisits, const char** skip_name);
 	static void			write(const char* url, const char** baseids, bool(*comparer)(void* object, const bsreq* type) = 0);
 	static void			write(const char* url, const char* baseid);
 	static void			write(const char* url, const array& source, const bsreq* fields);
