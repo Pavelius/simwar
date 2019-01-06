@@ -1,8 +1,8 @@
 #include "main.h"
 
-static name_info player_ai_data[] = {{"NoPlayer"},
-{"PlayerHuman"},
-{"PlayerComputer"},
+static name_info player_ai_data[] = {{"none"},
+{"human"},
+{"computer"},
 };
 assert_enum(player_ai, PlayerComputer);
 bsreq player_ai_type[] = {

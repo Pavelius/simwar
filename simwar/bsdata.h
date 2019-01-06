@@ -24,6 +24,7 @@ struct bsdata : array {
 	struct parser {
 		bsdata**		custom;
 		constexpr parser() : custom(0), count(0) {}
+		void			add() { count++; }
 		void			add(bsparse_error_s id, const char* url, int line, int column, ...);
 		bool			check(const requisit* requisits, unsigned requisits_count);
 		bool			check(const char* url, bsval source);
@@ -48,7 +49,8 @@ struct bsdata : array {
 	void*				find(const bsreq* id, const char* value);
 	static bsdata*		findbyptr(const void* object);
 	static bsval		findbyid(const char* value);
-	static void			read(const char* url, parser* callback = 0);
+	static void			read(const char* url);
+	static void			read(const char* url, parser& errors);
 	static bool			readl(const char* url, const char** requisits);
 	static bool			readl(const char* url, const char** requisits, void* object, const bsreq* type);
 	static bool			readl(const char* url, const char* locale_name, parser& log, const char** prefixs, const char** requisits, const char** skip_name);

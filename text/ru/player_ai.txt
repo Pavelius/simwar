@@ -1,0 +1,3 @@
+none: Нет
+human: Человек
+computer: Компьютер

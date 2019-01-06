@@ -15,15 +15,14 @@ public:
 };
 
 struct bsdata_serial : bsfile {
-
 	char			buffer[128 * 256];
 	int				value;
 	const bsreq*	value_type;
 	void*			value_object;
 	const char*		p;
-	bsdata::parser*	parser;
+	bsdata::parser&	errors;
 
-	bsdata_serial(const char* url, const bsfile* parent = 0) : bsfile(url, parent), p(getstart()), parser(0) {
+	bsdata_serial(bsdata::parser& errors, const char* url, const bsfile* parent = 0) : bsfile(url, parent), errors(errors), p(getstart()) {
 		clearvalue();
 		buffer[0] = 0;
 	}
@@ -57,8 +56,8 @@ struct bsdata_serial : bsfile {
 	}
 
 	bsdata* findbase(const bsreq* type) const {
-		if(parser && parser->custom) {
-			for(auto p = parser->custom; *p; p++) {
+		if(errors.custom) {
+			for(auto p = errors.custom; *p; p++) {
 				if((*p)->fields == type)
 					return *p;
 			}
@@ -67,8 +66,8 @@ struct bsdata_serial : bsfile {
 	}
 
 	bsdata* findbase(const char* id) const {
-		if(parser && parser->custom) {
-			for(auto p = parser->custom; *p; p++) {
+		if(errors.custom) {
+			for(auto p = errors.custom; *p; p++) {
 				if(strcmp((*p)->id, id)==0)
 					return *p;
 			}
@@ -99,20 +98,18 @@ struct bsdata_serial : bsfile {
 	}
 
 	void error(bsparse_error_s id, ...) {
-		if(!parser)
-			return;
 		int line, column;
 		getpos(p, line, column);
-		parser->error(id, geturl(), line, column, xva_start(id));
+		errors.error(id, geturl(), line, column, xva_start(id));
+		errors.add();
 		skipline();
 	}
 
 	void warning(bsparse_error_s id, ...) {
-		if(!parser)
-			return;
 		int line, column;
 		getpos(p, line, column);
-		parser->error(id, geturl(), line, column, xva_start(id));
+		errors.error(id, geturl(), line, column, xva_start(id));
+		errors.add();
 	}
 
 	void clearvalue() {
@@ -546,9 +543,13 @@ void bsdata::write(const char* url, const char* baseid) {
 	write(url, source);
 }
 
-void bsdata::read(const char* url, bsdata::parser* parser) {
-	bsdata_serial e(url);
-	e.parser = parser;
+void bsdata::read(const char* url, bsdata::parser& parser) {
+	bsdata_serial e(parser, url);
 	if(e)
 		e.parse();
+}
+
+void bsdata::read(const char* url) {
+	parser errors;
+	read(url, errors);
 }

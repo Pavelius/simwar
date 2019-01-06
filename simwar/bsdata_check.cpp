@@ -3,7 +3,7 @@
 
 void bsdata::parser::add(bsparse_error_s id, const char* url, int line, int column, ...) {
 	error(id, url, line, column, xva_start(column));
-	count++;
+	add();
 }
 
 bool bsdata::parser::check(const char* url, bsval source) {

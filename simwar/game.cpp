@@ -34,20 +34,16 @@ bool game_info::read(const char* name) {
 	auto result = true;
 	const auto url_errors = "errors.txt";
 	game.clear();
+	io::file::remove(url_errors);
 	if(true) {
-		bslog log(url_errors);
-		bsdata::read(zprint(temp, "script/%1.txt", name), &log);
-		if(log.iserrors())
-			result = false;
+		bslog errors(url_errors);
+		bsdata::read(zprint(temp, "script/%1.txt", name), errors);
 		bsdata::readl(zprint(temp, "script/%1_%2.txt", name, "ru"), requisits);
-		if(!log.check(required_reqisits, sizeof(required_reqisits)/ sizeof(required_reqisits[0])))
-			result = false;
+		errors.check(required_reqisits, lenghtof(required_reqisits));
+		if(result) {
+			if(!draw::initializemap())
+				return false;
+		}
 	}
-	if(result) {
-		if(!draw::initializemap())
-			return false;
-	}
-	if(result)
-		io::file::remove(url_errors);
-	return result;
+	return !io::file::exist(url_errors);
 }

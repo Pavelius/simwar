@@ -19,28 +19,36 @@ static const char* bsparse_error_data[] = {"No errors",
 };
 assert_enum(bsparse_error, ErrorFile1pNotFound);
 
+bslog::~bslog() {
+	if(stream)
+		delete stream;
+	stream = 0;
+}
+
 void bslog::head(const char* url, int line, int column) {
 	if(line == 0 && column == 0)
 		return;
-	file << url << "(" << line << ", " << column << "): ";
+	*stream << url << "(" << line << ", " << column << "): ";
 }
 
 void bslog::linefeed() {
-	file << "\r\n";
+	*stream << "\r\n";
 }
 
 void bslog::error(bsparse_error_s id, const char* url, int line, int column, const char* format_param) {
 	auto parameters = (const char**)format_param;
+	if(!stream)
+		stream = new io::file(this->url, StreamWrite | StreamText);
 	if(id == ErrorNotFilled1pIn2pRecord3p
 		&& (strcmp(parameters[0], "name") == 0 || (parameters[0][0]==0 && parameters[1][0] == 0))) {
 		if(last_error != id)
-			file << "In file " << url << " you need add next lines" << "\r\n";
-		file << parameters[2] << ":";
+			*stream << "In file " << url << " you need add next lines" << "\r\n";
+		*stream << parameters[2] << ":";
 	} else {
 		char temp[4096];
 		head(url, line, column);
 		zprint(temp, bsparse_error_data[id], parameters[0], parameters[1], parameters[2], parameters[3], parameters[4]);
-		file << temp;
+		*stream << temp;
 	}
 	linefeed();
 	last_error = id;

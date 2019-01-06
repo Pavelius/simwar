@@ -148,7 +148,7 @@ bool bsdata::readl(const char* url, const char* locale_name, parser& errors, con
 			continue;
 		if(inlist(pb->id, skip_name))
 			continue;
-		zprint(file, "%1/%2_%3.txt", url, pb->id, locale_name);
+		zprint(file, "%1/%3/%2.txt", url, pb->id, locale_name);
 		if(pb->getcount() == 1) {
 			if(!readl(file, prefix, pb->get(0), pb->fields))
 				errors.add(ErrorFile1pNotFound, error_url, 0, 0, file);

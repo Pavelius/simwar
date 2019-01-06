@@ -4,11 +4,13 @@
 #pragma once
 
 struct bslog : bsdata::parser {
-	io::file			file;
-	bsparse_error_s		last_error;
-	bslog(const char* url) : file(url, StreamWrite | StreamText), last_error(NoParserError) {}
+	constexpr bslog(const char* url) : url(url), stream(0), last_error(NoParserError) {}
+	~bslog();
 	void				error(bsparse_error_s id, const char* url, int line, int column, const char* format_param) override;
 	void				head(const char* url, int line, int column);
-	bool				iserrors() const { return last_error != NoParserError; }
 	void				linefeed();
+private:
+	const char*			url;
+	io::file*			stream;
+	bsparse_error_s		last_error;
 };

@@ -256,13 +256,13 @@
     <Text Include="..\errors.txt">
       <Filter>Ядро</Filter>
     </Text>
-    <Text Include="..\text\core\msg_ru.txt">
+    <Text Include="..\text\ru\msg.txt">
       <Filter>Ядро</Filter>
     </Text>
-    <Text Include="..\text\core\player_ai_ru.txt">
+    <Text Include="..\text\ru\player_ai.txt">
       <Filter>Ядро</Filter>
     </Text>
-    <Text Include="..\text\core\tactic_ru.txt">
+    <Text Include="..\text\ru\tactic.txt">
       <Filter>Ядро</Filter>
     </Text>
   </ItemGroup>

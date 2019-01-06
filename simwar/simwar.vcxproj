@@ -198,9 +198,9 @@
     <Text Include="..\errors.txt" />
     <Text Include="..\script\test.txt" />
     <Text Include="..\script\test_ru.txt" />
-    <Text Include="..\text\core\msg_ru.txt" />
-    <Text Include="..\text\core\player_ai_ru.txt" />
-    <Text Include="..\text\core\tactic_ru.txt" />
+    <Text Include="..\text\ru\msg.txt" />
+    <Text Include="..\text\ru\player_ai.txt" />
+    <Text Include="..\text\ru\tactic.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

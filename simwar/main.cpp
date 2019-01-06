@@ -8,13 +8,12 @@ static bool initialize_messages() {
 	static const char* skip_name[] = {"gui", "game", 0};
 	auto result = true;
 	auto url_errors = "errors.txt";
+	io::file::remove(url_errors);
 	if(true) {
 		bslog errors(url_errors);
-		result = bsdata::readl("text/core", "ru", errors, prefixs, requisits, skip_name);
+		bsdata::readl("text", "ru", errors, prefixs, requisits, skip_name);
 	}
-	if(result)
-		io::file::remove(url_errors);
-	return result;
+	return !io::file::exist(url_errors);
 }
 
 int main(int argc, char* argv[]) {
