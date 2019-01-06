@@ -135,6 +135,11 @@ public:
 		return result;
 	}
 
+	void addloyalty(int value) {
+		if(general)
+			general->setloyalty(general->getloyalty() + value);
+	}
+
 };
 
 bool province_info::battle(string& sb, player_info* attacker_player, player_info* defender_player, action_info* action, bool raid) {
@@ -171,10 +176,12 @@ bool province_info::battle(string& sb, player_info* attacker_player, player_info
 			if(defender_player)
 				*defender_player -= e;
 		}
+		defenders.addloyalty(-1);
 	} else {
 		retreat(attacker_player);
 		if(defender_player && defenders.general)
 			defender_player->fame += imax(0, defenders.general->getnobility());
+		attackers.addloyalty(-1);
 	}
 	return iswin;
 }
