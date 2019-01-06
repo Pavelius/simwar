@@ -25,6 +25,7 @@ struct msg_info {
 	const char* predict_fail, *predict_partial, *predict_success;
 	const char*	hero_wait;
 	const char*	hero_wound;
+	const char* hero_desert;
 	const char* income;
 	const char* income_province;
 	const char* income_units;

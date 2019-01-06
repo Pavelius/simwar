@@ -43,7 +43,12 @@ bool game_info::read(const char* name) {
 		if(result) {
 			if(!draw::initializemap())
 				return false;
+			initialize();
 		}
 	}
 	return !io::file::exist(url_errors);
+}
+
+void game_info::initialize() {
+
 }

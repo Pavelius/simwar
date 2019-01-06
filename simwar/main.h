@@ -6,6 +6,10 @@
 
 #pragma once
 
+const int player_max = 8;
+const int hero_max = player_max * 5;
+const int province_max = player_max * 16;
+
 enum province_flag_s {
 	AnyProvince,
 	NoFriendlyProvince, FriendlyProvince, NeutralProvince,
@@ -14,13 +18,13 @@ enum player_ai_s : unsigned char {
 	NoPlayer,
 	PlayerHuman, PlayerComputer,
 };
-
-const int player_max = 8;
-const int hero_max = player_max * 5;
-const int province_max = player_max * 16;
+enum gender_s : unsigned char {
+	Male, Female
+};
 
 bsreq action_type[];
 bsreq character_type[];
+bsreq gender_type[];
 bsreq landscape_type[];
 bsreq msg_type[];
 bsreq nation_type[];
@@ -38,9 +42,16 @@ struct unit_info;
 struct unit_set;
 
 struct string : stringcreator, stringbuilder {
-	string() : stringbuilder(*this, buffer, buffer + sizeof(buffer) / sizeof(buffer[0])) { buffer[0] = 0; }
+	string() : stringbuilder(*this, buffer, buffer + sizeof(buffer) / sizeof(buffer[0])), gender(Male) { buffer[0] = 0; }
+	void						accept() { control("accept"); }
+	void						control(const char* id) { addn("$(%1)", id); }
+	void						parseidentifier(char* result, const char* result_max, const char* identifier) override;
+	void						set(gender_s v) { gender = v; }
+	void						set(hero_info* v);
 private:
+	gender_s					gender;
 	char						buffer[8192];
+	hero_info*					hero;
 };
 struct tip_info {
 	char*						result;
@@ -82,8 +93,7 @@ struct name_info {
 	static int					fix(tip_info* ti, const char* name, int value);
 	int							fix(tip_info* ti, int value) const { return fix(ti, name, value); }
 };
-struct nation_info : name_info {
-};
+struct nation_info : name_info {};
 struct action_info : name_info, combat_info, cost_info {
 	char						recruit, support, rule, hire, movement;
 	char						order;
@@ -106,8 +116,8 @@ struct landscape_info : name_info, combat_info, cost_info {
 };
 struct province_info : name_info {
 	void						add(unit_info* unit);
-	void						addeconomy(int value);
-	void						addsupport(const player_info* player, int value);
+	void						addeconomy(int value) { seteconomy(geteconomy() + value); }
+	void						addsupport(const player_info* player, int value) { setsupport(player, getsupport(player) + value); }
 	void						arrival(const player_info* player);
 	bool						battle(string& sb, player_info* attacker_player, player_info* defender_player, action_info* action, bool raid);
 	void						build(unit_info* unit, int wait = 1);
@@ -132,6 +142,7 @@ struct province_info : name_info {
 	void						render_neighbors(const rect& rc) const;
 	void						retreat(const player_info* player);
 	static unsigned				select(province_info** source, unsigned maximum, const player_info* player = 0, province_flag_s state = AnyProvince);
+	void						seteconomy(int value);
 	void						setplayer(player_info* value) { player = value; }
 	void						setsupport(const player_info* player, int value);
 private:
@@ -153,11 +164,11 @@ struct report_info {
 	bool						is(const player_info* player) const;
 	void						set(player_info* player);
 private:
-	hero_info * hero;
-	player_info*				player;
-	province_info*				province;
 	const char*					text;
 	int							turn;
+	hero_info*					hero;
+	player_info*				player;
+	province_info*				province;
 };
 struct trait_info : name_info, character_info {};
 struct tactic_info : name_info, combat_info {
@@ -181,12 +192,14 @@ struct hero_info : name_info {
 	trait_info*					traits[2];
 	//
 	void						cancelaction();
+	static void					desert_heroes();
 	int							get(const char* id) const;
 	int							getattack() const { return get("attack"); }
 	const action_info*			getaction() const { return action; }
 	const char*					getavatar() const { return avatar; }
 	const tactic_info*			getbesttactic() const { return best_tactic; }
 	int							getbonus(const char* id) const;
+	gender_s					getgender() const { return gender; }
 	int							getgood() const { return get("good"); }
 	int							getdefend() const { return get("defend"); }
 	int							getdiplomacy() const { return get("diplomacy"); }
@@ -218,13 +231,14 @@ struct hero_info : name_info {
 	void						setwait(int v) { wait = v; }
 	void						setwound(int v) { wound = v; }
 private:
-	action_info * action;
+	char						wait, wound, loyalty;
+	gender_s					gender;
+	action_info*				action;
 	const char*					avatar;
 	player_info*				player;
 	province_info*				province;
 	const tactic_info*			tactic;
 	const tactic_info*			best_tactic;
-	char						wait, wound, loyalty;
 };
 struct unit_info : name_info, combat_info, cost_info {
 	char						level;
@@ -306,6 +320,7 @@ struct game_info {
 	char						economy_minimum, economy_maximum;
 	int							turn;
 	void						clear();
+	void						initialize();
 	bool						read(const char* name);
 };
 struct gui_info {

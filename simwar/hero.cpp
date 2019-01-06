@@ -5,6 +5,7 @@ bsreq hero_info::metadata[] = {
 	BSREQ(hero_info, name, text_type),
 	BSREQ(hero_info, nameof, text_type),
 	BSREQ(hero_info, text, text_type),
+	BSREQ(hero_info, gender, gender_type),
 	BSREQ(hero_info, avatar, text_type),
 	BSREQ(hero_info, tactic, tactic_type),
 	BSREQ(hero_info, best_tactic, tactic_type),
@@ -185,4 +186,21 @@ unsigned hero_info::select(action_info** source, unsigned maximum_count) const {
 			*ps++ = &e;
 	}
 	return ps - source;
+}
+
+void hero_info::desert_heroes() {
+	string sb;
+	for(auto& e : hero_data) {
+		if(!e)
+			continue;
+		if(!e.getplayer())
+			continue;
+		if(e.loyalty <= 0) {
+			sb.clear();
+			sb.add(msg.hero_desert, e.getname());
+			sb.accept();
+			report_info::add(e.player, 0, &e, sb);
+			e.player = 0;
+		}
+	}
 }

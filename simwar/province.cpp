@@ -119,7 +119,7 @@ const char* province_info::getsupport(char* result, const char* result_maximum) 
 		auto value = getsupport(&e);
 		if(value == 0)
 			continue;
-		szprint(zend(result), result_maximum, " %1:[%2i]", e.getname(), value);
+		szprint(zend(result), result_maximum, " %+1:[%2i]", e.getname(), value);
 	}
 	return result;
 }
@@ -179,25 +179,12 @@ void province_info::setsupport(const player_info* player, int value) {
 	support[player_index] = value;
 }
 
-void province_info::addsupport(const player_info* player, int value) {
-	auto player_index = player->getindex();
-	if(player_index == -1)
-		return;
-	value += support[player_index];
-	if(value > game.support_maximum)
-		value = game.support_maximum;
-	if(value < game.support_minimum)
-		value = game.support_minimum;
-	support[player_index] = value;
-}
-
-void province_info::addeconomy(int value) {
-	value += economy;
-	if(value > game.economy_maximum)
-		value = game.economy_maximum;
-	if(value < game.economy_minimum)
-		value = game.economy_minimum;
-	economy = value;
+void province_info::seteconomy(int value) {
+	economy += value;
+	if(economy > game.economy_maximum)
+		economy = game.economy_maximum;
+	if(economy < game.economy_minimum)
+		economy = game.economy_minimum;
 }
 
 province_info* province_info::getneighbors(const player_info* player) const {
