@@ -37,21 +37,27 @@ bsreq unit_type[];
 struct army;
 struct hero_info;
 struct player_info;
+struct province_info;
 struct troop_info;
 struct unit_info;
 struct unit_set;
 
 struct string : stringcreator, stringbuilder {
-	string() : stringbuilder(*this, buffer, buffer + sizeof(buffer) / sizeof(buffer[0])), gender(Male) { buffer[0] = 0; }
+	string() : stringbuilder(*this, buffer, buffer + sizeof(buffer) / sizeof(buffer[0])),
+		gender(Male), hero(0), player(0), province(0) { buffer[0] = 0; }
 	void						accept() { control("accept"); }
 	void						control(const char* id) { addn("$(%1)", id); }
 	void						parseidentifier(char* result, const char* result_max, const char* identifier) override;
 	void						set(gender_s v) { gender = v; }
 	void						set(hero_info* v);
+	void						set(player_info* v) { player = v; }
+	void						set(province_info* v) { province = v; }
 private:
 	gender_s					gender;
 	char						buffer[8192];
 	hero_info*					hero;
+	player_info*				player;
+	province_info*				province;
 };
 struct tip_info {
 	char*						result;
@@ -334,8 +340,6 @@ struct unit_set : adat<unit_info*, 32> {
 	cost_info					getcost() const;
 };
 namespace draw {
-void							addaccept(char* result, const char* result_max);
-void							addbutton(char* result, const char* result_max, const char* name);
 void							avatar(int x, int y, const char* id);
 int								button(int x, int y, int width, const char* label, const runable& e, unsigned key = 0);
 int								buttonw(int x, int y, int width, const char* label, const runable& e, unsigned key = 0, const char* tips = 0);
@@ -347,7 +351,7 @@ bool							initializemap();
 bool							recruit(const player_info* player, hero_info* hero, const action_info* action, const province_info* province, unit_set& s1, unit_set& s2, cost_info& pay);
 void							report(const char* format);
 areas							window(rect rc, bool disabled = false, bool hilight = false, int border = 0);
-int								window(int x, int y, int width, const char* string);
+int								window(int x, int y, int width, const char* string, int right_width = 0);
 int								windowb(int x, int y, int width, const char* string, const runable& e, int border = 0, unsigned key = 0, const char* tips = 0);
 }
 extern adat<action_info, 32>	action_data;

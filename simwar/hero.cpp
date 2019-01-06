@@ -196,6 +196,8 @@ void hero_info::desert_heroes() {
 		if(!e.getplayer())
 			continue;
 		if(e.loyalty <= 0) {
+			sb.set(&e);
+			sb.set(e.player);
 			sb.clear();
 			sb.add(msg.hero_desert, e.getname());
 			sb.accept();

@@ -34,7 +34,7 @@ static rect				hilite_rect;
 const int				map_normal = 1000;
 static int				map_scale = map_normal;
 static player_info*		current_player;
-static province_info*	current_province;
+static const province_info*	current_province;
 static control*			current_hilite;
 static control*			current_focus_control;
 static control*			current_execute_control;
@@ -596,8 +596,8 @@ static int render_right_side(callback_proc proc = 0) {
 
 static void mouse_map_info() {
 	auto pt = hot.mouse + camera;
-	char temp[512]; zprint(temp, "Координаты карты: %1i, %2i.", pt.x, pt.y);
-	addaccept(temp, zendof(temp));
+	char temp[512];
+	zprint(temp, "Координаты карты: %1i, %2i.", pt.x, pt.y);
 	report(temp);
 }
 
@@ -696,11 +696,18 @@ static int render_text(int x, int y, int width, const char* string) {
 	return result;
 }
 
-int draw::window(int x, int y, int width, const char* string) {
+int draw::window(int x, int y, int width, const char* string, int right_width) {
+	auto right_side = (right_width != 0);
 	rect rc = {x, y, x + width, y};
 	draw::state push;
 	draw::font = metrics::font;
 	auto height = textf(rc, string);
+	if(right_side) {
+		auto w1 = rc.width();
+		x = x + right_width - w1;
+		rc.x1 = x;
+		rc.x2 = rc.x1 + w1;
+	}
 	window(rc, false);
 	render_text(x, y, rc.width(), string);
 	return height + gui.border * 2 + gui.padding;
@@ -895,11 +902,12 @@ void draw::report(const char* format) {
 	auto old_focus = getfocus();
 	setfocus(0);
 	while(ismodal()) {
-		render_board();
-		render_right_side();
-		auto x = gui.border * 2;
-		auto y = render_left_side(false);
-		draw::window(x, y, gui.window_width, format);
+		render_board(false, true);
+		render_left_side(true);
+		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
+		auto y = gui.padding + gui.border;
+		y += draw::window(x, y, gui.window_width, format, gui.hero_window_width) + gui.padding;
+		y += buttonw(x, y, gui.hero_window_width, msg.accept, cmd(buttonok), KeyEnter);
 		domodal();
 		control_standart();
 	}
@@ -1143,6 +1151,8 @@ static void show_reports() {
 			continue;
 		if(!e.is(current_player))
 			continue;
+		if(e.getprovince())
+			current_province = e.getprovince();
 		report(e.get());
 	}
 }
@@ -1190,35 +1200,8 @@ int	draw::button(int x, int y, int width, const char* label, const runable& e, u
 	return rc.height();
 }
 
-void draw::addaccept(char* result, const char* result_max) {
-	addbutton(result, result_max, "accept");
-}
-
-void draw::addbutton(char* result, const char* result_max, const char* name) {
-	szprint(zend(result), result_max, "\n$(%1)", name);
-}
-
 int	draw::buttonw(int x, int y, int width, const char* label, const runable& e, unsigned key, const char* tips) {
 	return windowb(x, y, width, label, e, 0, key);
-}
-
-TEXTPLUGIN(accept) {
-	if(hot.key == KeyEnter)
-		execute(buttonok);
-	return button(x + width - gui.button_width - gui.button_border,
-		y + gui.button_border + gui.padding,
-		gui.button_width, msg.accept, cmd(buttonok)) + gui.padding;
-}
-
-TEXTPLUGIN(yesno) {
-	if(hot.key == Alpha + 'Y')
-		execute(buttonok);
-	else if(hot.key == Alpha + 'N')
-		execute(buttoncancel);
-	auto height = button(x + width - gui.button_width, y, gui.button_width, msg.yes, cmd(buttonok));
-	width -= gui.button_width + gui.padding;
-	button(x + width - gui.button_width, y, gui.button_width, msg.no, cmd(buttoncancel));
-	return height;
 }
 
 void draw::domodal() {

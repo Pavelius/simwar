@@ -176,6 +176,5 @@ bool province_info::battle(string& sb, player_info* attacker_player, player_info
 		if(defender_player && defenders.general)
 			defender_player->fame += imax(0, defenders.general->getnobility());
 	}
-	draw::addbutton(sb.get(), sb.end(), "accept");
 	return iswin;
 }

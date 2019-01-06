@@ -19,7 +19,6 @@ static void test_report() {
 	sb.set(Male);
 	sb.addh("Тестирование");
 	sb.addn("Это %ее месть. Ничего не поделаешь.");
-	sb.accept();
 	draw::report(sb);
 }
 
