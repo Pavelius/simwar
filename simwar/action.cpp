@@ -11,7 +11,6 @@ bsreq action_type[] = {
 	BSREQ(action_info, rule, number_type),
 	BSREQ(action_info, recruit, number_type),
 	BSREQ(action_info, support, number_type),
-	BSREQ(action_info, hire, number_type),
 	BSREQ(action_info, movement, number_type),
 	BSREQ(action_info, order, number_type),
 	BSREQ(action_info, gold, number_type),

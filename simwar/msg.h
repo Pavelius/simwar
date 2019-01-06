@@ -27,7 +27,9 @@ struct msg_info {
 	const char*	hero_wait;
 	const char*	hero_wound;
 	const char* hero_desert;
-	const char* hero_choose;
+	const char* hero_hire;
+	const char* hero_hire_fail;
+	const char* hero_hire_success;
 	const char* income;
 	const char* income_province;
 	const char* income_units;

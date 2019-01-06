@@ -42,7 +42,18 @@ struct troop_info;
 struct unit_info;
 struct unit_set;
 
-struct string : stringcreator, stringbuilder {
+struct cost_info {
+	short						gold, income;
+	char						fame;
+	constexpr cost_info() : gold(0), income(0), fame(0) {}
+	constexpr void operator+=(const cost_info& e) { gold += e.gold; fame += e.fame; }
+	constexpr void operator+=(const int value) { gold += value; }
+	constexpr void operator-=(const cost_info& e) { gold -= e.gold; fame -= e.fame; }
+	constexpr bool operator>(const cost_info& e) { return gold > e.gold || fame > e.fame; }
+	void						clear();
+	char*						get(char* result, const char* result_maximum) const;
+};
+struct string : stringcreator, stringbuilder, cost_info {
 	string() : stringbuilder(*this, buffer, buffer + sizeof(buffer) / sizeof(buffer[0])) { clear(); }
 	void						clear();
 	void						create(player_info* v1, province_info* v2, hero_info* v3);
@@ -72,17 +83,6 @@ struct combat_info {
 	char						sword, shield;
 	int							get(const char* id) const;
 };
-struct cost_info {
-	short						gold, income;
-	char						fame;
-	constexpr cost_info() : gold(0), income(0), fame(0) {}
-	constexpr void operator+=(const cost_info& e) { gold += e.gold; fame += e.fame; }
-	constexpr void operator+=(const int value) { gold += value; }
-	constexpr void operator-=(const cost_info& e) { gold -= e.gold; fame -= e.fame; }
-	constexpr bool operator>(const cost_info& e) { return gold > e.gold || fame > e.fame; }
-	void						clear();
-	char*						get(char* result, const char* result_maximum) const;
-};
 struct name_info {
 	const char*					id;
 	const char*					name;
@@ -101,7 +101,7 @@ struct name_info {
 };
 struct nation_info : name_info {};
 struct action_info : name_info, combat_info, cost_info {
-	char						recruit, support, rule, hire, movement;
+	char						recruit, support, rule, movement;
 	char						order;
 	char						good;
 	char						wait;
@@ -211,6 +211,7 @@ struct hero_info : name_info {
 	int							getdefend() const { return get("defend"); }
 	int							getdiplomacy() const { return get("diplomacy"); }
 	int							getex(const char* id) const { return get(id) + getbonus(id); }
+	int							gethirecost(const player_info* player) const;
 	int							getincome() const;
 	int							getloyalty() const { return loyalty; }
 	int							getnobility() const { return get("nobility"); }
@@ -227,9 +228,10 @@ struct hero_info : name_info {
 	bool						isallow(const action_info* action) const;
 	bool						isready() const { return (wait == 0) && (wound == 0); }
 	void						hired(player_info* player);
+	void						hire_heroes();
 	static void					refresh_heroes();
 	unsigned					remove_this(hero_info** source, unsigned count) const;
-	unsigned					remove_hired(hero_info** source, unsigned count) const;
+	static unsigned				remove_hired(hero_info** source, unsigned count);
 	void						resolve();
 	unsigned					select(action_info** source, unsigned maximum) const;
 	static unsigned				select(hero_info** source, unsigned maximum_count, const province_info* province = 0, const player_info* player = 0);
@@ -296,18 +298,24 @@ struct player_info : name_info, cost_info {
 	static void					gain_profit();
 	static unsigned				getactions(hero_info** source, unsigned maximum_count, int order);
 	province_info*				getbestprovince() const;
-	cost_info					getcost() const { return *this; }
+	const cost_info&			getcost() const { return *this; }
+	hero_info*					gethire() const { return hire_hero; }
+	int							gethirecost(const hero_info* hero) const;
 	int							getincome(tip_info* ti = 0) const;
 	int							getindex() const;
 	const char*					getnameof() const { return nameof; }
 	int							getsupport(tip_info* ti = 0) const;
 	static unsigned				gettroops(troop_info** source, unsigned maximum_count, const province_info* province = 0, const player_info* player = 0, const player_info* player_move = 0);
+	static void					hire_heroes();
+	bool						isallowhire() const;
 	void						makemove();
 	static bsreq				metadata[];
 	static void					playgame();
 	static void					resolve_actions();
+	void						sethire(hero_info* hero);
 private:
 	player_ai_s					type;
+	hero_info*					hire_hero;
 };
 struct build_info {
 	unit_info*					unit;
@@ -328,6 +336,7 @@ struct game_info {
 	char						support_maximum, support_minimum, support_attack, support_defend, support_change;
 	char						economy_minimum, economy_maximum;
 	char						loyalty_maximum, loyalty_base, loyalty_noble_modifier;
+	char						hire_cost;
 	int							turn;
 	void						clear();
 	void						initialize();

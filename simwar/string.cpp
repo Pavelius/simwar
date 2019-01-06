@@ -28,7 +28,9 @@ void string::parseidentifier(char* result, const char* result_max, const char* i
 		gms(gender, result, result_max, "он", identifier);
 	else if(strcmp(identifier, "ее") == 0)
 		gms(gender, result, result_max, "его", identifier);
-	else {
+	else if(strcmp(identifier, "cost") == 0) {
+		print(result, result_max, ":gold:%1i", gold);
+	} else {
 		zcat(result, "[-");
 		zcat(result, identifier);
 		zcat(result, "]");

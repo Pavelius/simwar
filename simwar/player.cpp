@@ -140,6 +140,53 @@ static void create_province_order() {
 	zshuffle(province_order, province_data.count);
 }
 
+void player_info::sethire(hero_info* hero) {
+	if(hire_hero) {
+		hire_hero = 0;
+		gold += gethirecost(hire_hero);
+	}
+	if(hero) {
+		hire_hero = hero;
+		gold -= gethirecost(hire_hero);
+	}
+}
+
+int player_info::gethirecost(const hero_info* hero) const {
+	return game.hire_cost;
+}
+
+bool player_info::isallowhire() const {
+	auto need_gold = gethirecost(0);
+	if(gold < need_gold)
+		return false;
+	for(auto& e : hero_data) {
+		if(!e)
+			continue;
+		if(e.getplayer() == 0)
+			return true;
+	}
+	return false;
+}
+
+void player_info::hire_heroes() {
+	for(auto& e : player_data) {
+		if(!e)
+			continue;
+		if(!e.hire_hero)
+			continue;
+		string sb; sb.create(&e, 0, e.hire_hero);
+		if(e.hire_hero->getplayer()) {
+			sb.add(msg.hero_hire_fail, e.hire_hero->getname(), e.hire_hero->getplayer()->getname());
+			sb.post();
+			e.sethire(0);
+		} else {
+			sb.add(msg.hero_hire_success, e.hire_hero->getname());
+			sb.post();
+			e.hire_hero = 0;
+		}
+	}
+}
+
 void player_info::playgame() {
 	create_province_order();
 	while(true) {
@@ -159,6 +206,7 @@ void player_info::playgame() {
 		resolve_actions();
 		gain_profit();
 		hero_info::desert_heroes();
+		hire_heroes();
 		province_info::change_support();
 	}
 }

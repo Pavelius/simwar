@@ -7,7 +7,6 @@
 #action defend order(5) defend(1)
 #action recruit order(3) recruit(1) wait(1)
 #action support order(3) support(1) rule(1) gold(7)
-#action hire order(3) hire(1)
 #action mobilization order(2) movement(2)
 #action quest order(1)
 
@@ -25,6 +24,7 @@
 #game loyalty_base(15)
 #game loyalty_maximum(100)
 #game loyalty_noble_modifier(2)
+#game hire_cost(20)
 
 #gui opacity(220)
 #gui opacity_disabled(50)

@@ -37,7 +37,9 @@ bsreq msg_type[] = {
 	BSREQ(msg_info, hero_wait, text_type),
 	BSREQ(msg_info, hero_wound, text_type),
 	BSREQ(msg_info, hero_desert, text_type),
-	BSREQ(msg_info, hero_choose, text_type),
+	BSREQ(msg_info, hero_hire, text_type),
+	BSREQ(msg_info, hero_hire_success, text_type),
+	BSREQ(msg_info, hero_hire_fail, text_type),
 	//	
 	BSREQ(msg_info, total_strenght, text_type),
 	BSREQ(msg_info, total, text_type),

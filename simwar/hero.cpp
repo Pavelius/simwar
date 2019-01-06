@@ -169,7 +169,7 @@ void hero_info::cancelaction() {
 	pay.clear();
 }
 
-unsigned hero_info::remove_hired(hero_info** source, unsigned count) const {
+unsigned hero_info::remove_hired(hero_info** source, unsigned count) {
 	auto ps = source;
 	auto pe = source + count;
 	for(auto pb = source; pb < pe; pb++) {
@@ -223,6 +223,10 @@ void hero_info::desert_heroes() {
 	}
 }
 
+void hero_info::hire_heroes() {
+
+}
+
 void hero_info::hired(player_info* player) {
 	this->player = player;
 	this->loyalty = game.loyalty_base + game.loyalty_noble_modifier*getnobility();
@@ -236,4 +240,8 @@ void hero_info::initialize() {
 			continue;
 		e.hired(e.player);
 	}
+}
+
+int	hero_info::gethirecost(const player_info* player) const {
+	return game.hire_cost;
 }

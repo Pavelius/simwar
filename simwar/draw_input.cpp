@@ -291,7 +291,7 @@ static int render_player(int x, int y, const player_info* player) {
 	sb.add("###%+1\n", player->getname());
 	auto cost = player->getcost();
 	auto income = player->getincome(&ti);
-	sb.add(":gold:%1i[%4\"%3\"%+2i]", cost.gold, income, tips, (income>=0) ? "+" : "-");
+	sb.add(":gold:%1i[%4\"%3\"%+2i]", cost.gold, income, tips, (income >= 0) ? "+" : "-");
 	sb.add(" :flag_grey:%1i", cost.fame);
 	return window(x, y, gui.window_width, temp);
 }
@@ -327,7 +327,7 @@ static void render_shield(int x, int y, const province_info* province, const pla
 	fore = colors::gray;
 	if(value > 0)
 		fore = colors::yellow;
-	else if(value<0)
+	else if(value < 0)
 		fore = colors::red;
 	auto index = province_player->getindex();
 	stroke(x, y, sprite_shields, index, 0, 2);
@@ -485,7 +485,7 @@ static int render_hero(int x, int y, int width, const hero_info* e, const char* 
 	}
 	sb.addn("%1: %2i", msg.loyalty, e->getloyalty());
 	rect rc = {x, y, x + width, y + height};
-	areas hittest = window(rc, error_text!=0, proc!=0);
+	areas hittest = window(rc, error_text != 0, proc != 0);
 	int x1 = x;
 	if(pa) {
 		auto y1 = y;
@@ -719,7 +719,7 @@ int draw::windowb(int x, int y, int width, const char* string, const runable& e,
 	rect rc = {x, y, x + width, y + draw::texth()};
 	auto ra = window(rc, e.isdisabled(), true, border);
 	draw::text(rc, string, AlignCenterCenter);
-	if((ra==AreaHilited || ra==AreaHilitedPressed) && tips)
+	if((ra == AreaHilited || ra == AreaHilitedPressed) && tips)
 		tooltips(x, y, rc.width(), tips);
 	if(!e.isdisabled()
 		&& ((ra == AreaHilitedPressed && hot.key == MouseLeft)
@@ -985,15 +985,14 @@ static void render_two_window(const player_info* player, hero_info* hero, const 
 	control_standart();
 }
 
-static hero_info* choose_hire(const hero_info* hero, const action_info* action, hero_info** source, unsigned source_count) {
-	auto player = hero->getplayer();
+static hero_info* choose_hire(const player_info* player, hero_info** source, unsigned source_count) {
 	auto origin = 0;
 	while(ismodal()) {
-		render_board();
+		render_board(false, true);
+		render_left_side(true);
 		auto x = gui.border * 2;
 		auto y = gui.padding + gui.border;
 		y += render_player(x, y, player);
-		y += window(x, y, gui.window_width, msg.hero_choose);
 		const char* error_text = 0;
 		x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
 		y = gui.padding + gui.border;
@@ -1018,7 +1017,7 @@ bool draw::recruit(const player_info* player, hero_info* hero, const action_info
 	while(ismodal()) {
 		cost = s2.getcost();
 		const char* error_info = 0;
-		if(s2.getcount()==0)
+		if(s2.getcount() == 0)
 			error_info = msg.not_choose_units;
 		else if(cost > player_cost)
 			error_info = msg.not_enought_gold;
@@ -1043,7 +1042,7 @@ bool draw::recruit(const player_info* player, hero_info* hero, const action_info
 }
 
 static bool choose_conquer(const player_info* player, hero_info* hero, const action_info* action, const province_info* province, army& s1, army& s2, const army& a3, int minimal_count) {
-	if(!s1.getcount() && minimal_count==0)
+	if(!s1.getcount() && minimal_count == 0)
 		return true;
 	stringcreator sc;
 	army_list u1(s1); u1.id = 10;
@@ -1127,14 +1126,16 @@ static void choose_action() {
 		if(!recruit(player, hero, action, province, a1, units_product, cost))
 			return;
 	}
-	if(action->hire) {
-		hero_info* a1[hero_max];
-		auto count = hero_info::select(a1, lenghtof(a1), player, action);
-		count = hero->remove_hired(a1, count);
-		if(!choose_hire(hero, action, a1, count))
-			return;
-	}
 	hero->setaction(action, province, cost, troops_move, units_product);
+}
+
+static void choose_hire() {
+	player_info* player = current_player;
+	hero_info* a1[hero_max];
+	auto count = hero_info::select(a1, lenghtof(a1), player, 0);
+	count = hero_info::remove_hired(a1, count);
+	if(!choose_hire(player, a1, count))
+		return;
 }
 
 static void end_turn() {
@@ -1162,6 +1163,10 @@ void player_info::makemove() {
 		render_left_side(true);
 		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
 		auto y = render_right_side(choose_action);
+		if(current_player) {
+			if(current_player->isallowhire())
+				y += buttonw(x, y, gui.hero_window_width, msg.hero_hire, cmd(choose_hire), Ctrl + Alpha + 'H');
+		}
 		y += buttonw(x, y, gui.hero_window_width, msg.end_turn, cmd(end_turn), Ctrl + Alpha + 'E');
 		domodal();
 		control_standart();
