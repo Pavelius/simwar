@@ -203,13 +203,25 @@ void hero_info::desert_heroes() {
 		if(!e.getplayer())
 			continue;
 		if(e.loyalty <= 0) {
-			sb.clear();
-			sb.set(&e);
-			sb.set(e.player);
+			sb.create(e.player, 0, &e);
 			sb.add(msg.hero_desert, e.getname());
-			sb.accept();
-			report_info::add(e.player, 0, &e, sb);
+			sb.post();
 			e.player = 0;
 		}
+	}
+}
+
+void hero_info::hired(player_info* player) {
+	this->player = player;
+	this->loyalty = game.loyalty_base + game.loyalty_noble_modifier*getnobility();
+}
+
+void hero_info::initialize() {
+	for(auto& e : hero_data) {
+		if(!e)
+			continue;
+		if(!e.player)
+			continue;
+		e.hired(e.player);
 	}
 }

@@ -483,7 +483,7 @@ static int render_hero(int x, int y, int width, const hero_info* e, const char* 
 			continue;
 		sb.addn(p->getname());
 	}
-	sb.addn(e->getbesttactic()->getname());
+	sb.addn("%1: %2i", msg.loyalty, e->getloyalty());
 	rect rc = {x, y, x + width, y + height};
 	areas hittest = window(rc, error_text!=0, proc!=0);
 	int x1 = x;

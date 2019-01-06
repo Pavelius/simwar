@@ -22,6 +22,9 @@
 #game support_attack(20)
 #game support_defend(20)
 #game support_change(4)
+#game loyalty_base(15)
+#game loyalty_maximum(100)
+#game loyalty_noble_modifier(2)
 
 #gui opacity(220)
 #gui opacity_disabled(50)
@@ -61,9 +64,9 @@
 
 #trait general defend(1) attack(1)
 #trait diplomat defend(1) diplomacy(1)
-#trait hireling raid(2) nobility(-1)
+#trait hireling attack(1) raid(2) nobility(-1)
 #trait carefull shield(1)
-#trait bloody attack(2) good(-1)
+#trait bloody attack(2) defend(1) good(-1)
 #trait cunning attack(1) raid(1)
 
 #tactic lighting_attack attack(2) raid(1) defend(2)

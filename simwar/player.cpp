@@ -110,8 +110,8 @@ static int compare_heroes_by_order(const void* p1, const void* p2) {
 	auto e2 = *((hero_info**)p2);
 	auto pl1 = e1->getplayer();
 	auto pl2 = e2->getplayer();
-	auto sp1 = pl1->getcost().fame;
-	auto sp2 = pl2->getcost().fame;
+	auto sp1 = pl1 ? pl1->getcost().fame : 0;
+	auto sp2 = pl2 ? pl2->getcost().fame : 0;
 	if(sp1 < sp2)
 		return -1;
 	else if(sp1 > sp2)

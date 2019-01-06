@@ -11,6 +11,9 @@ static bsreq game_type[] = {
 	BSREQ(game_info, support_change, number_type),
 	BSREQ(game_info, support_attack, number_type),
 	BSREQ(game_info, support_defend, number_type),
+	BSREQ(game_info, loyalty_base, number_type),
+	BSREQ(game_info, loyalty_maximum, number_type),
+	BSREQ(game_info, loyalty_noble_modifier, number_type),
 	BSREQ(game_info, default_action, action_type),
 	BSREQ(game_info, map, text_type),
 {}};
@@ -26,6 +29,8 @@ static bsdata::requisit required_reqisits[] = {{"name", true},
 {"nameact", true},
 {"order", false, {1, 5}},
 {"bonus_tactic", true},
+{"loyalty_maximum", true},
+{"loyalty_base", true},
 {"nation", true, {}, province_info::metadata},
 };
 
@@ -50,5 +55,7 @@ bool game_info::read(const char* name) {
 }
 
 void game_info::initialize() {
-
+	if(!loyalty_noble_modifier)
+		loyalty_noble_modifier = 1;
+	hero_info::initialize();
 }

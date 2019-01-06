@@ -49,6 +49,15 @@ void string::clear() {
 	player = 0;
 }
 
+void string::create(player_info* v1, province_info* v2, hero_info* v3) {
+	clear();
+	player = v1;
+	province = v2;
+	hero = v3;
+	if(hero)
+		gender = hero->getgender();
+}
+
 void string::post() const {
 	report_info::add(player, province, hero, buffer);
 }

@@ -15,6 +15,7 @@ struct msg_info {
 	const char* sword;
 	const char* shield;
 	const char* diplomacy;
+	const char* loyalty;
 	const char* good;
 	const char* good_negative;
 	const char* nobility;

@@ -44,9 +44,8 @@ struct unit_set;
 
 struct string : stringcreator, stringbuilder {
 	string() : stringbuilder(*this, buffer, buffer + sizeof(buffer) / sizeof(buffer[0])) { clear(); }
-	void						accept() { control("accept"); }
 	void						clear();
-	void						control(const char* id) { addn("$(%1)", id); }
+	void						create(player_info* v1, province_info* v2, hero_info* v3);
 	void						parseidentifier(char* result, const char* result_max, const char* identifier) override;
 	void						post() const;
 	void						set(gender_s v) { gender = v; }
@@ -224,8 +223,10 @@ struct hero_info : name_info {
 	int							getwait() const { return wait; }
 	int							getwound() const { return wound; }
 	static bsreq				metadata[];
+	static void					initialize();
 	bool						isallow(const action_info* action) const;
 	bool						isready() const { return (wait == 0) && (wound == 0); }
+	void						hired(player_info* player);
 	static void					refresh_heroes();
 	unsigned					remove_this(hero_info** source, unsigned count) const;
 	void						resolve();
@@ -325,6 +326,7 @@ struct game_info {
 	char						income_per_level, casualties;
 	char						support_maximum, support_minimum, support_attack, support_defend, support_change;
 	char						economy_minimum, economy_maximum;
+	char						loyalty_maximum, loyalty_base, loyalty_noble_modifier;
 	int							turn;
 	void						clear();
 	void						initialize();
