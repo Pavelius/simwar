@@ -166,6 +166,9 @@
     <ClCompile Include="gender.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
+    <ClCompile Include="answer.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="draw.h">

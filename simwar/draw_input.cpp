@@ -33,7 +33,7 @@ static sprite*			sprite_shields;
 static rect				hilite_rect;
 const int				map_normal = 1000;
 static int				map_scale = map_normal;
-static player_info*		current_player;
+static const player_info* current_player;
 static const province_info*	current_province;
 static control*			current_hilite;
 static control*			current_focus_control;
@@ -277,6 +277,76 @@ bool draw::ismodal() {
 	return false;
 }
 
+static areas hilite(rect rc) {
+	auto border = gui.border;
+	rc.offset(-border, -border);
+	color c = colors::form;
+	auto rs = draw::area(rc);
+	if(rs == AreaHilited) {
+		auto op = gui.opacity_hilighted_province;
+		draw::rectf(rc, c, op);
+		draw::rectb(rc, c);
+	}
+	return rs;
+}
+
+static areas window(rect rc, bool disabled = false, bool hilight = true, int border = 0) {
+	if(border == 0)
+		border = gui.border;
+	rc.offset(-border, -border);
+	color c = colors::form;
+	color b = colors::form;
+	auto rs = draw::area(rc);
+	auto op = gui.opacity;
+	if(disabled)
+		op = op / 2;
+	else if(hilight && (rs == AreaHilited || rs == AreaHilitedPressed))
+		op = gui.opacity_hilighted;
+	draw::rectf(rc, c, op);
+	draw::rectb(rc, b);
+	return rs;
+}
+
+static int render_text(int x, int y, int width, const char* string) {
+	draw::link[0] = 0;
+	auto result = textf(x, y, width, string);
+	if(draw::link[0])
+		tooltips(x, y, width, draw::link);
+	return result;
+}
+
+static int window(int x, int y, int width, const char* string, int right_width = 0) {
+	auto right_side = (right_width != 0);
+	rect rc = {x, y, x + width, y};
+	draw::state push;
+	draw::font = metrics::font;
+	auto height = textf(rc, string);
+	if(right_side) {
+		auto w1 = rc.width();
+		x = x + right_width - w1;
+		rc.x1 = x;
+		rc.x2 = rc.x1 + w1;
+	}
+	window(rc, false);
+	render_text(x, y, rc.width(), string);
+	return height + gui.border * 2 + gui.padding;
+}
+
+static int windowb(int x, int y, int width, const char* string, const runable& e, int border = 0, unsigned key = 0, const char* tips = 0) {
+	draw::state push;
+	draw::font = metrics::font;
+	rect rc = {x, y, x + width, y + draw::texth()};
+	auto ra = window(rc, e.isdisabled(), true, border);
+	draw::text(rc, string, AlignCenterCenter);
+	if((ra == AreaHilited || ra == AreaHilitedPressed) && tips)
+		tooltips(x, y, rc.width(), tips);
+	if(!e.isdisabled()
+		&& ((ra == AreaHilitedPressed && hot.key == MouseLeft)
+			|| (key && key == hot.key)))
+		e.execute();
+	return rc.height() + gui.border * 2;
+}
+
 static void render_power(int x, int y, const player_info* owner, const province_info* province) {
 	draw::circlef(x, y, 4 * 4, colors::green, 128);
 	draw::circle(x, y, 4 * 4, colors::green);
@@ -465,27 +535,31 @@ static void render_board(const rect& rco, const player_info* player, callback_pr
 		render_province(last_board, last_mouse, player, proc, selection, selection_color, set_current_province);
 }
 
+static void avatar(int x, int y, const char* id) {
+	static amap<const char*, surface> avatars;
+	auto p = avatars.find(id);
+	if(!p) {
+		p = avatars.add(id, surface());
+		p->value.resize(gui.hero_width, gui.hero_width, 32, true);
+		surface e(id, 0);
+		if(e)
+			blit(p->value, 0, 0, p->value.width, p->value.height, 0, e, 0, 0, e.width, e.height);
+	}
+	blit(*draw::canvas, x, y, gui.hero_width, gui.hero_width, 0, p->value, 0, 0);
+	rectb({x, y, x + gui.hero_width, y + gui.hero_width}, colors::border);
+}
+
 static void render_board(bool set_current_province = false, bool show_lines = false) {
 	render_board({0, 0, draw::getwidth(), draw::getheight()}, current_player, 0, {}, colors::blue, set_current_province, show_lines);
 }
 
-static int render_hero(int x, int y, int width, const hero_info* e, const char* error_text, callback_proc proc = 0) {
-	char temp[2048]; temp[0] = 0;
-	stringcreator sc;
-	stringbuilder sb(sc, temp);
+static int render_hero(int x, int y, int width, const hero_info* hero, callback_proc proc = 0, bool show_state = true) {
 	draw::state push;
 	draw::font = metrics::font;
-	auto pa = e->getavatar();
+	auto pa = hero->getavatar();
 	int height = gui.hero_width;
-	sb.addn("###%1", e->getname());
-	for(auto p : e->traits) {
-		if(!p)
-			continue;
-		sb.addn(p->getname());
-	}
-	sb.addn("%1: %2i", msg.loyalty, e->getloyalty());
 	rect rc = {x, y, x + width, y + height};
-	areas hittest = window(rc, error_text != 0, proc != 0);
+	areas hittest = window(rc, show_state && !hero->isready(), proc != 0);
 	int x1 = x;
 	if(pa) {
 		auto y1 = y;
@@ -493,42 +567,17 @@ static int render_hero(int x, int y, int width, const hero_info* e, const char* 
 		rectb({x, y1, x + gui.hero_width, y1 + gui.hero_width}, colors::border);
 		x1 += gui.hero_width + gui.padding;
 	}
-	draw::textf(x1, y - 3, rc.x2 - x1, temp);
+	string sb;
+	hero->getbrief(sb);
+	draw::textf(x1, y - 3, rc.x2 - x1, sb);
 	if(hittest == AreaHilited || hittest == AreaHilitedPressed) {
-		temp[0] = 0;
-		// Ability block
-		auto ps = zend(temp);
-		auto ph = hero_info::metadata;
-		for(auto ppf = character_type; *ppf; ppf++) {
-			auto pf = msg_type->find(ppf->id);
-			if(!pf)
-				continue;
-			auto pn = (const char*)pf->get(pf->ptr(&msg));
-			if(!pn)
-				continue;
-			auto value = e->get(ppf->id);
-			if(!value)
-				continue;
-			if(value < 0) {
-				char name[64]; ;
-				auto pf1 = msg_type->find(zprint(name, "%1_negative", pf->id));
-				if(pf1) {
-					pn = (const char*)pf1->get(pf1->ptr(&msg));
-					value = -value;
-				}
-			}
-			if(ps[0])
-				zcat(temp, "\n");
-			szprint(zend(temp), zendof(temp), "%+2i %1", pn, value);
-		}
-		if(error_text) {
-			if(temp[0])
-				szprint(zend(temp), zendof(temp), "\n");
-			szprint(zend(temp), zendof(temp), "[-%1]", error_text);
-		}
-		tooltips(x, y, width, temp);
+		sb.clear();
+		hero->getinfo(sb);
+		if(show_state)
+			hero->getstate(sb);
+		tooltips(x, y, width, sb);
 		if(hittest == AreaHilitedPressed && hot.key == MouseLeft && proc)
-			execute(proc, (int)e);
+			execute(proc, (int)hero);
 	}
 	return height + gui.border * 2;
 }
@@ -544,18 +593,7 @@ static int render_heroes(int x, int y, const player_info* player, callback_proc 
 	for(auto& e : hero_data) {
 		if(!e || e.getplayer() != player)
 			continue;
-		char temp[260]; temp[0] = 0;
-		const char* error_text = 0;
-		if(e.getwait()) {
-			zprint(temp, msg.hero_wait, e.getwait());
-			error_text = temp;
-		} else if(e.getwound()) {
-			zprint(temp, msg.hero_wound, e.getwound());
-			error_text = temp;
-		} else if(!e.isready())
-			error_text = "Unknown error";
-		y += render_hero(x, y, gui.hero_window_width, &e, error_text, proc);
-		y += gui.padding;
+		y += render_hero(x, y, gui.hero_window_width, &e, proc) + gui.padding;
 	}
 	return y - y0;
 }
@@ -575,7 +613,7 @@ static int render_province(int x, int y, const province_info* province) {
 		return 0;
 	draw::state state;
 	draw::fore = colors::text;
-	return draw::window(x, y, gui.window_width, temp) + gui.border * 2 + gui.padding;
+	return window(x, y, gui.window_width, temp) + gui.border * 2 + gui.padding;
 }
 
 static int render_left_side(bool show_current_province = true) {
@@ -658,74 +696,8 @@ static void draw_icon(int& x, int& y, int x0, int x2, int* max_width, int& w, co
 	draw::blit(*draw::canvas, x, y + dy - p->value.height - 2, w, p->value.height, ImageTransparent, p->value, 0, 0);
 }
 
-areas draw::hilite(rect rc) {
-	auto border = gui.border;
-	rc.offset(-border, -border);
-	color c = colors::form;
-	auto rs = draw::area(rc);
-	if(rs == AreaHilited) {
-		auto op = gui.opacity_hilighted_province;
-		draw::rectf(rc, c, op);
-		draw::rectb(rc, c);
-	}
-	return rs;
-}
-
-areas draw::window(rect rc, bool disabled, bool hilight, int border) {
-	if(border == 0)
-		border = gui.border;
-	rc.offset(-border, -border);
-	color c = colors::form;
-	color b = colors::form;
-	auto rs = draw::area(rc);
-	auto op = gui.opacity;
-	if(disabled)
-		op = op / 2;
-	else if(hilight && (rs == AreaHilited || rs == AreaHilitedPressed))
-		op = gui.opacity_hilighted;
-	draw::rectf(rc, c, op);
-	draw::rectb(rc, b);
-	return rs;
-}
-
-static int render_text(int x, int y, int width, const char* string) {
-	draw::link[0] = 0;
-	auto result = textf(x, y, width, string);
-	if(draw::link[0])
-		tooltips(x, y, width, draw::link);
-	return result;
-}
-
-int draw::window(int x, int y, int width, const char* string, int right_width) {
-	auto right_side = (right_width != 0);
-	rect rc = {x, y, x + width, y};
-	draw::state push;
-	draw::font = metrics::font;
-	auto height = textf(rc, string);
-	if(right_side) {
-		auto w1 = rc.width();
-		x = x + right_width - w1;
-		rc.x1 = x;
-		rc.x2 = rc.x1 + w1;
-	}
-	window(rc, false);
-	render_text(x, y, rc.width(), string);
-	return height + gui.border * 2 + gui.padding;
-}
-
-int draw::windowb(int x, int y, int width, const char* string, const runable& e, int border, unsigned key, const char* tips) {
-	draw::state push;
-	draw::font = metrics::font;
-	rect rc = {x, y, x + width, y + draw::texth()};
-	auto ra = window(rc, e.isdisabled(), true, border);
-	draw::text(rc, string, AlignCenterCenter);
-	if((ra == AreaHilited || ra == AreaHilitedPressed) && tips)
-		tooltips(x, y, rc.width(), tips);
-	if(!e.isdisabled()
-		&& ((ra == AreaHilitedPressed && hot.key == MouseLeft)
-			|| (key && key == hot.key)))
-		e.execute();
-	return rc.height() + gui.border * 2;
+static int buttonw(int x, int y, int width, const char* label, const runable& e, unsigned key = 0, const char* tips = 0) {
+	return windowb(x, y, width, label, e, 0, key, tips);
 }
 
 void draw::tooltips(int x1, int y1, int width, const char* format, ...) {
@@ -759,7 +731,7 @@ static void render_tooltips() {
 			rc.move(0, height - 2 - rc.y2);
 		if(rc.x2 >= width)
 			rc.move(width - 2 - rc.x2, 0);
-		draw::window(rc);
+		window(rc);
 		draw::fore = colors::tips::text;
 		draw::textf(rc.x1, rc.y1, rc.width(), tooltips_text);
 	}
@@ -906,7 +878,7 @@ void draw::report(const char* format) {
 		render_left_side(true);
 		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
 		auto y = gui.padding + gui.border;
-		y += draw::window(x, y, gui.window_width, format, gui.hero_window_width) + gui.padding;
+		y += window(x, y, gui.window_width, format, gui.hero_window_width) + gui.padding;
 		y += buttonw(x, y, gui.hero_window_width, msg.accept, cmd(buttonok), KeyEnter);
 		domodal();
 		control_standart();
@@ -918,7 +890,7 @@ static void breakparam() {
 	breakmodal(hot.param);
 }
 
-action_info* draw::getaction(player_info* player, hero_info* hero) {
+static action_info* getaction(const player_info* player, hero_info* hero) {
 	action_info* source[16];
 	auto count = hero->select(source, lenghtof(source));
 	action_info::sort(source, count);
@@ -939,7 +911,7 @@ action_info* draw::getaction(player_info* player, hero_info* hero) {
 	return (action_info*)getresult();
 }
 
-province_info* draw::getprovince(player_info* player, hero_info* hero, action_info* action, aref<province_info*> selection, color selection_color) {
+static const province_info* getprovince(const player_info* player, const hero_info* hero, const action_info* action, aref<province_info*> selection, color selection_color) {
 	while(ismodal()) {
 		rect rc = {0, 0, draw::getwidth(), draw::getheight()};
 		render_board(rc, player, breakparam, selection, selection_color, false, false);
@@ -953,6 +925,14 @@ province_info* draw::getprovince(player_info* player, hero_info* hero, action_in
 		control_standart();
 	}
 	return (province_info*)getresult();
+}
+
+static color getcolor(province_flag_s id) {
+	switch(id) {
+	case NoFriendlyProvince: return colors::red;
+	case FriendlyProvince: return colors::green;
+	default: return colors::gray;
+	}
 }
 
 static void render_two_window(const player_info* player, hero_info* hero, const action_info* action, list& u1, list& u2, const char* error_text, const char* footer) {
@@ -975,7 +955,7 @@ static void render_two_window(const player_info* player, hero_info* hero, const 
 	y += render_player(x, y, player);
 	auto y2 = getheight() - gui.padding * 2 - gui.border;
 	auto y3 = y2 - th;
-	draw::window({x, y, x + gui.window_width, y2});
+	window({x, y, x + gui.window_width, y2});
 	u1.view({x, y, x + w - pw, y3});
 	x = x + w + gui.padding;
 	u2.view({x, y, x + w - pw, y3});
@@ -985,32 +965,7 @@ static void render_two_window(const player_info* player, hero_info* hero, const 
 	control_standart();
 }
 
-static hero_info* choose_hire(const player_info* player, hero_info** source, unsigned source_count) {
-	auto origin = 0;
-	while(ismodal()) {
-		render_board(false, true);
-		render_left_side(true);
-		auto x = gui.border * 2;
-		auto y = gui.padding + gui.border;
-		y += render_player(x, y, player);
-		const char* error_text = 0;
-		x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
-		y = gui.padding + gui.border;
-		auto y1 = y;
-		auto y2 = getheight() - gui.border * 2 - gui.hero_width;
-		for(unsigned i = origin; i < source_count; i++) {
-			if(y > y2)
-				break;
-			y += render_hero(x, y, gui.hero_window_width, source[i], error_text, breakparam) + gui.padding;
-		}
-		y += windowb(x, y, gui.hero_window_width, msg.cancel, cmd(breakparam, 0), 0, KeyEscape) + 1;
-		domodal();
-		control_standart();
-	}
-	return (hero_info*)getresult();
-}
-
-bool draw::recruit(const player_info* player, hero_info* hero, const action_info* action, const province_info* province, unit_set& s1, unit_set& s2, cost_info& cost) {
+static bool recruit(const player_info* player, hero_info* hero, const action_info* action, const province_info* province, unit_set& s1, unit_set& s2, cost_info& cost) {
 	unit_list u1(s1); u1.id = 10;
 	unit_list u2(s2); u2.id = 11;
 	auto player_cost = player->getcost();
@@ -1086,7 +1041,7 @@ static void choose_action() {
 	hero_info* hero = (hero_info*)hot.param;
 	if(!hero)
 		return;
-	auto player = current_player;
+	auto player = const_cast<player_info*>(current_player);
 	auto action = getaction(player, hero);
 	if(!action)
 		return;
@@ -1096,17 +1051,17 @@ static void choose_action() {
 		province_info* provinces[128];
 		auto count = province_info::select(provinces, sizeof(provinces) / sizeof(provinces[0]), player, choose_mode);
 		count = province_info::remove_hero_present({provinces, count}, player);
-		province = getprovince(player, hero, action, {provinces, count}, getcolor(choose_mode));
+		province = const_cast<province_info*>(getprovince(player, hero, action, {provinces, count}, getcolor(choose_mode)));
 		if(!province)
 			return;
 		current_province = province;
 	}
 	auto raid = action->raid > 0;
-	army troops_move(player, province, hero, true, raid);
+	army troops_move(player, const_cast<province_info*>(province), hero, true, raid);
 	unit_set units_product;
 	if(action->raid || action->attack) {
-		army a1(player, province, hero, true, raid);
-		army a3(0, province, 0, false, raid);
+		army a1(const_cast<player_info*>(player), const_cast<province_info*>(province), hero, true, raid);
+		army a3(0, const_cast<province_info*>(province), 0, false, raid);
 		a1.fill(player, 0);
 		a1.count = troop_info::remove_moved(a1.data, a1.count);
 		a3.fill(province->getplayer(), province);
@@ -1127,16 +1082,6 @@ static void choose_action() {
 			return;
 	}
 	hero->setaction(action, province, cost, troops_move, units_product);
-}
-
-static void choose_hire() {
-	player_info* player = current_player;
-	hero_info* a1[hero_max];
-	auto count = hero_info::select(a1, lenghtof(a1), player, 0);
-	count = hero_info::remove_hired(a1, count);
-	auto hero = choose_hire(player, a1, count);
-	if(hero)
-		player->sethire(hero);
 }
 
 static void end_turn() {
@@ -1164,27 +1109,64 @@ void player_info::makemove() {
 		render_left_side(true);
 		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
 		auto y = render_right_side(choose_action);
-		if(current_player) {
-			if(current_player->isallowhire())
-				y += buttonw(x, y, gui.hero_window_width, msg.hero_hire, cmd(choose_hire), Ctrl + Alpha + 'H');
-		}
 		y += buttonw(x, y, gui.hero_window_width, msg.end_turn, cmd(end_turn), Ctrl + Alpha + 'E');
 		domodal();
 		control_standart();
 	}
 }
 
-void draw::avatar(int x, int y, const char* id) {
-	static amap<const char*, surface> avatars;
-	auto p = avatars.find(id);
-	if(!p) {
-		p = avatars.add(id, surface());
-		p->value.resize(gui.hero_width, gui.hero_width, 32, true);
-		surface e(id, 0);
-		if(e)
-			blit(p->value, 0, 0, p->value.width, p->value.height, 0, e, 0, 0, e.width, e.height);
+static int windowh(const hero_info* hero, const char* format, const char* format_param) {
+	string sb;
+	draw::state push;
+	draw::font = metrics::font;
+	auto width = gui.window_width;
+	auto avatar_width = 0;
+	if(hero)
+		avatar_width = gui.hero_width + gui.padding;
+	width -= avatar_width;
+	rect rc = {0, 0, width, 0};
+	auto h = textf(rc, format);
+	auto w = rc.width() + avatar_width;
+	auto x = getwidth() - w - gui.border - gui.padding;
+	auto y = gui.padding + gui.border;
+	if(hero) {
+		if(h < gui.hero_width)
+			h = gui.hero_width;
 	}
-	blit(*draw::canvas, x, y, gui.hero_width, gui.hero_width, 0, p->value, 0, 0);
+	auto hittest = window({x, y, x + w, y + h}, false, false);
+	if(hero) {
+		avatar(x, y, hero->getavatar());
+		if(hittest == AreaHilited || hittest == AreaHilitedPressed) {
+			sb.clear();
+			hero->getinfo(sb);
+			tooltips(x, y, width, sb);
+		}
+		x += avatar_width;
+		sb.clear();
+		sb.set(hero->getgender());
+	}
+	sb.addv(format, format_param);
+	render_text(x, y, w - avatar_width, sb);
+	return y + h + gui.border * 2;
+}
+
+int	player_info::choose(const hero_info* hero, answer_info& source, const char* format, ...) const {
+	if(type == PlayerComputer)
+		return source.elements.data[rand() % source.elements.count].param;
+	current_player = this;
+	while(ismodal()) {
+		render_board(false, false);
+		render_left_side(false);
+		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
+		auto y = windowh(hero, format, xva_start(format)) + gui.padding;
+		for(unsigned i = 0; i < source.elements.count; i++)
+			y += buttonw(x, y, gui.hero_window_width, source.elements[i].text,
+				cmd(breakparam, source.elements[i].param),
+				Alpha + '1' + i);
+		domodal();
+		control_standart();
+	}
+	return draw::getresult();
 }
 
 int	draw::button(int x, int y, int width, const char* label, const runable& e, unsigned key) {
@@ -1200,10 +1182,6 @@ int	draw::button(int x, int y, int width, const char* label, const runable& e, u
 		e.execute();
 	}
 	return rc.height();
-}
-
-int	draw::buttonw(int x, int y, int width, const char* label, const runable& e, unsigned key, const char* tips) {
-	return windowb(x, y, width, label, e, 0, key);
 }
 
 void draw::domodal() {
@@ -1225,12 +1203,4 @@ void draw::domodal() {
 		hot.key = draw::rawinput();
 	if(!hot.key)
 		exit(0);
-}
-
-color draw::getcolor(province_flag_s id) {
-	switch(id) {
-	case NoFriendlyProvince: return colors::red;
-	case FriendlyProvince: return colors::green;
-	default: return colors::gray;
-	}
 }

@@ -90,13 +90,8 @@ void hero_info::resolve() {
 		auto enemy = province->getplayer();
 		if(enemy != player) {
 			province->battle(sb, player, enemy, action, israid);
-			sb.set(province);
-			sb.set(player);
-			sb.set(this);
-			sb.post();
-			sb.set(enemy);
-			sb.set(province->gethero(enemy));
-			sb.post();
+			player->post(this, province, sb);
+			enemy->post(province->gethero(enemy), province, sb);
 		}
 	}
 	if(action->support)
@@ -125,29 +120,15 @@ void hero_info::resolve() {
 	setloyalty(getloyalty() + action->good*getgood());
 }
 
-unsigned hero_info::select(hero_info** source, unsigned maximum_count, const province_info* province, const player_info* player) {
+unsigned hero_info::select(hero_info** source, unsigned maximum_count, const player_info* player) {
 	auto ps = source;
 	auto pe = ps + maximum_count;
 	for(auto& e : hero_data) {
 		if(!e)
 			continue;
-		if(player && e.getplayer() != player)
+		if(!e.isready())
 			continue;
-		if(province && e.getprovince() != province)
-			continue;
-		if(ps < pe)
-			*ps++ = &e;
-	}
-	return ps - source;
-}
-
-unsigned hero_info::select(hero_info** source, unsigned maximum_count, const player_info* player, const action_info* action, const hero_info* exclude) {
-	auto ps = source;
-	auto pe = ps + maximum_count;
-	for(auto& e : hero_data) {
-		if(!e)
-			continue;
-		if(&e == exclude)
+		if(e.getplayer() != player)
 			continue;
 		if(ps < pe)
 			*ps++ = &e;
@@ -208,25 +189,21 @@ unsigned hero_info::select(action_info** source, unsigned maximum_count) const {
 	return ps - source;
 }
 
-void hero_info::desert_heroes() {
-	string sb;
-	for(auto& e : hero_data) {
-		if(!e)
-			continue;
-		if(!e.getplayer())
-			continue;
-		if(e.loyalty <= 0) {
-			sb.create(e.player, 0, &e);
-			sb.add(msg.hero_desert, e.getname());
-			sb.post();
-			e.player = 0;
-		}
+void hero_info::check_leave() {
+	if(!player)
+		return;
+	if(loyalty <= 0) {
+		string sb;
+		sb.set(getgender());
+		sb.add(msg.hero_desert, getname());
+		player->post(this, 0, sb);
+		player = 0;
 	}
 }
 
-void hero_info::hired(player_info* player) {
+void hero_info::setplayer(player_info* player) {
 	this->player = player;
-	this->loyalty = game.loyalty_base + game.loyalty_noble_modifier*getnobility();
+	loyalty = game.loyalty_base + game.loyalty_noble_modifier*getnobility();
 }
 
 void hero_info::initialize() {
@@ -235,10 +212,59 @@ void hero_info::initialize() {
 			continue;
 		if(!e.player)
 			continue;
-		e.hired(e.player);
+		e.setplayer(e.player);
 	}
 }
 
 int	hero_info::gethirecost(const player_info* player) const {
 	return game.hire_cost;
+}
+
+void hero_info::getinfo(stringbuilder& sb) const {
+	auto ph = metadata;
+	for(auto ppf = character_type; *ppf; ppf++) {
+		auto pf = msg_type->find(ppf->id);
+		if(!pf)
+			continue;
+		auto pn = (const char*)pf->get(pf->ptr(&msg));
+		if(!pn)
+			continue;
+		auto value = get(ppf->id);
+		if(!value)
+			continue;
+		if(value < 0) {
+			char name[64]; ;
+			auto pf1 = msg_type->find(zprint(name, "%1_negative", pf->id));
+			if(pf1) {
+				pn = (const char*)pf1->get(pf1->ptr(&msg));
+				value = -value;
+			}
+		}
+		sb.addn("%+2i %1", pn, value);
+	}
+}
+
+void hero_info::getstate(stringbuilder& sb) const {
+	auto value = getwait();
+	if(value > 0) {
+		sb.addn("[-");
+		sb.addn(msg.hero_wait, value);
+		sb.add("]");
+	}
+	value = getwound();
+	if(value > 0) {
+		sb.addn("[-");
+		sb.add(msg.hero_wound, value);
+		sb.add("]");
+	}
+}
+
+void hero_info::getbrief(stringbuilder& sb) const {
+	sb.addn("###%1", getname());
+	for(auto p : traits) {
+		if(!p)
+			continue;
+		sb.addn(p->getname());
+	}
+	sb.addn("%1: %2i", msg.loyalty, getloyalty());
 }

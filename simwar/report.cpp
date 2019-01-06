@@ -2,7 +2,7 @@
 
 adat<report_info, 2048>	report_data;
 
-report_info* report_info::add(player_info* player, province_info* province, hero_info* hero, const char* text) {
+report_info* report_info::add(const player_info* player, const province_info* province, const hero_info* hero, const char* text) {
 	auto p = report_data.add();
 	p->turn = game.turn;
 	p->hero = hero;

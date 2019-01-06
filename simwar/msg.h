@@ -30,6 +30,7 @@ struct msg_info {
 	const char* hero_hire;
 	const char* hero_hire_fail;
 	const char* hero_hire_success;
+	const char* pay_gold;
 	const char* income;
 	const char* income_province;
 	const char* income_units;

@@ -167,6 +167,10 @@ void stringbuilder::add(const char* format, ...) {
 	p = driver.printv(p, result_maximum, format, xva_start(format));
 }
 
+void stringbuilder::addv(const char* format, const char* format_param) {
+	p = driver.printv(p, result_maximum, format, format_param);
+}
+
 void stringbuilder::addx(const char* separator, const char* format, const char* format_param) {
 	if(p != result)
 		p = driver.printv(p, result_maximum, separator, 0);

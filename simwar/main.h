@@ -7,7 +7,8 @@
 #pragma once
 
 const int player_max = 8;
-const int hero_max = player_max * 5;
+const int hero_max_per_player = 5;
+const int hero_max = player_max * hero_max_per_player;
 const int province_max = player_max * 16;
 
 enum province_flag_s {
@@ -54,21 +55,13 @@ struct cost_info {
 	char*						get(char* result, const char* result_maximum) const;
 };
 struct string : stringcreator, stringbuilder, cost_info {
-	string() : stringbuilder(*this, buffer, buffer + sizeof(buffer) / sizeof(buffer[0])) { clear(); }
-	void						clear();
-	void						create(player_info* v1, province_info* v2, hero_info* v3);
+	string(gender_s gender = Male) : stringbuilder(*this, buffer, buffer + sizeof(buffer) / sizeof(buffer[0])), gender(gender) {}
+	void						clear() { stringbuilder::clear(); }
 	void						parseidentifier(char* result, const char* result_max, const char* identifier) override;
-	void						post() const;
 	void						set(gender_s v) { gender = v; }
-	void						set(hero_info* v);
-	void						set(player_info* v) { player = v; }
-	void						set(province_info* v) { province = v; }
 private:
 	gender_s					gender;
 	char						buffer[8192];
-	hero_info*					hero;
-	player_info*				player;
-	province_info*				province;
 };
 struct tip_info {
 	char*						result;
@@ -164,7 +157,7 @@ private:
 };
 struct report_info {
 	constexpr report_info() : hero(0), player(0), province(0), text(0), turn(0) {}
-	static report_info*			add(player_info* player, province_info* province, hero_info* hero, const char* text);
+	static report_info*			add(const player_info* player, const province_info* province, const hero_info* hero, const char* text);
 	const province_info*		getprovince() const { return province; }
 	const char*					get() const { return text; }
 	int							getturn() const { return turn; }
@@ -173,9 +166,9 @@ struct report_info {
 private:
 	const char*					text;
 	int							turn;
-	hero_info*					hero;
-	player_info*				player;
-	province_info*				province;
+	const hero_info*			hero;
+	const player_info*			player;
+	const province_info*		province;
 };
 struct trait_info : name_info, character_info {};
 struct tactic_info : name_info, combat_info {
@@ -194,18 +187,32 @@ struct army : adat<troop_info*, 32> {
 	int							get(const char* id, tip_info* ti, bool include_number = true) const;
 	int							getstrenght(tip_info* ti, bool include_number = true) const;
 };
+struct answer_info {
+	struct element {
+		int						param;
+		const char*				text;
+	};
+	adat<element, 8>			elements;
+	answer_info() { p = buffer; buffer[0] = 0; }
+	void						add(int param, const char* format, ...);
+	void						addv(int param, const char* format, const char* format_param);
+private:
+	char*						p;
+	char						buffer[8196];
+};
 struct hero_info : name_info {
 	cost_info					pay;
-	trait_info*					traits[2];
 	//
 	void						cancelaction();
-	static void					desert_heroes();
+	void						check_leave();
 	int							get(const char* id) const;
 	int							getattack() const { return get("attack"); }
 	const action_info*			getaction() const { return action; }
 	const char*					getavatar() const { return avatar; }
 	const tactic_info*			getbesttactic() const { return best_tactic; }
 	int							getbonus(const char* id) const;
+	void						getbrief(stringbuilder& sb) const;
+	void						getinfo(stringbuilder& sb) const;
 	gender_s					getgender() const { return gender; }
 	int							getgood() const { return get("good"); }
 	int							getdefend() const { return get("defend"); }
@@ -219,6 +226,7 @@ struct hero_info : name_info {
 	province_info*				getprovince() const { return province; }
 	int							getraid() const { return get("raid"); }
 	int							getshield() const { return get("shield"); }
+	void						getstate(stringbuilder& sb) const;
 	int							getsword() const { return get("sword"); }
 	const tactic_info*			gettactic() const { return tactic; }
 	int							getwait() const { return wait; }
@@ -227,16 +235,15 @@ struct hero_info : name_info {
 	static void					initialize();
 	bool						isallow(const action_info* action) const;
 	bool						isready() const { return (wait == 0) && (wound == 0); }
-	void						hired(player_info* player);
 	static void					refresh_heroes();
 	unsigned					remove_this(hero_info** source, unsigned count) const;
 	static unsigned				remove_hired(hero_info** source, unsigned count);
 	void						resolve();
 	unsigned					select(action_info** source, unsigned maximum) const;
-	static unsigned				select(hero_info** source, unsigned maximum_count, const province_info* province = 0, const player_info* player = 0);
-	static unsigned				select(hero_info** source, unsigned maximum_count, const player_info* player, const action_info* action, const hero_info* exclude = 0);
+	static unsigned				select(hero_info** source, unsigned maximum_count, const player_info* player);
 	void						setaction(action_info* value) { action = value; }
 	void						setaction(action_info* action, province_info* province, const cost_info& cost, const army& logistic, const unit_set& production);
+	void						setplayer(player_info* player);
 	void						setprovince(province_info* value) { province = value; }
 	void						setloyalty(int value) { loyalty = value; }
 	void						setwait(int v) { wait = v; }
@@ -250,6 +257,7 @@ private:
 	province_info*				province;
 	const tactic_info*			tactic;
 	const tactic_info*			best_tactic;
+	trait_info*					traits[2];
 };
 struct unit_info : name_info, combat_info, cost_info {
 	char						level;
@@ -294,27 +302,30 @@ private:
 struct player_info : name_info, cost_info {
 	explicit operator bool() const { return type != NoPlayer; }
 	operator cost_info&() { return *static_cast<cost_info*>(this); }
+	static void					check_heroes();
+	void						check_hire();
+	int							choose(const hero_info* hero, answer_info& source, const char* format, ...) const;
+	static int					compare_hire_bet(const void* p1, const void* p2);
 	static void					gain_profit();
 	static unsigned				getactions(hero_info** source, unsigned maximum_count, int order);
 	province_info*				getbestprovince() const;
 	const cost_info&			getcost() const { return *this; }
-	hero_info*					gethire() const { return hire_hero; }
-	int							gethirecost(const hero_info* hero) const;
+	int							getherocount() const;
 	int							getincome(tip_info* ti = 0) const;
 	int							getindex() const;
 	const char*					getnameof() const { return nameof; }
 	int							getsupport(tip_info* ti = 0) const;
 	static unsigned				gettroops(troop_info** source, unsigned maximum_count, const province_info* province = 0, const player_info* player = 0, const player_info* player_move = 0);
 	static void					hire_heroes();
-	bool						isallowhire() const;
 	void						makemove();
 	static bsreq				metadata[];
 	static void					playgame();
+	void						post(const hero_info* hero, const province_info* province, const char* text) const;
 	static void					resolve_actions();
-	void						sethire(hero_info* hero);
+	static void					suggest_heroes();
 private:
 	player_ai_s					type;
-	hero_info*					hire_hero;
+	int							hire_gold;
 };
 struct build_info {
 	unit_info*					unit;
@@ -336,8 +347,13 @@ struct game_info {
 	char						economy_minimum, economy_maximum;
 	char						loyalty_maximum, loyalty_base, loyalty_noble_modifier;
 	char						hire_cost;
+	int							hire_event;
+	hero_info*					hire_hero;
 	int							turn;
+	int							year;
+	//
 	void						clear();
+	int							getyear() const;
 	void						initialize();
 	bool						read(const char* name);
 };
@@ -352,19 +368,9 @@ struct unit_set : adat<unit_info*, 32> {
 	cost_info					getcost() const;
 };
 namespace draw {
-void							avatar(int x, int y, const char* id);
 int								button(int x, int y, int width, const char* label, const runable& e, unsigned key = 0);
-int								buttonw(int x, int y, int width, const char* label, const runable& e, unsigned key = 0, const char* tips = 0);
-action_info*					getaction(player_info* player, hero_info* hero);
-color							getcolor(province_flag_s id);
-province_info*					getprovince(player_info* player, hero_info* hero, action_info* action, aref<province_info*> selection, color selection_color);
-areas							hilite(rect rc);
 bool							initializemap();
-bool							recruit(const player_info* player, hero_info* hero, const action_info* action, const province_info* province, unit_set& s1, unit_set& s2, cost_info& pay);
 void							report(const char* format);
-areas							window(rect rc, bool disabled = false, bool hilight = false, int border = 0);
-int								window(int x, int y, int width, const char* string, int right_width = 0);
-int								windowb(int x, int y, int width, const char* string, const runable& e, int border = 0, unsigned key = 0, const char* tips = 0);
 }
 extern adat<action_info, 32>	action_data;
 extern adat<build_info, 256>	build_data;
