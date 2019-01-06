@@ -985,7 +985,7 @@ static void render_two_window(const player_info* player, hero_info* hero, const 
 	control_standart();
 }
 
-static bool choose_hire(const hero_info* hero, const action_info* action, hero_info** source, unsigned source_count) {
+static hero_info* choose_hire(const hero_info* hero, const action_info* action, hero_info** source, unsigned source_count) {
 	auto player = hero->getplayer();
 	auto origin = 0;
 	while(ismodal()) {
@@ -993,21 +993,17 @@ static bool choose_hire(const hero_info* hero, const action_info* action, hero_i
 		auto x = gui.border * 2;
 		auto y = gui.padding + gui.border;
 		y += render_player(x, y, player);
-		auto y1 = y;
-		auto y2 = getheight() - gui.border * 2 - gui.hero_width;
-		auto column = 1;
-		for(unsigned i = origin; i < source_count; i++) {
-			if(y > y2) {
-				y = y1;
-				x += gui.hero_width * 2;
-				column++;
-			}
-			y += render_hero(x, y, source[i]) + gui.padding;
-		}
+		y += window(x, y, gui.window_width, msg.hero_choose);
 		const char* error_text = 0;
 		x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
 		y = gui.padding + gui.border;
-		y += render_hero(x, y, hero) + 1;
+		auto y1 = y;
+		auto y2 = getheight() - gui.border * 2 - gui.hero_width;
+		for(unsigned i = origin; i < source_count; i++) {
+			if(y > y2)
+				break;
+			y += render_hero(x, y, gui.hero_window_width, source[i], error_text, breakparam) + gui.padding;
+		}
 		y += windowb(x, y, gui.hero_window_width, msg.cancel, cmd(breakparam, 0), 0, KeyEscape) + 1;
 		domodal();
 		control_standart();
@@ -1134,7 +1130,7 @@ static void choose_action() {
 	if(action->hire) {
 		hero_info* a1[hero_max];
 		auto count = hero_info::select(a1, lenghtof(a1), player, action);
-		count = hero->remove_this(a1, count);
+		count = hero->remove_hired(a1, count);
 		if(!choose_hire(hero, action, a1, count))
 			return;
 	}

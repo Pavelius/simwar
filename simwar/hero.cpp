@@ -169,6 +169,18 @@ void hero_info::cancelaction() {
 	pay.clear();
 }
 
+unsigned hero_info::remove_hired(hero_info** source, unsigned count) const {
+	auto ps = source;
+	auto pe = source + count;
+	for(auto pb = source; pb < pe; pb++) {
+		auto p = *pb;
+		if(p->player)
+			continue;
+		*ps++ = p;
+	}
+	return ps - source;
+}
+
 unsigned hero_info::remove_this(hero_info** source, unsigned count) const {
 	auto ps = source;
 	auto pe = source + count;

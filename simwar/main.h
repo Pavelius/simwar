@@ -229,6 +229,7 @@ struct hero_info : name_info {
 	void						hired(player_info* player);
 	static void					refresh_heroes();
 	unsigned					remove_this(hero_info** source, unsigned count) const;
+	unsigned					remove_hired(hero_info** source, unsigned count) const;
 	void						resolve();
 	unsigned					select(action_info** source, unsigned maximum) const;
 	static unsigned				select(hero_info** source, unsigned maximum_count, const province_info* province = 0, const player_info* player = 0);
