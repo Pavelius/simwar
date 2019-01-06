@@ -43,11 +43,12 @@ struct unit_info;
 struct unit_set;
 
 struct string : stringcreator, stringbuilder {
-	string() : stringbuilder(*this, buffer, buffer + sizeof(buffer) / sizeof(buffer[0])),
-		gender(Male), hero(0), player(0), province(0) { buffer[0] = 0; }
+	string() : stringbuilder(*this, buffer, buffer + sizeof(buffer) / sizeof(buffer[0])) { clear(); }
 	void						accept() { control("accept"); }
+	void						clear();
 	void						control(const char* id) { addn("$(%1)", id); }
 	void						parseidentifier(char* result, const char* result_max, const char* identifier) override;
+	void						post() const;
 	void						set(gender_s v) { gender = v; }
 	void						set(hero_info* v);
 	void						set(player_info* v) { player = v; }
@@ -103,6 +104,7 @@ struct nation_info : name_info {};
 struct action_info : name_info, combat_info, cost_info {
 	char						recruit, support, rule, hire, movement;
 	char						order;
+	char						good;
 	char						wait;
 	//
 	static int					compare(const void* p1, const void* p2);
@@ -289,7 +291,6 @@ private:
 struct player_info : name_info, cost_info {
 	explicit operator bool() const { return type != NoPlayer; }
 	operator cost_info&() { return *static_cast<cost_info*>(this); }
-	void						add(province_info* province, hero_info* hero, const char* text);
 	static void					gain_profit();
 	static unsigned				getactions(hero_info** source, unsigned maximum_count, int order);
 	province_info*				getbestprovince() const;

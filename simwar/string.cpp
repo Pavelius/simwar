@@ -40,3 +40,15 @@ void string::set(hero_info* v) {
 	if(hero)
 		gender = hero->getgender();
 }
+
+void string::clear() {
+	stringbuilder::clear();
+	gender = Male;
+	hero = 0;
+	province = 0;
+	player = 0;
+}
+
+void string::post() const {
+	report_info::add(player, province, hero, buffer);
+}

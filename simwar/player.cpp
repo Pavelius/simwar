@@ -134,10 +134,6 @@ void player_info::resolve_actions() {
 	}
 }
 
-void player_info::add(province_info* province, hero_info* hero, const char* text) {
-	report_info::add(this, province, hero, text);
-}
-
 static void create_province_order() {
 	for(unsigned i = 0; i < province_data.count; i++)
 		province_order[i] = i;
@@ -162,6 +158,7 @@ void player_info::playgame() {
 		game.turn++;
 		resolve_actions();
 		gain_profit();
+		hero_info::desert_heroes();
 		province_info::change_support();
 	}
 }

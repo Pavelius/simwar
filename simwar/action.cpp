@@ -17,6 +17,7 @@ bsreq action_type[] = {
 	BSREQ(action_info, gold, number_type),
 	BSREQ(action_info, fame, number_type),
 	BSREQ(action_info, wait, number_type),
+	BSREQ(action_info, good, number_type),
 {}};
 adat<action_info, 32> action_data; BSMETA(action);
 

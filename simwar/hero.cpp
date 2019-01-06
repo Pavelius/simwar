@@ -88,9 +88,14 @@ void hero_info::resolve() {
 		auto israid = (action->raid > 0);
 		auto enemy = province->getplayer();
 		if(enemy != player) {
-			auto iswin = province->battle(sb, player, enemy, action, israid);
-			player->add(province, this, sb);
-			enemy->add(province, province->gethero(enemy), sb);
+			province->battle(sb, player, enemy, action, israid);
+			sb.set(province);
+			sb.set(player);
+			sb.set(this);
+			sb.post();
+			sb.set(enemy);
+			sb.set(province->gethero(enemy));
+			sb.post();
 		}
 	}
 	if(action->support)
@@ -115,6 +120,8 @@ void hero_info::resolve() {
 	// Ћюбое действие доброго геро€ повышают вли€ние
 	if(province)
 		province->addsupport(player, getgood());
+	// ƒоброе или злое действие вли€ет на ло€льность геро€
+	setloyalty(getloyalty() + action->good*getgood());
 }
 
 unsigned hero_info::select(hero_info** source, unsigned maximum_count, const province_info* province, const player_info* player) {
@@ -196,9 +203,9 @@ void hero_info::desert_heroes() {
 		if(!e.getplayer())
 			continue;
 		if(e.loyalty <= 0) {
+			sb.clear();
 			sb.set(&e);
 			sb.set(e.player);
-			sb.clear();
 			sb.add(msg.hero_desert, e.getname());
 			sb.accept();
 			report_info::add(e.player, 0, &e, sb);
