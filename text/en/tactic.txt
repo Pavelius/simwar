@@ -1,0 +1,3 @@
+lighting_attack: Lighting attack. %+1 use lighting attack in hope to dismiss opponent.
+careful_defence: Careful defence. %+1 build defending formation and ready to stop incoming enemy.
+messy_fighting: Messy fighting. %+1 sundelly run on enemy. They want nobody mecry, including themselves.

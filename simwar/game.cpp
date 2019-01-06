@@ -21,7 +21,7 @@ void game_info::clear() {
 	memset(this, 0, sizeof(*this));
 }
 
-static const char* requisits[] = {"name", "nameof", "nameact", "text", 0};
+const char* key_requisits[] = {"name", "nameof", "nameact", "text", 0};
 static bsdata::requisit required_reqisits[] = {{"name", true},
 {"nameact", true},
 {"order", false, {1, 5}},
@@ -38,7 +38,7 @@ bool game_info::read(const char* name) {
 	if(true) {
 		bslog errors(url_errors);
 		bsdata::read(zprint(temp, "script/%1.txt", name), errors);
-		bsdata::readl(zprint(temp, "script/%1_%2.txt", name, "ru"), requisits);
+		bsdata::readl(zprint(temp, "script/%1_%2.txt", name, "ru"), key_requisits);
 		errors.check(required_reqisits, lenghtof(required_reqisits));
 		if(result) {
 			if(!draw::initializemap())

@@ -1,0 +1,55 @@
+﻿attacking_force: Army %1 total strenght %2 invade province [%3].
+defending_force: Province defend army of %1 total strenght %2.
+neutral_army: local forces
+neutral_army_of: local forces
+winner: Winner of this battle was [%1].
+lead: leading [%1]
+moved: in move
+casualties: Casualties
+raid_spoils: Raid spoils was [%1i] golds.
+
+attack: Attack
+defend: Defend
+raid: Raid
+sword: Enemy casualties
+shield: Shield
+diplomacy: Diplomacy
+good: Good|Evil
+nobility: Nobility|Greed
+will: Will
+support: Support
+
+income: Income
+income_heroes: Loss on heroes
+income_province: Income from provincies
+income_units: Loss on units
+cost: Cost
+squads: %1i units io %2
+turns: turns
+
+hero_wait: Hero will be busy yet %1i turns.
+hero_wound: Hero will be healing yet %1i turns.
+total_strenght: Strenght of your army is %1, defending army strenght if %2.
+total: Total
+predict_fail: You loose battle, if no miracle came.
+predict_partial: You will win battle, if enemy don't have powerfull hero or winning tactic.
+predict_success: You will win battle.
+
+not_enought_gold: Do not enought gold.
+not_choose_units: Choose one or more elements.
+
+title: Strategy prototype
+
+end_turn: End turn
+newgame: Start game
+loadgame: Load game
+savegame: Save game
+exit: Exit
+
+accept: Accept
+cancel: Cancel
+
+yes: Yes
+no: No
+
+wound: wound|wounds|wounds
