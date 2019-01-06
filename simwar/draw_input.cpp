@@ -1134,8 +1134,9 @@ static void choose_hire() {
 	hero_info* a1[hero_max];
 	auto count = hero_info::select(a1, lenghtof(a1), player, 0);
 	count = hero_info::remove_hired(a1, count);
-	if(!choose_hire(player, a1, count))
-		return;
+	auto hero = choose_hire(player, a1, count);
+	if(hero)
+		player->sethire(hero);
 }
 
 static void end_turn() {

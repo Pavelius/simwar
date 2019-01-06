@@ -157,6 +157,8 @@ int player_info::gethirecost(const hero_info* hero) const {
 
 bool player_info::isallowhire() const {
 	auto need_gold = gethirecost(0);
+	if(hire_hero)
+		return false;
 	if(gold < need_gold)
 		return false;
 	for(auto& e : hero_data) {
@@ -182,6 +184,7 @@ void player_info::hire_heroes() {
 		} else {
 			sb.add(msg.hero_hire_success, e.hire_hero->getname());
 			sb.post();
+			e.hire_hero->hired(&e);
 			e.hire_hero = 0;
 		}
 	}

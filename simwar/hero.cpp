@@ -80,7 +80,8 @@ void hero_info::setaction(action_info* action, province_info* province, const co
 void hero_info::resolve() {
 	string sb;
 	// Ћюбое действие благородного геро€ повышает доход
-	*player += getnobility();
+	if(player)
+		*player += getnobility();
 	// ƒалее идут действи€, которые действуют на провинцию
 	if(!province)
 		return;
@@ -221,10 +222,6 @@ void hero_info::desert_heroes() {
 			e.player = 0;
 		}
 	}
-}
-
-void hero_info::hire_heroes() {
-
 }
 
 void hero_info::hired(player_info* player) {

@@ -228,7 +228,6 @@ struct hero_info : name_info {
 	bool						isallow(const action_info* action) const;
 	bool						isready() const { return (wait == 0) && (wound == 0); }
 	void						hired(player_info* player);
-	void						hire_heroes();
 	static void					refresh_heroes();
 	unsigned					remove_this(hero_info** source, unsigned count) const;
 	static unsigned				remove_hired(hero_info** source, unsigned count);

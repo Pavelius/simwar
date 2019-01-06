@@ -65,9 +65,13 @@
 #trait general defend(1) attack(1)
 #trait diplomat defend(1) diplomacy(1)
 #trait hireling attack(1) raid(2) nobility(-1)
+#trait rogue raid(3) nobility(-1)
+
+#trait mad attack(1) sword(1) good(-1)
 #trait carefull shield(1)
 #trait bloody attack(2) defend(1) good(-1)
 #trait cunning attack(1) raid(1)
+#trait noble nobility(1) good(1)
 
 #tactic lighting_attack attack(2) raid(1) defend(2)
 #tactic careful_defence shield(1)
@@ -77,6 +81,9 @@
 #hero mistra avatar("art/portraits/mistra.bmp") traits(carefull, diplomat) player(red) best_tactic(careful_defence) gender(female)
 #hero antaris avatar("art/portraits/antaris.bmp") traits(bloody, diplomat) player(green) best_tactic(messy_fighting)
 #hero groomsh avatar("art/portraits/groomsh.bmp") traits(cunning, general) player(green) best_tactic(careful_defence)
+#hero bogart avatar("art/portraits/bogard.bmp") traits(bloody, general) best_tactic(messy_fighting)
+#hero argh avatar("art/portraits/argh.bmp") traits(mad, general) best_tactic(messy_fighting)
+#hero toybo avatar("art/portraits/toybo.bmp") traits(noble, general) best_tactic(careful_defence)
 
 #unit barbarians attack(1) defend(1) gold(1) income(-1) recruit_count(3) nation(northerners)
 #unit orcs attack(1) defend(1) raid(1) gold(2) income(-1) recruit_count(2) nation(orcs)
