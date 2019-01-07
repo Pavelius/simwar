@@ -1,4 +1,5 @@
 #include "main.h"
+#include "draw_control.h"
 
 using namespace draw;
 using namespace draw::controls;
@@ -27,7 +28,7 @@ static rect				last_board;
 static point			tooltips_point;
 static short			tooltips_width;
 static char				tooltips_text[4096];
-static surface			map;
+static surface			map_image;
 static sprite*			sprite_shields;
 static rect				hilite_rect;
 const int				map_normal = 1000;
@@ -567,22 +568,22 @@ static void render_board(const rect& rco, const player_info* player, callback_pr
 		rc.x1 -= x1;
 		x1 = 0;
 	}
-	if(x2 > map.width) {
-		rc.x2 -= x2 - map.width;
-		x2 = map.width;
+	if(x2 > map_image.width) {
+		rc.x2 -= x2 - map_image.width;
+		x2 = map_image.width;
 	}
 	if(y1 < 0) {
 		rc.y1 -= y1;
 		y1 = 0;
 	}
-	if(y2 > map.height) {
-		rc.y2 -= y2 - map.height;
-		y2 = map.height;
+	if(y2 > map_image.height) {
+		rc.y2 -= y2 - map_image.height;
+		y2 = map_image.height;
 	}
 	if(rc.x1 != last_board.x1 || rc.y1 != last_board.y1 || rc.y2 != last_board.y2 || rc.x2 != last_board.x2)
 		draw::rectf(last_board, colors::gray);
 	if(rc.width() > 0 && rc.height() > 0)
-		blit(*draw::canvas, rc.x1, rc.y1, rc.width(), rc.height(), 0, map, x1, y1);
+		blit(*draw::canvas, rc.x1, rc.y1, rc.width(), rc.height(), 0, map_image, x1, y1);
 	if(current_province && show_lines)
 		current_province->render_neighbors(rco);
 	if(player)
@@ -821,11 +822,11 @@ static bool read_sprite(sprite** result, const char* name) {
 	return (*result) != 0;
 }
 
-bool draw::initializemap() {
-	if(!game.map || !game.map[0])
+bool game_info::initializemap() {
+	if(!map || !map[0])
 		return false;
 	char temp[260];
-	if(!map.read(szurl(temp, "maps", game.map)))
+	if(!map_image.read(szurl(temp, "maps", map)))
 		return false;
 	if(!read_sprite(&sprite_shields, "shields"))
 		return false;

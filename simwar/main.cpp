@@ -1,5 +1,5 @@
 #include "bslog.h"
-#include "initializer_list.h"
+#include "draw_control.h"
 #include "main.h"
 
 static bool initialize_messages(const char* locale_name) {
@@ -14,14 +14,6 @@ static bool initialize_messages(const char* locale_name) {
 	return !io::file::exist(url_errors);
 }
 
-static void test_report() {
-	string sb;
-	sb.set(Male);
-	sb.addh("Тестирование");
-	sb.addn("Это %ее месть. Ничего не поделаешь.");
-	draw::report(sb);
-}
-
 int main(int argc, char* argv[]) {
 	if(!initialize_messages("ru"))
 		return 0;
@@ -31,7 +23,6 @@ int main(int argc, char* argv[]) {
 	draw::setcaption(msg.title);
 	if(!game.read("test"))
 		return 0;
-	//test_report();
 	player_info::playgame();
 	return 0;
 }

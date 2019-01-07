@@ -47,7 +47,7 @@ bool game_info::read(const char* name) {
 		bsdata::readl(zprint(temp, "script/%1_%2.txt", name, "ru"), key_requisits);
 		errors.check(required_reqisits, lenghtof(required_reqisits));
 		if(result) {
-			if(!draw::initializemap())
+			if(!initializemap())
 				return false;
 			initialize();
 		}

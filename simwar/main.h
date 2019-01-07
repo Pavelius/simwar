@@ -1,7 +1,8 @@
+#include "bsdata.h"
 #include "collection.h"
 #include "crt.h"
-#include "draw_control.h"
 #include "msg.h"
+#include "point.h"
 #include "stringcreator.h"
 
 #pragma once
@@ -358,6 +359,7 @@ struct game_info {
 	void						clear();
 	int							getyear() const;
 	void						initialize();
+	bool						initializemap();
 	bool						read(const char* name);
 };
 struct gui_info {
@@ -370,11 +372,6 @@ struct unit_set : adat<unit_info*, 32> {
 	void						fill(const player_info* player, const province_info* province, const hero_info* hero, const action_info* action);
 	cost_info					getcost() const;
 };
-namespace draw {
-int								button(int x, int y, int width, const char* label, const runable& e, unsigned key = 0);
-bool							initializemap();
-void							report(const char* format);
-}
 extern adat<action_info, 32>	action_data;
 extern adat<build_info, 256>	build_data;
 extern game_info				game;
