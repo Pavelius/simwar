@@ -58,7 +58,7 @@ bool game_info::read(const char* name) {
 
 void game_info::initialize() {
 	if(!loyalty_noble_modifier)
-		loyalty_noble_modifier = 1;
+		loyalty_noble_modifier = 2;
 	if(!hire_turns)
 		hire_turns = 1;
 	if(!hire_turns_range[0])

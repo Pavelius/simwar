@@ -108,7 +108,7 @@
 #unit cavalry attack(2) raid(1) defend(1) sword(1) gold(6) income(-2) level(2) nation(southerners) landscape(plains, hills)
 
 // Red player start
-#player red gold(20) type(human)
+#player red gold(50) type(human)
 #province white_harbor player(red)
 #troop type(barbarians) province(sunrise_hills)
 #troop type(barbarians) province(white_harbor)
@@ -117,7 +117,7 @@
 #troop type(spearmans) province(white_harbor)
 
 // Green player start
-#player green gold(20) type(human)
+#player green gold(50) type(human)
 #province elder_mountains player(green)
 #troop type(orcs) province(elder_mountains)
 #troop type(orcs) province(black_wood)
