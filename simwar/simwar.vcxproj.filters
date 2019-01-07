@@ -169,6 +169,12 @@
     <ClCompile Include="answer.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
+    <ClCompile Include="calendar.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
+    <ClCompile Include="season.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="draw.h">

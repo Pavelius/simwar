@@ -24,34 +24,21 @@ void troop_info::sort(troop_info** source, unsigned count) {
 	qsort(source, count, sizeof(source[0]), compare);
 }
 
-const char* troop_info::getpresent(char* result, const char* result_maximum, troop_info** objects, unsigned count, const char* addition_text) {
-	stringcreator sc;
-	auto ps = result;
-	auto pe = result_maximum;
-	ps[0] = 0;
+void troop_info::getpresent(stringbuilder& sb, troop_info** objects, unsigned count, const char* addition_text) {
 	int count_in_row = 1;
 	for(unsigned i = 0; i < count; i++) {
 		if(i < count - 1 && compare(objects + i, objects + i + 1) == 0) {
 			count_in_row++;
 			continue;
 		}
-		if(ps != result) {
-			sc.print(ps, pe, "\n");
-			ps = zend(ps);
-		}
 		if(count_in_row == 1)
-			sc.print(ps, pe, objects[i]->getname());
+			sb.addn("%+1", objects[i]->getname());
 		else
-			sc.print(ps, pe, msg.squads, count_in_row, objects[i]->getnameof());
-		szupper(ps, 1);
-		ps = zend(ps);
-		if(addition_text) {
-			sc.print(ps, pe, " (%1)", addition_text);
-			ps = zend(ps);
-		}
+			sb.addn(msg.squads, count_in_row, objects[i]->getnameof());
+		if(addition_text)
+			sb.adds("(%1)", addition_text);
 		count_in_row = 1;
 	}
-	return result;
 }
 
 province_info* troop_info::getprovince(const player_info* player) const {

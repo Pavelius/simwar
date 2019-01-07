@@ -130,6 +130,7 @@
     <ClCompile Include="bsreq.cpp" />
     <ClCompile Include="bstream.cpp" />
     <ClCompile Include="build.cpp" />
+    <ClCompile Include="calendar.cpp" />
     <ClCompile Include="character_info.cpp" />
     <ClCompile Include="collection.cpp" />
     <ClCompile Include="color.cpp" />
@@ -161,6 +162,7 @@
     <ClCompile Include="point.cpp" />
     <ClCompile Include="province.cpp" />
     <ClCompile Include="report.cpp" />
+    <ClCompile Include="season.cpp" />
     <ClCompile Include="string.cpp" />
     <ClCompile Include="stringcreator.cpp" />
     <ClCompile Include="string_value.cpp" />

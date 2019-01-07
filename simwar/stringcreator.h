@@ -19,7 +19,7 @@ struct stringbuilder {
 	void				add(const char* format, ...);
 	void				addh(const char* format, ...);
 	void				addn(const char* format, ...) { addx("\n", format, xva_start(format)); }
-	void				adds(const char* format, ...) { addx(" ", format, xva_start(format)); }
+	void				adds(const char* format, ...);
 	void				addv(const char* format, const char* format_param);
 	void				addx(const char* separator, const char* format, const char* format_param);
 	const char*			begin() const { return result; }

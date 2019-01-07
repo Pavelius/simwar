@@ -53,7 +53,7 @@ char* stringcreator::parsenumber(char* dst, const char* result_max, unsigned val
 		value /= radix;
 	}
 	while(precision-- > i) {
-		if(dst<result_max)
+		if(dst < result_max)
 			*dst++ = '0';
 	}
 	while(i) {
@@ -62,7 +62,7 @@ char* stringcreator::parsenumber(char* dst, const char* result_max, unsigned val
 			if(v < 10)
 				*dst++ = '0' + v;
 			else
-				*dst++ = 'A' + (v-10);
+				*dst++ = 'A' + (v - 10);
 		}
 	}
 	dst[0] = 0;
@@ -71,7 +71,7 @@ char* stringcreator::parsenumber(char* dst, const char* result_max, unsigned val
 
 char* stringcreator::parseint(char* dst, const char* result_max, int value, int precision, const int radix) {
 	if(value < 0) {
-		if(dst<result_max)
+		if(dst < result_max)
 			*dst++ = '-';
 		value = -value;
 	}
@@ -104,7 +104,7 @@ const char* stringcreator::parseformat(char* dst, const char* result_max, const 
 			src++;
 			auto value = ((int*)vl)[pn - 1];
 			if(prefix == '+' && value >= 0) {
-				if(dst<result_max)
+				if(dst < result_max)
 					*dst++ = '+';
 			}
 			dst = parseint(dst, result_max, value, pnp, 10);
@@ -175,6 +175,12 @@ void stringbuilder::addx(const char* separator, const char* format, const char* 
 	if(p != result)
 		p = driver.printv(p, result_maximum, separator, 0);
 	p = driver.printv(p, result_maximum, format, format_param);
+}
+
+void stringbuilder::adds(const char* format, ...) {
+	if(p > result && p[-1] != '\n' && p[-1] != '\t')
+		p = driver.printv(p, result_maximum, " ", 0);
+	p = driver.printv(p, result_maximum, format, xva_start(format));
 }
 
 void stringbuilder::addh(const char* format, ...) {

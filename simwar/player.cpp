@@ -16,6 +16,38 @@ void player_info::post(const hero_info* hero, const province_info* province, con
 	report_info::add(this, province, hero, text);
 }
 
+extern bsdata calendar_manager;
+
+bool player_info::isallow(const action_info* action) const {
+	auto pc = static_cast<const cost_info*>(this);
+	auto ac = static_cast<const cost_info*>(action);
+	if(*ac > *pc)
+		return false;
+	return true;
+}
+
+unsigned player_info::remove_restricted(action_info** source, unsigned count) const {
+	auto ps = source;
+	auto pe = source + count;
+	for(auto pb = source; pb < pe; pb++) {
+		auto p = *pb;
+		if(!isallow(p))
+			continue;
+		*ps++ = p;
+	}
+	return ps - source;
+}
+
+void player_info::getcalendar(stringbuilder& sb) {
+	auto count = calendar_manager.getcount();
+	if(!count)
+		return;
+	auto calendar_index = game.turn % count;
+	auto calendar = (calendar_info*)calendar_manager.get(calendar_index);
+	auto year = game.year + game.turn / count;
+	sb.add("%1 %2i года, %3", calendar->getname(), year, calendar->season->getname(), calendar->season->getnameof());
+}
+
 int	player_info::getindex() const {
 	return player_data.indexof(this);
 }

@@ -54,6 +54,7 @@ int	hero_info::getincome() const {
 		if(p)
 			result--;
 	}
+	result += getnobility();
 	return result;
 }
 
@@ -80,9 +81,6 @@ void hero_info::setaction(const action_info* action, province_info* province, co
 
 void hero_info::resolve() {
 	string sb;
-	// Любое действие благородного героя повышает доход
-	if(player)
-		*player += getnobility();
 	// Далее идут действия, которые действуют на провинцию
 	if(!province)
 		return;
@@ -104,9 +102,9 @@ void hero_info::resolve() {
 		// Защита позволяет эффективно бороться с криминалом
 		criminal_negation += getdefend() * game.support_change;
 		// Дипломатия существенно повышает влияние
-		province->addsupport(player, getdiplomacy()*game.support_change);
+		province->addsupport(player, imax(0, getdiplomacy())*game.support_change);
 		// Благородство дает дополнительный доход
-		*player += getnobility();
+		*player += imax(0, getnobility());
 	}
 	// Борьба с анархистами
 	if(criminal_negation && province->getsupport(player) < 0) {
@@ -115,8 +113,7 @@ void hero_info::resolve() {
 			province->setsupport(player, 0);
 	}
 	// Любое действие доброго героя повышают влияние
-	if(province)
-		province->addsupport(player, getgood());
+	province->addsupport(player, getgood());
 	// Доброе или злое действие влияет на лояльность героя
 	setloyalty(getloyalty() + action->good*getgood());
 }
@@ -196,7 +193,7 @@ void hero_info::check_leave() {
 		return;
 	if(loyalty <= 0) {
 		string sb;
-		sb.set(getgender());
+		sb.gender = getgender();
 		sb.add(msg.hero_desert, getname());
 		player->post(this, 0, sb);
 		player = 0;
@@ -205,7 +202,7 @@ void hero_info::check_leave() {
 
 void hero_info::setplayer(player_info* player) {
 	this->player = player;
-	loyalty = game.loyalty_base + game.loyalty_noble_modifier*getnobility();
+	loyalty = game.loyalty_base + game.loyalty_noble_modifier*getgood();
 }
 
 void hero_info::initialize() {

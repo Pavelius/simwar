@@ -25,6 +25,7 @@ enum gender_s : unsigned char {
 };
 
 bsreq action_type[];
+bsreq calendar_type[];
 bsreq character_type[];
 bsreq gender_type[];
 bsreq landscape_type[];
@@ -32,6 +33,7 @@ bsreq msg_type[];
 bsreq nation_type[];
 bsreq point_type[];
 bsreq player_ai_type[];
+bsreq season_type[];
 bsreq tactic_type[];
 bsreq trait_type[];
 bsreq unit_type[];
@@ -51,17 +53,16 @@ struct cost_info {
 	constexpr void operator+=(const cost_info& e) { gold += e.gold; fame += e.fame; }
 	constexpr void operator+=(const int value) { gold += value; }
 	constexpr void operator-=(const cost_info& e) { gold -= e.gold; fame -= e.fame; }
-	constexpr bool operator>(const cost_info& e) { return gold > e.gold || fame > e.fame; }
+	constexpr bool operator>(const cost_info& e) const { return gold > e.gold || fame > e.fame; }
 	void						clear();
 	char*						get(char* result, const char* result_maximum) const;
 };
-struct string : stringcreator, stringbuilder, cost_info {
-	string(gender_s gender = Male) : stringbuilder(*this, buffer, buffer + sizeof(buffer) / sizeof(buffer[0])), gender(gender) {}
-	void						clear() { stringbuilder::clear(); }
-	void						parseidentifier(char* result, const char* result_max, const char* identifier) override;
-	void						set(gender_s v) { gender = v; }
-private:
+struct string : stringcreator, stringbuilder {
 	gender_s					gender;
+	cost_info					cost;
+	string(gender_s gender = Male) : stringbuilder(*this, buffer, buffer + sizeof(buffer) / sizeof(buffer[0])), gender(gender) {}
+	void						parseidentifier(char* result, const char* result_max, const char* identifier) override;
+private:
 	char						buffer[8192];
 };
 struct tip_info {
@@ -112,6 +113,12 @@ struct character_info : combat_info {
 	char						will;
 	int							get(const char* id) const;
 };
+struct season_info : name_info {
+
+};
+struct calendar_info : name_info {
+	const season_info*			season;
+};
 struct landscape_info : name_info, combat_info, cost_info {
 	int							getincome(tip_info* ti) const;
 };
@@ -119,6 +126,7 @@ struct province_info : name_info {
 	void						add(unit_info* unit);
 	void						addeconomy(int value) { seteconomy(geteconomy() + value); }
 	void						addsupport(const player_info* player, int value) { setsupport(player, getsupport(player) + value); }
+	void						addsupportex(const player_info* player, int value, int minimal_value, int maximal_value);
 	void						arrival(const player_info* player);
 	bool						battle(string& sb, player_info* attacker_player, player_info* defender_player, const action_info* action, bool raid);
 	void						build(unit_info* unit, int wait = 1);
@@ -130,14 +138,14 @@ struct province_info : name_info {
 	player_info*				getplayer() const { return player; }
 	point						getposition() const { return position; }
 	int							getincome(tip_info* ti = 0) const;
-	char*						getinfo(char* result, const char* result_maximum, bool show_landscape, const army* support_units = 0) const;
+	void						getinfo(stringbuilder& sb, bool show_landscape, const army* support_units = 0) const;
 	landscape_info*				getlandscape() const { return landscape; }
 	int							getlevel() const { return level; }
 	nation_info*				getnation() const { return nation; }
 	province_info*				getneighbors(const player_info* player) const;
 	province_flag_s				getstatus(const player_info* player) const;
 	int							getsupport(const player_info* player) const;
-	const char*					getsupport(char* result, const char* result_maximum) const;
+	void						getsupport(stringbuilder& sb) const;
 	static bsreq				metadata[];
 	static unsigned				remove_hero_present(aref<province_info*> source, const player_info* player);
 	void						render_neighbors(const rect& rc) const;
@@ -288,7 +296,7 @@ struct troop_info {
 	const char*					getname() const { return type->name; }
 	const char*					getnameof() const { return type->nameof; }
 	player_info*				getplayer() const { return province->getplayer(); }
-	static const char*			getpresent(char* result, const char* result_maximum, troop_info** source, unsigned count, const char* addition_text);
+	static void					getpresent(stringbuilder& sb, troop_info** source, unsigned count, const char* addition_text);
 	province_info*				getprovince() const { return province; }
 	province_info*				getprovince(const player_info* player) const;
 	int							getshield() const { return get("shield"); }
@@ -320,6 +328,7 @@ struct player_info : name_info, cost_info {
 	static void					gain_profit();
 	static unsigned				getactions(hero_info** source, unsigned maximum_count, int order);
 	province_info*				getbestprovince() const;
+	static void					getcalendar(stringbuilder& sb);
 	const cost_info&			getcost() const { return *this; }
 	int							getherocount() const;
 	int							getincome(tip_info* ti = 0) const;
@@ -328,10 +337,12 @@ struct player_info : name_info, cost_info {
 	int							getsupport(tip_info* ti = 0) const;
 	static unsigned				gettroops(troop_info** source, unsigned maximum_count, const province_info* province = 0, const player_info* player = 0, const player_info* player_move = 0);
 	static void					hire_heroes();
+	bool						isallow(const action_info* action) const;
 	void						make_move();
 	static bsreq				metadata[];
 	static void					playgame();
 	void						post(const hero_info* hero, const province_info* province, const char* text) const;
+	unsigned					remove_restricted(action_info** source, unsigned maximum) const;
 	static void					resolve_actions();
 	void						show_reports() const;
 	static void					suggest_heroes();
@@ -347,7 +358,7 @@ struct build_info {
 	static void					build_units();
 	void						clear();
 	static int					compare(const void* p1, const void* p2);
-	static const char*			getpresent(char* result, const char* result_maximum, build_info** objects, unsigned count);
+	static void					getpresent(stringbuilder& sb, build_info** objects, unsigned count);
 	static unsigned				select(build_info** source, unsigned maximum, const province_info* province);
 	static void					sort(build_info** source, unsigned count);
 };

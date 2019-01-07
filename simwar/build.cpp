@@ -25,32 +25,20 @@ void build_info::sort(build_info** source, unsigned count) {
 	qsort(source, count, sizeof(source[0]), compare);
 }
 
-const char* build_info::getpresent(char* result, const char* result_maximum, build_info** objects, unsigned count) {
-	stringcreator sc;
-	auto ps = result;
-	auto pe = result_maximum;
-	ps[0] = 0;
+void build_info::getpresent(stringbuilder& sb, build_info** objects, unsigned count) {
 	int count_in_row = 1;
 	for(unsigned i = 0; i < count; i++) {
 		if(i < count - 1 && compare(objects + i, objects + i + 1) == 0) {
 			count_in_row++;
 			continue;
 		}
-		if(ps != result) {
-			sc.print(ps, pe, "\n");
-			ps = zend(ps);
-		}
 		if(count_in_row == 1)
-			sc.print(ps, pe, objects[i]->unit->getname());
+			sb.addn("%+1", objects[i]->unit->getname());
 		else
-			sc.print(ps, pe, msg.squads, count_in_row, objects[i]->unit->nameof);
-		szupper(ps, 1);
-		ps = zend(ps);
-		sc.print(ps, pe, " (%1i %2)", objects[i]->wait, msg.turns);
-		ps = zend(ps);
+			sb.addn(msg.squads, count_in_row, objects[i]->unit->nameof);
+		sb.adds("(%1i %2)", objects[i]->wait, msg.turns);
 		count_in_row = 1;
 	}
-	return result;
 }
 
 unsigned build_info::select(build_info** source, unsigned maximum, const province_info* province) {

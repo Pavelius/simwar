@@ -100,28 +100,25 @@ unsigned province_info::remove_hero_present(aref<province_info*> source, const p
 	return ps - source.data;
 }
 
-char* province_info::getinfo(char* result, const char* result_maximum, bool show_landscape, const army* defenders) const {
-	result[0] = 0;
+void province_info::getinfo(stringbuilder& sb, bool show_landscape, const army* defenders) const {
 	if(show_landscape)
-		szprint(zend(result), result_maximum, "%1 ", landscape->name);
+		sb.adds(landscape->name);
 	auto value = getdefend();
 	if(defenders)
 		value = defenders->get("defend", 0);
-	szprint(zend(result), result_maximum, ":gold:%1i :house:%2i :shield_grey:%3i",
+	sb.adds(":gold:%1i :house:%2i :shield_grey:%3i",
 		getincome(), getlevel(), value);
-	return result;
 }
 
-const char* province_info::getsupport(char* result, const char* result_maximum) const {
+void province_info::getsupport(stringbuilder& sb) const {
 	for(auto& e : player_data) {
 		if(!e)
 			continue;
 		auto value = getsupport(&e);
 		if(value == 0)
 			continue;
-		szprint(zend(result), result_maximum, " %+1:[%2i]", e.getname(), value);
+		sb.adds("%+1:[%2i]", e.getname(), value);
 	}
-	return result;
 }
 
 void province_info::build(unit_info* unit, int turns) {
@@ -177,6 +174,23 @@ void province_info::setsupport(const player_info* player, int value) {
 	if(value < game.support_minimum)
 		value = game.support_minimum;
 	support[player_index] = value;
+}
+
+void province_info::addsupportex(const player_info* player, int value, int minimal_value, int maximal_value) {
+	auto player_index = player->getindex();
+	for(unsigned i = 0; i < sizeof(support) / sizeof(support[0]); i++) {
+		if(i = player_index)
+			continue;
+		auto v = support[i];
+		if(v < minimal_value || v > maximal_value)
+			continue;
+		v += value;
+		if(v < minimal_value)
+			v = minimal_value;
+		if(v > maximal_value)
+			v = maximal_value;
+		setsupport(player_data.data + i, v);
+	}
 }
 
 void province_info::seteconomy(int value) {

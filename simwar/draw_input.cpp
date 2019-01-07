@@ -314,6 +314,17 @@ static int render_text(int x, int y, int width, const char* string) {
 	return result;
 }
 
+static int windowf(int x, int y, int width, const char* string) {
+	rect rc = {x, y, x + width, y};
+	draw::state push;
+	draw::font = metrics::font;
+	auto height = textf(rc, string);
+	rc.x2 = rc.x1 + width;
+	window(rc, false);
+	render_text(x, y, rc.width(), string);
+	return height + gui.border * 2 + gui.padding;
+}
+
 static int window(int x, int y, int width, const char* string, int right_width = 0) {
 	auto right_side = (right_width != 0);
 	rect rc = {x, y, x + width, y};
@@ -390,7 +401,7 @@ static int windowh(const hero_info* hero, const char* format, const char* format
 		}
 		x += avatar_width;
 		sb.clear();
-		sb.set(hero->getgender());
+		sb.gender = hero->getgender();
 	}
 	sb.addv(format, format_param);
 	draw::link[0] = 0;
@@ -401,17 +412,19 @@ static int windowh(const hero_info* hero, const char* format, const char* format
 }
 
 static int render_player(int x, int y, const player_info* player) {
-	char temp[8192]; temp[0] = 0;
+	if(!player)
+		return 0;
 	char tips[1024]; tips[0] = 0;
 	tip_info ti(tips);
-	stringcreator sc;
-	stringbuilder sb(sc, temp);
-	sb.add("###%+1\n", player->getname());
+	string sb;
+	sb.add("###%+1, ", player->getname());
+	player->getcalendar(sb);
+	sb.add("\n");
 	auto cost = player->getcost();
 	auto income = player->getincome(&ti);
 	sb.add(":gold:%1i[%4\"%3\"%+2i]", cost.gold, income, tips, (income >= 0) ? "+" : "-");
 	sb.add(" :flag_grey:%1i", cost.fame);
-	return window(x, y, gui.window_width, temp);
+	return window(x, y, gui.window_width, sb);
 }
 
 static void choose_current_province() {
@@ -419,8 +432,8 @@ static void choose_current_province() {
 }
 
 static point getscreen(const rect& rc, point pt) {
-	auto x = pt.x - camera.x + rc.x1 + rc.width()/2;
-	auto y = pt.y - camera.y + rc.y1 + rc.height()/2;
+	auto x = pt.x - camera.x + rc.x1 + rc.width() / 2;
+	auto y = pt.y - camera.y + rc.y1 + rc.height() / 2;
 	return {(short)x, (short)y};
 }
 
@@ -460,11 +473,11 @@ static void render_shield(int x, int y, const province_info* province, const pla
 }
 
 static void render_province(rect rc, point mouse, const player_info* player, callback_proc proc, aref<province_info*> selection, color selection_color, bool set_current_province) {
-	char temp[1024];
 	if(!draw::font)
 		return;
 	draw::state push;
 	const int max_size = 128;
+	string sb;
 	for(auto& e : province_data) {
 		if(!e)
 			continue;
@@ -474,8 +487,7 @@ static void render_province(rect rc, point mouse, const player_info* player, cal
 		draw::font = metrics::h1;
 		fore = colors::black;
 		fore_stroke = colors::white.mix(selection_color);
-		zprint(temp, e.getname());
-		auto text_width = draw::textw(temp);
+		auto text_width = draw::textw(e.getname());
 		army defenders;
 		defenders.province = &e;
 		defenders.count = troop_info::select(defenders.data, defenders.getmaximum(), &e);
@@ -503,48 +515,53 @@ static void render_province(rect rc, point mouse, const player_info* player, cal
 			}
 		}
 		render_shield(pt.x - text_width / 2 - 20, pt.y, &e, player);
-		draw::text(pt.x - text_width / 2, pt.y - draw::texth() / 2, temp, -1, TextStroke);
+		draw::text(pt.x - text_width / 2, pt.y - draw::texth() / 2, e.getname(), -1, TextStroke);
 		pt.y += draw::texth() / 2;
 		draw::font = metrics::font;
 		auto hero = e.gethero(player);
 		if(status == FriendlyProvince)
 			defenders.general = hero;
-		zprint(temp, "%+1 ", e.getnation()->getname());
-		e.getinfo(zend(temp), zendof(temp), false, &defenders);
-		auto w = textfw(temp);
-		textf(pt.x - w / 2, pt.y, w, temp, 0, 0, 0, 0, 0, TextStroke);
+		sb.clear();
+		sb.add("%+1 ", e.getnation()->getname());
+		e.getinfo(sb, false, &defenders);
+		auto w = textfw(sb);
+		textf(pt.x - w / 2, pt.y, w, sb, 0, 0, 0, 0, 0, TextStroke);
 		pt.y += texth();
 		if(defenders) {
+			sb.clear();
 			troop_info::sort(defenders.data, defenders.getcount());
-			troop_info::getpresent(temp, zendof(temp), defenders.data, defenders.getcount(), 0);
-			rect rc = {0, 0, 200, 0}; draw::textw(rc, temp);
-			pt.y += draw::text({pt.x - rc.width() / 2, pt.y, pt.x + rc.width() / 2 + 1, pt.y + rc.height()}, temp, AlignCenter);
+			troop_info::getpresent(sb, defenders.data, defenders.getcount(), 0);
+			rect rc = {0, 0, 200, 0}; draw::textw(rc, sb);
+			pt.y += draw::text({pt.x - rc.width() / 2, pt.y, pt.x + rc.width() / 2 + 1, pt.y + rc.height()}, sb, AlignCenter);
 		}
 		if(hero) {
+			sb.clear();
 			auto action = hero->getaction();
 			if(action)
-				zprint(temp, "%1 %2", hero->getname(), action->nameof);
+				sb.add("%1 %2", hero->getname(), action->nameof);
 			else
-				zprint(temp, "%1", hero->getname());
-			text(pt.x - textw(temp) / 2, pt.y, temp);
+				sb.add("%1", hero->getname());
+			text(pt.x - textw(sb) / 2, pt.y, sb);
 			pt.y += texth();
 		}
 		defenders.count = troop_info::select_move(defenders.data, defenders.getmaximum(), &e, player);
 		if(defenders) {
+			sb.clear();
 			troop_info::sort(defenders.data, defenders.getcount());
-			troop_info::getpresent(temp, zendof(temp), defenders.data, defenders.count, msg.moved);
-			rect rc = {0, 0, 200, 0}; draw::textw(rc, temp);
-			pt.y += draw::text({pt.x - rc.width() / 2, pt.y, pt.x + rc.width() / 2 + 1, pt.y + rc.height()}, temp, AlignCenter);
+			troop_info::getpresent(sb, defenders.data, defenders.count, msg.moved);
+			rect rc = {0, 0, 200, 0}; draw::textw(rc, sb);
+			pt.y += draw::text({pt.x - rc.width() / 2, pt.y, pt.x + rc.width() / 2 + 1, pt.y + rc.height()}, sb, AlignCenter);
 		}
 		if(status == FriendlyProvince) {
+			sb.clear();
 			fore = fore.mix(colors::blue);
 			build_info* build_array[16];
 			auto count = build_info::select(build_array, lenghtof(build_array), &e);
 			if(count) {
 				build_info::sort(build_array, count);
-				build_info::getpresent(temp, zendof(temp), build_array, count);
-				rect rc = {0, 0, 200, 0}; draw::textw(rc, temp);
-				pt.y += draw::text({pt.x - rc.width() / 2, pt.y, pt.x + rc.width() / 2 + 1, pt.y + rc.height()}, temp, AlignCenter);
+				build_info::getpresent(sb, build_array, count);
+				rect rc = {0, 0, 200, 0}; draw::textw(rc, sb);
+				pt.y += draw::text({pt.x - rc.width() / 2, pt.y, pt.x + rc.width() / 2 + 1, pt.y + rc.height()}, sb, AlignCenter);
 			}
 		}
 	}
@@ -557,13 +574,13 @@ static void render_board(const rect& rco, const player_info* player, callback_pr
 	last_board = rc;
 	int w = rc.width();
 	int h = rc.height();
-	int x1 = camera.x - w/2;
-	int y1 = camera.y - h/2;
+	int x1 = camera.x - w / 2;
+	int y1 = camera.y - h / 2;
 	int x2 = x1 + w;
 	int y2 = y1 + h;
 	point last_mouse = {
-	(short)(hot.mouse.x - rc.x1 - rc.width()/2 + camera.x),
-	(short)(hot.mouse.y - rc.y1 - rc.height()/2 + camera.y)};
+		(short)(hot.mouse.x - rc.x1 - rc.width() / 2 + camera.x),
+		(short)(hot.mouse.y - rc.y1 - rc.height() / 2 + camera.y)};
 	if(x1 < 0) {
 		rc.x1 -= x1;
 		x1 = 0;
@@ -624,21 +641,17 @@ static int render_hero(int x, int y, const hero_info* e) {
 }
 
 static int render_province(int x, int y, const province_info* province) {
-	char temp[4096];
 	if(!province)
 		return 0;
-	zprint(temp, "###%1\n", province->getname());
-	province->getinfo(zend(temp), zendof(temp), true);
-	province->getsupport(zend(temp), zendof(temp));
-	if(province->text) {
-		szprint(zend(temp), zendof(temp), "\n");
-		szprint(zend(temp), zendof(temp), province->text);
-	}
-	if(!temp[0])
-		return 0;
+	string sb;
+	sb.add("###%1\n", province->getname());
+	province->getinfo(sb, true);
+	province->getsupport(sb);
+	if(province->text)
+		sb.addn(province->text);
 	draw::state state;
 	draw::fore = colors::text;
-	return window(x, y, gui.window_width, temp) + gui.border * 2 + gui.padding;
+	return window(x, y, gui.window_width, sb) + gui.border * 2 + gui.padding;
 }
 
 static void render_left_side(const player_info* player, const province_info* province, bool set_current_province = false) {
@@ -923,6 +936,7 @@ struct army_list : list {
 static action_info* choose_action(const player_info* player, hero_info* hero) {
 	action_info* source[16];
 	auto count = hero->select(source, lenghtof(source));
+	count = player->remove_restricted(source, count);
 	action_info::sort(source, count);
 	while(ismodal()) {
 		render_left_side(player, current_province, false);

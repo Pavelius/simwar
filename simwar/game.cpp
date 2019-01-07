@@ -15,6 +15,7 @@ static bsreq game_type[] = {
 	BSREQ(game_info, loyalty_maximum, number_type),
 	BSREQ(game_info, loyalty_noble_modifier, number_type),
 	BSREQ(game_info, hire_cost, number_type),
+	BSREQ(game_info, year, number_type),
 	BSREQ(game_info, default_action, action_type),
 	BSREQ(game_info, map, text_type),
 {}};
