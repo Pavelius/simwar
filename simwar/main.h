@@ -158,6 +158,8 @@ private:
 struct report_info {
 	constexpr report_info() : hero(0), player(0), province(0), text(0), turn(0) {}
 	static report_info*			add(const player_info* player, const province_info* province, const hero_info* hero, const char* text);
+	const hero_info*			gethero() const { return hero; }
+	const player_info*			getplayer() const { return player; }
 	const province_info*		getprovince() const { return province; }
 	const char*					get() const { return text; }
 	int							getturn() const { return turn; }
@@ -317,11 +319,12 @@ struct player_info : name_info, cost_info {
 	int							getsupport(tip_info* ti = 0) const;
 	static unsigned				gettroops(troop_info** source, unsigned maximum_count, const province_info* province = 0, const player_info* player = 0, const player_info* player_move = 0);
 	static void					hire_heroes();
-	void						makemove();
+	void						make_move();
 	static bsreq				metadata[];
 	static void					playgame();
 	void						post(const hero_info* hero, const province_info* province, const char* text) const;
 	static void					resolve_actions();
+	void						show_reports() const;
 	static void					suggest_heroes();
 private:
 	player_ai_s					type;

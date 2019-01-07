@@ -255,9 +255,10 @@ void player_info::playgame() {
 			if(!e)
 				continue;
 			e.check_hire();
+			e.show_reports();
 			switch(e.type) {
 			case PlayerHuman:
-				e.makemove();
+				e.make_move();
 				break;
 			case PlayerComputer:
 				break;
