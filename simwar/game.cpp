@@ -59,5 +59,13 @@ bool game_info::read(const char* name) {
 void game_info::initialize() {
 	if(!loyalty_noble_modifier)
 		loyalty_noble_modifier = 1;
+	if(!hire_turns)
+		hire_turns = 1;
+	if(!hire_turns_range[0])
+		hire_turns_range[0] = 3;
+	if(!hire_turns_range[1])
+		hire_turns_range[1] = 7;
+	if(hire_turns_range[0] > hire_turns_range[1])
+		hire_turns_range[0] = hire_turns_range[1] - 1;
 	hero_info::initialize();
 }

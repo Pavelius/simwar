@@ -96,7 +96,7 @@ struct name_info {
 };
 struct nation_info : name_info {};
 struct action_info : name_info, combat_info, cost_info {
-	char						recruit, support, rule, movement;
+	char						recruit, support, economy, movement;
 	char						order;
 	char						good;
 	char						wait;
@@ -110,7 +110,6 @@ struct character_info : combat_info {
 	char						diplomacy;
 	char						good;
 	char						nobility;
-	char						will;
 	int							get(const char* id) const;
 };
 struct season_info : name_info {
@@ -338,6 +337,7 @@ struct player_info : name_info, cost_info {
 	static unsigned				gettroops(troop_info** source, unsigned maximum_count, const province_info* province = 0, const player_info* player = 0, const player_info* player_move = 0);
 	static void					hire_heroes();
 	bool						isallow(const action_info* action) const;
+	static bool					isallowgame();
 	void						make_move();
 	static bsreq				metadata[];
 	static void					playgame();
@@ -370,7 +370,7 @@ struct game_info {
 	char						economy_minimum, economy_maximum;
 	char						loyalty_maximum, loyalty_base, loyalty_noble_modifier;
 	char						hire_cost;
-	int							hire_event;
+	char						hire_turns, hire_turns_range[2];
 	hero_info*					hire_hero;
 	int							turn;
 	int							year;

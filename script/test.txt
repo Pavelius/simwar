@@ -19,11 +19,12 @@
 #nation northerners
 #nation southerners
 
-#action raid order(2) raid(1)
-#action attack order(4) attack(1) gold(5)
+#action raid order(2) raid(1) support(-3)
+#action attack order(4) attack(1) support(-6) gold(5)
 #action defend order(5) defend(1) gold(1)
-#action recruit order(3) recruit(1) wait(1)
-#action support order(3) support(1) rule(1)
+#action recruit order(3) recruit(1)
+#action support order(3) support(5) gold(6)
+#action economy order(3) economy(1) gold(6)
 #action mobilization order(2) movement(2) gold(2)
 #action quest order(1)
 
@@ -107,17 +108,17 @@
 #unit cavalry attack(2) raid(1) defend(1) sword(1) gold(6) income(-2) level(2) nation(southerners) landscape(plains, hills)
 
 // Red player start
-#player red gold(10) type(human)
-#province sunrise_hills player(red)
+#player red gold(20) type(human)
 #province white_harbor player(red)
 #troop type(barbarians) province(sunrise_hills)
+#troop type(barbarians) province(white_harbor)
+#troop type(cavalry) province(white_harbor)
 #troop type(barbarians) province(white_harbor)
 #troop type(spearmans) province(white_harbor)
 
 // Green player start
-#player green gold(100) type(human)
+#player green gold(20) type(human)
 #province elder_mountains player(green)
-#province black_wood player(green)
 #troop type(orcs) province(elder_mountains)
 #troop type(orcs) province(black_wood)
 #troop type(black_orcs) province(black_wood)

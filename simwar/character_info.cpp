@@ -9,7 +9,6 @@ bsreq character_type[] = {
 	BSREQ(character_info, good, number_type),
 	BSREQ(character_info, diplomacy, number_type),
 	BSREQ(character_info, nobility, number_type),
-	BSREQ(character_info, will, number_type),
 {}};
 
 int character_info::get(const char* id) const {

@@ -180,7 +180,7 @@ void province_info::setsupport(const player_info* player, int value) {
 void province_info::addsupportex(const player_info* player, int value, int minimal_value, int maximal_value) {
 	auto player_index = player->getindex();
 	for(unsigned i = 0; i < sizeof(support) / sizeof(support[0]); i++) {
-		if(i = player_index)
+		if(i == player_index)
 			continue;
 		auto v = support[i];
 		if(v < minimal_value || v > maximal_value)

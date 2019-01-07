@@ -8,7 +8,7 @@ bsreq action_type[] = {
 	BSREQ(action_info, attack, number_type),
 	BSREQ(action_info, raid, number_type),
 	BSREQ(action_info, defend, number_type),
-	BSREQ(action_info, rule, number_type),
+	BSREQ(action_info, economy, number_type),
 	BSREQ(action_info, recruit, number_type),
 	BSREQ(action_info, support, number_type),
 	BSREQ(action_info, movement, number_type),
@@ -23,14 +23,14 @@ adat<action_info, 32> action_data; BSMETA(action);
 province_flag_s action_info::getprovince() const {
 	if(attack > 0 || raid > 0)
 		return NoFriendlyProvince;
-	else if(defend > 0 || recruit > 0 || rule > 0 || movement > 0)
+	else if(defend || recruit || economy || movement)
 		return FriendlyProvince;
 	return AnyProvince;
 }
 
 bool action_info::isplaceable() const {
 	return attack > 0 || raid > 0 || defend > 0
-		|| recruit > 0 || support > 0 || rule > 0 || movement > 0;
+		|| recruit || support || economy|| movement;
 }
 
 int action_info::compare(const void* p1, const void* p2) {

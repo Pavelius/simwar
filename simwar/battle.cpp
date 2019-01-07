@@ -147,9 +147,6 @@ bool province_info::battle(string& sb, player_info* attacker_player, player_info
 	sb.add(" "); sb.add(msg.winner, winner.getside());
 	attackers.applycasualty(sb);
 	defenders.applycasualty(sb);
-	if(!raid)
-		addsupport(attacker_player, -1 * game.support_change);
-	addsupport(attacker_player, -1 * game.support_change);
 	auto iswin = (&winner == &attackers);
 	if(iswin) {
 		retreat(defender_player);

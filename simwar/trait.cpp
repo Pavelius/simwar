@@ -12,6 +12,5 @@ bsreq trait_type[] = {
 	BSREQ(trait_info, good, number_type),
 	BSREQ(trait_info, diplomacy, number_type),
 	BSREQ(trait_info, nobility, number_type),
-	BSREQ(trait_info, will, number_type),
 {}};
 adat<trait_info, 64> trait_data; BSMETA(trait);

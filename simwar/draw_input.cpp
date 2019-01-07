@@ -669,6 +669,11 @@ static void breakparam() {
 	breakmodal(hot.param);
 }
 
+static void keyparam() {
+	hot.key = hot.param;
+	hot.param = 0;
+}
+
 static void mouse_map_info();
 
 static bool control_board() {
@@ -1119,10 +1124,8 @@ static void choose_move() {
 		a3.fill(province->getplayer(), province);
 		if(!choose_conquer(player, hero, action, province, a1, troops_move, a3, 0))
 			return;
-		tactic = hero->choose_tactic();
-		if(!tactic)
-			return;
-	} else if(action->movement) {
+	}
+	if(action->movement) {
 		army a1(const_cast<player_info*>(player), province, hero, false, false);
 		army a3;
 		a1.fill(player, 0);
@@ -1130,6 +1133,11 @@ static void choose_move() {
 		a1.count = troop_info::remove_moved(a1.data, a1.count);
 		a1.count = troop_info::remove_restricted(a1.data, a1.count, province);
 		if(!choose_conquer(player, hero, action, province, a1, troops_move, a3, 1))
+			return;
+	}
+	if(action->raid || action->attack || action->defend) {
+		tactic = hero->choose_tactic();
+		if(!tactic)
 			return;
 	}
 	if(action->recruit) {
@@ -1177,6 +1185,7 @@ void player_info::show_reports() const {
 }
 
 void player_info::make_move() {
+	setcamera(getbestprovince());
 	while(ismodal()) {
 		render_left_side(this, current_province, true);
 		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;

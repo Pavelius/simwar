@@ -110,7 +110,7 @@ unsigned player_info::gettroops(troop_info** source, unsigned maximum_count, con
 
 province_info* player_info::getbestprovince() const {
 	province_info* elements[player_max];
-	auto count = province_info::select(elements, sizeof(elements) / sizeof(elements[0]), this);
+	auto count = province_info::select(elements, sizeof(elements) / sizeof(elements[0]), this, FriendlyProvince);
 	if(!count)
 		return 0;
 	return elements[0];
@@ -214,10 +214,11 @@ void player_info::check_heroes() {
 
 void player_info::suggest_heroes() {
 	game.hire_hero = 0;
-	game.hire_event += xrand(5, 20);
-	if(game.hire_event < 100)
+	if(game.hire_turns > 0) {
+		game.hire_turns--;
 		return;
-	game.hire_event -= 100;
+	}
+	game.hire_turns = imax(1, game.hire_turns_range[0] + (rand() % game.hire_turns_range[0]));
 	hero_info* source[hero_max];
 	auto count = hero_info::select(source, lenghtof(source), 0);
 	if(!count)
@@ -278,10 +279,20 @@ void player_info::check_hire() {
 	gold -= hire_gold;
 }
 
+bool player_info::isallowgame() {
+	for(auto& e : player_data) {
+		if(!e)
+			continue;
+		auto province = e.getbestprovince();
+		if(!province)
+			return false;
+	}
+	return true;
+}
+
 void player_info::playgame() {
 	create_province_order();
-	game.hire_event = 80;
-	while(true) {
+	while(isallowgame()) {
 		hero_info::refresh_heroes();
 		for(auto& e : player_data) {
 			if(!e)

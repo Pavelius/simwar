@@ -59,8 +59,10 @@ int	hero_info::getincome() const {
 }
 
 bool hero_info::isallow(const action_info* action) const {
-	if(action->raid)
+	if(action->raid > 0)
 		return (getattack() + getraid()) > 0;
+	if(action->support > 0)
+		return (action->support + getdiplomacy()) > 0;
 	return true;
 }
 
@@ -94,26 +96,11 @@ void hero_info::resolve() {
 		}
 	}
 	if(action->support)
-		province->addsupport(player, action->support);
-	auto criminal_negation = 0;
-	if(action->rule) {
-		// Повышает экономику
-		province->addeconomy(action->rule);
-		// Защита позволяет эффективно бороться с криминалом
-		criminal_negation += getdefend() * game.support_change;
-		// Дипломатия существенно повышает влияние
-		province->addsupport(player, imax(0, getdiplomacy())*game.support_change);
-		// Благородство дает дополнительный доход
-		*player += imax(0, getnobility());
-	}
-	// Борьба с анархистами
-	if(criminal_negation && province->getsupport(player) < 0) {
-		province->addsupport(player, criminal_negation);
-		if(province->getsupport(player) > 0)
-			province->setsupport(player, 0);
-	}
-	// Любое действие доброго героя повышают влияние
+		province->addsupport(player, action->support + getdiplomacy());
 	province->addsupport(player, getgood());
+	province->addeconomy(action->economy);
+	if(action->defend)
+		province->addsupportex(player, -action->defend - imax(0, getdefend()), 0, game.support_maximum);
 	// Доброе или злое действие влияет на лояльность героя
 	setloyalty(getloyalty() + action->good*getgood());
 }
