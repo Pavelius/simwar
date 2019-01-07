@@ -1081,6 +1081,7 @@ static void choose_move() {
 	auto action = choose_action(player, hero);
 	if(!action)
 		return;
+	const tactic_info* tactic = 0;
 	province_info* province = 0;
 	if(action->isplaceable()) {
 		auto choose_mode = action->getprovince();
@@ -1104,12 +1105,16 @@ static void choose_move() {
 		a3.fill(province->getplayer(), province);
 		if(!choose_conquer(player, hero, action, province, a1, troops_move, a3, 0))
 			return;
+		tactic = hero->choose_tactic();
+		if(!tactic)
+			return;
 	} else if(action->movement) {
 		army a1(const_cast<player_info*>(player), province, hero, false, false);
 		army a3;
 		a1.fill(player, 0);
 		a1.count = troop_info::remove(a1.data, a1.count, province);
 		a1.count = troop_info::remove_moved(a1.data, a1.count);
+		a1.count = troop_info::remove_restricted(a1.data, a1.count, province);
 		if(!choose_conquer(player, hero, action, province, a1, troops_move, a3, 1))
 			return;
 	}
@@ -1118,7 +1123,25 @@ static void choose_move() {
 		if(!recruit(player, hero, action, province, a1, units_product, cost))
 			return;
 	}
-	hero->setaction(action, province, cost, troops_move, units_product);
+	hero->setaction(action, province, tactic, cost, troops_move, units_product);
+}
+
+const tactic_info* hero_info::choose_tactic() const {
+	while(ismodal()) {
+		render_left_side(getplayer(), current_province, false);
+		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
+		auto y = gui.padding + gui.border;
+		y += render_hero(x, y, gui.hero_window_width, this) + gui.padding;
+		for(auto& e : tactic_data) {
+			if(!e)
+				continue;
+			y += windowb(x, y, gui.hero_window_width, e.getname(), cmd(breakparam, (int)&e));
+		}
+		y += windowb(x, y, gui.hero_window_width, msg.cancel, cmd(buttoncancel), 0, KeyEscape);
+		domodal();
+		control_standart();
+	}
+	return (tactic_info*)getresult();
 }
 
 int	player_info::choose(const hero_info* hero, answer_info& source, const char* format, ...) const {

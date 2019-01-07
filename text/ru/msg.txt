@@ -60,4 +60,6 @@ cancel: Отменить
 yes: Да
 no: Нет
 
+word_in: в
+
 wound: рана|раны|ран

@@ -51,9 +51,9 @@ public:
 		if(!tactic) {
 			auto count = tactic_manager.getcount();
 			if(count > 0)
-				tactic = tactic_data + rand() % count;
+				tactic = tactic_data.data + (rand() % count);
 			else
-				tactic = tactic_data;
+				tactic = tactic_data.data;
 		}
 		strenght = army::getstrenght(&ti);
 		sb.add(format, getlead(text_lead, zendof(text_lead)), text_tips, province_name);
@@ -142,7 +142,7 @@ public:
 
 };
 
-bool province_info::battle(string& sb, player_info* attacker_player, player_info* defender_player, action_info* action, bool raid) {
+bool province_info::battle(string& sb, player_info* attacker_player, player_info* defender_player, const action_info* action, bool raid) {
 	combatside attackers(this, attacker_player, true, raid);
 	combatside defenders(this, defender_player, false, raid);
 	attackers.setstrenght(sb, msg.attacking_force, getname()); sb.add(" ");

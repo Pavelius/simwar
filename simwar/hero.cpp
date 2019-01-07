@@ -63,10 +63,11 @@ bool hero_info::isallow(const action_info* action) const {
 	return true;
 }
 
-void hero_info::setaction(action_info* action, province_info* province, const cost_info& cost, const army& logistic, const unit_set& production) {
+void hero_info::setaction(const action_info* action, province_info* province, const tactic_info* tactic, const cost_info& cost, const army& logistic, const unit_set& production) {
 	cancelaction();
 	setaction(action);
 	setprovince(province);
+	settactic(tactic);
 	pay = cost;
 	pay += *action;
 	if(player)
@@ -149,6 +150,7 @@ void hero_info::cancelaction() {
 	if(player)
 		*player += pay;
 	pay.clear();
+	tactic = 0;
 }
 
 unsigned hero_info::remove_hired(hero_info** source, unsigned count) {
@@ -249,9 +251,11 @@ void hero_info::getstate(stringbuilder& sb) const {
 		sb.addn("[+");
 		sb.add("%+1", action->getnameof());
 		if(province) {
-			sb.add(" â ");
+			sb.add(" %1 ", msg.word_in);
 			sb.add(province->getname());
 		}
+		if(tactic)
+			sb.adds("(%1)", tactic->getname());
 		sb.add("]");
 	}
 	auto value = getwait();

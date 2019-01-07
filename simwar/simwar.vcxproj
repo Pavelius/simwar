@@ -204,7 +204,6 @@
     <Text Include="..\text\ru\gender.txt" />
     <Text Include="..\text\ru\msg.txt" />
     <Text Include="..\text\ru\player_ai.txt" />
-    <Text Include="..\text\ru\tactic.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

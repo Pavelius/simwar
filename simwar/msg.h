@@ -53,4 +53,5 @@ struct msg_info {
 	const char* wound;
 	const char* wounds;
 	const char* wounds_of;
+	const char* word_in;
 };

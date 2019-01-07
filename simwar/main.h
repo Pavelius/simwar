@@ -120,7 +120,7 @@ struct province_info : name_info {
 	void						addeconomy(int value) { seteconomy(geteconomy() + value); }
 	void						addsupport(const player_info* player, int value) { setsupport(player, getsupport(player) + value); }
 	void						arrival(const player_info* player);
-	bool						battle(string& sb, player_info* attacker_player, player_info* defender_player, action_info* action, bool raid);
+	bool						battle(string& sb, player_info* attacker_player, player_info* defender_player, const action_info* action, bool raid);
 	void						build(unit_info* unit, int wait = 1);
 	static void					change_support();
 	void						createwave();
@@ -175,7 +175,6 @@ private:
 };
 struct trait_info : name_info, character_info {};
 struct tactic_info : name_info, combat_info {
-	constexpr tactic_info(const char* id) : name_info(id), combat_info() {}
 };
 struct army : adat<troop_info*, 32> {
 	hero_info*					general;
@@ -208,6 +207,7 @@ struct hero_info : name_info {
 	//
 	void						cancelaction();
 	void						check_leave();
+	const tactic_info*			choose_tactic() const;
 	int							get(const char* id) const;
 	int							getattack() const { return get("attack"); }
 	const action_info*			getaction() const { return action; }
@@ -244,17 +244,18 @@ struct hero_info : name_info {
 	void						resolve();
 	unsigned					select(action_info** source, unsigned maximum) const;
 	static unsigned				select(hero_info** source, unsigned maximum_count, const player_info* player);
-	void						setaction(action_info* value) { action = value; }
-	void						setaction(action_info* action, province_info* province, const cost_info& cost, const army& logistic, const unit_set& production);
+	void						setaction(const action_info* value) { action = value; }
+	void						setaction(const action_info* action, province_info* province, const tactic_info* tactic, const cost_info& cost, const army& logistic, const unit_set& production);
+	void						setloyalty(int value) { loyalty = value; }
 	void						setplayer(player_info* player);
 	void						setprovince(province_info* value) { province = value; }
-	void						setloyalty(int value) { loyalty = value; }
+	void						settactic(const tactic_info* value) { tactic = value; }
 	void						setwait(int v) { wait = v; }
 	void						setwound(int v) { wound = v; }
 private:
 	char						wait, wound, loyalty;
 	gender_s					gender;
-	action_info*				action;
+	const action_info*			action;
 	const char*					avatar;
 	player_info*				player;
 	province_info*				province;
@@ -387,6 +388,6 @@ extern adat<player_info, player_max> player_data;
 extern adat<province_info, province_max> province_data;
 extern unsigned char			province_order[province_max];
 extern adat<report_info, 2048>	report_data;
-extern tactic_info				tactic_data[];
+extern adat<tactic_info, 16>	tactic_data;
 extern adat<troop_info, 256>	troop_data;
 extern adat<unit_info, 64>		unit_data;

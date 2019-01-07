@@ -65,6 +65,8 @@ bsreq msg_type[] = {
 	BSREQ(msg_info, wound, text_type),
 	BSREQ(msg_info, wounds, text_type),
 	BSREQ(msg_info, wounds_of, text_type),
+	//
+	BSREQ(msg_info, word_in, text_type),
 {}};
 msg_info msg;
 bsdata msg_manager("msg", msg, msg_type);

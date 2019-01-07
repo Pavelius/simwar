@@ -1,9 +1,6 @@
 #include "main.h"
 
-tactic_info tactic_data[] = {{"lighting_attack"},
-{"careful_defence"},
-{"messy_fighting"},
-};
+adat<tactic_info, 16> tactic_data;
 bsreq tactic_type[] = {
 	BSREQ(tactic_info, id, text_type),
 	BSREQ(tactic_info, name, text_type),

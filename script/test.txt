@@ -1,3 +1,7 @@
+#tactic lighting_attack attack(2) raid(1) defend(2)
+#tactic careful_defence shield(1)
+#tactic messy_fighting sword(1)
+
 #nation orcs
 #nation northerners
 #nation southerners
@@ -72,10 +76,6 @@
 #trait bloody attack(2) defend(1) good(-1)
 #trait cunning attack(1) raid(1)
 #trait noble nobility(1) good(1)
-
-#tactic lighting_attack attack(2) raid(1) defend(2)
-#tactic careful_defence shield(1)
-#tactic messy_fighting sword(1)
 
 #hero gordek avatar("art/portraits/gordek.bmp") traits(bloody, hireling) player(red) best_tactic(lighting_attack)
 #hero mistra avatar("art/portraits/mistra.bmp") traits(carefull, diplomat) player(red) best_tactic(careful_defence) gender(female)
