@@ -188,6 +188,8 @@ struct army : adat<troop_info*, 32> {
 	void						fill(const player_info* player, const province_info* province);
 	int							get(const char* id, tip_info* ti, bool include_number = true) const;
 	int							getstrenght(tip_info* ti, bool include_number = true) const;
+	int							getshield() const;
+	int							getsword() const;
 };
 struct answer_info {
 	struct element {
@@ -289,7 +291,9 @@ struct troop_info {
 	static const char*			getpresent(char* result, const char* result_maximum, troop_info** source, unsigned count, const char* addition_text);
 	province_info*				getprovince() const { return province; }
 	province_info*				getprovince(const player_info* player) const;
+	int							getshield() const { return get("shield"); }
 	int							getsort() const { return type->attack + type->defend; }
+	int							getsword() const { return get("sword"); }
 	void						kill(player_info* player);
 	static bsreq				metadata[];
 	static unsigned				remove(troop_info** source, unsigned count, const province_info* province);

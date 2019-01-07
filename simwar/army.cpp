@@ -1,8 +1,7 @@
 #include "main.h"
 
 army::army(player_info* player, province_info* province, hero_info* general, bool attack, bool raid) :
-	player(player), general(general), tactic(0), attack(attack), province(province), raid(raid) {
-}
+	player(player), general(general), tactic(0), attack(attack), province(province), raid(raid) {}
 
 void army::fill(const player_info* player, const province_info* province) {
 	for(auto& e : troop_data) {
@@ -16,6 +15,28 @@ void army::fill(const player_info* player, const province_info* province) {
 			continue;
 		add(&e);
 	}
+}
+
+int army::getsword() const {
+	auto result = 0;
+	if(general)
+		result += general->getsword() * game.casualties;
+	if(tactic)
+		result += tactic->sword * game.casualties;
+	for(auto p : *this)
+		result += p->getsword();
+	return result;
+}
+
+int army::getshield() const {
+	auto result = 0;
+	if(general)
+		result += general->getshield()*game.casualties;
+	if(tactic)
+		result += tactic->shield * game.casualties;
+	for(auto p : *this)
+		result += p->getshield();
+	return result;
 }
 
 int army::getstrenght(tip_info* ti, bool include_number) const {

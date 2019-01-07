@@ -18,7 +18,8 @@ class combatside : public army {
 
 public:
 
-	combatside(province_info* province, player_info* player, bool attack, bool raid) : army(player, province, 0, attack, raid), strenght(0), casualties(0), wounds(0) {
+	combatside(province_info* province, player_info* player, bool attack, bool raid) : army(player, province, 0, attack, raid),
+		strenght(0), casualties(0), wounds(0) {
 		fill(player, province);
 		general = province->gethero(player);
 		shuffle();
@@ -80,16 +81,9 @@ public:
 	}
 
 	void setcasualty(string& sb, combatside& enemy) {
+		auto strenght_casualties = enemy.strenght + enemy.getsword() - getshield();
 		if(game.casualties)
-			casualties += (enemy.strenght / game.casualties);
-		if(enemy.tactic)
-			casualties += enemy.tactic->sword;
-		if(enemy.general)
-			casualties += enemy.general->getsword();
-		if(tactic)
-			casualties -= tactic->shield;
-		if(general)
-			casualties -= general->getshield();
+			casualties += (strenght_casualties / game.casualties);
 		if(casualties > (int)count) {
 			wounds = casualties - count;
 			casualties = count;
