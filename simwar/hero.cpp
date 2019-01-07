@@ -245,6 +245,15 @@ void hero_info::getinfo(stringbuilder& sb) const {
 }
 
 void hero_info::getstate(stringbuilder& sb) const {
+	if(action) {
+		sb.addn("[+");
+		sb.add("%+1", action->getnameof());
+		if(province) {
+			sb.add(" â ");
+			sb.add(province->getname());
+		}
+		sb.add("]");
+	}
 	auto value = getwait();
 	if(value > 0) {
 		sb.addn("[-");

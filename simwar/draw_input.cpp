@@ -24,7 +24,6 @@ static int				break_result;
 static point			camera;
 static point			camera_drag;
 static rect				last_board;
-static point			last_mouse;
 static point			tooltips_point;
 static short			tooltips_width;
 static char				tooltips_text[4096];
@@ -379,6 +378,8 @@ static int windowh(const hero_info* hero, const char* format, const char* format
 			h = gui.hero_width;
 	}
 	auto hittest = window({x, y, x + w, y + h}, false, false);
+	auto x1 = x;
+	auto y1 = y;
 	if(hero) {
 		avatar(x, y, hero->getavatar());
 		if(hittest == AreaHilited || hittest == AreaHilitedPressed) {
@@ -391,7 +392,10 @@ static int windowh(const hero_info* hero, const char* format, const char* format
 		sb.set(hero->getgender());
 	}
 	sb.addv(format, format_param);
-	render_text(x, y, w - avatar_width, sb);
+	draw::link[0] = 0;
+	auto result = textf(x, y, width, sb);
+	if(draw::link[0])
+		tooltips(x1, y1, w, draw::link);
 	return y + h + gui.border * 2;
 }
 
@@ -414,8 +418,14 @@ static void choose_current_province() {
 }
 
 static point getscreen(const rect& rc, point pt) {
-	auto x = pt.x - camera.x + rc.x1;
-	auto y = pt.y - camera.y + rc.y1;
+	auto x = pt.x - camera.x + rc.x1 + rc.width()/2;
+	auto y = pt.y - camera.y + rc.y1 + rc.height()/2;
+	return {(short)x, (short)y};
+}
+
+static point getmappos(const rect& rc, point pt) {
+	auto x = pt.x + camera.x - rc.x1 - rc.width() / 2;
+	auto y = pt.y + camera.y - rc.y1 - rc.height() / 2;
 	return {(short)x, (short)y};
 }
 
@@ -544,14 +554,15 @@ static void render_board(const rect& rco, const player_info* player, callback_pr
 	draw::state push;
 	draw::area(rc); // Drag and drop analize this result
 	last_board = rc;
-	last_mouse.x = (short)(hot.mouse.x - rc.x1 + camera.x);
-	last_mouse.y = (short)(hot.mouse.y - rc.y1 + camera.y);
 	int w = rc.width();
 	int h = rc.height();
-	int x1 = camera.x;
-	int y1 = camera.y;
+	int x1 = camera.x - w/2;
+	int y1 = camera.y - h/2;
 	int x2 = x1 + w;
 	int y2 = y1 + h;
+	point last_mouse = {
+	(short)(hot.mouse.x - rc.x1 - rc.width()/2 + camera.x),
+	(short)(hot.mouse.y - rc.y1 - rc.height()/2 + camera.y)};
 	if(x1 < 0) {
 		rc.x1 -= x1;
 		x1 = 0;
@@ -683,7 +694,16 @@ void control_standart() {
 		return;
 }
 
+static void setcamera(const province_info* province) {
+	if(!province)
+		return;
+	current_province = province;
+	camera = province->getposition();
+}
+
 static int choose_answer(const player_info* player, const province_info* province, const hero_info* hero, answer_info& source, const char* format, const char* format_param) {
+	if(province)
+		setcamera(province);
 	while(ismodal()) {
 		render_left_side(player, province);
 		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
@@ -704,7 +724,7 @@ static void show_report(const player_info* player, const province_info* province
 }
 
 static void mouse_map_info() {
-	auto pt = hot.mouse + camera;
+	auto pt = getmappos(last_board, hot.mouse);
 	char temp[512]; zprint(temp, "Координаты карты: %1i, %2i.", pt.x, pt.y);
 	show_report(0, 0, 0, temp);
 }
@@ -1118,7 +1138,6 @@ void player_info::show_reports() const {
 }
 
 void player_info::make_move() {
-	current_province = province_data.data + 0;
 	while(ismodal()) {
 		render_left_side(this, current_province, true);
 		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
