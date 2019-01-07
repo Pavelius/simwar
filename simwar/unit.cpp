@@ -16,7 +16,7 @@ bsreq unit_type[] = {
 	BSREQ(unit_info, nation, nation_type),
 	BSREQ(unit_info, recruit_count, number_type),
 	BSREQ(unit_info, recruit_time, number_type),
-	BSREQ(unit_info, recruit_landscape, landscape_type),
+	BSREQ(unit_info, landscape, landscape_type),
 {}};
 adat<unit_info, 64> unit_data;
 BSMETA(unit);
@@ -24,10 +24,12 @@ BSMETA(unit);
 void unit_set::fill(const player_info* player, const province_info* province, const hero_info* hero, const action_info* action) {
 	auto player_cost = *player;
 	auto level = 0;
+	const landscape_info* landscape = 0;
 	nation_info* nation = 0;
 	if(province) {
 		level = province->geteconomy();
 		nation = province->getnation();
+		landscape = province->getlandscape();
 	}
 	for(auto& e : unit_data) {
 		if(!e)
@@ -37,6 +39,8 @@ void unit_set::fill(const player_info* player, const province_info* province, co
 		if(e.level > level)
 			continue;
 		if(e.nation && e.nation != nation)
+			continue;
+		if(!e.is(landscape))
 			continue;
 		auto count = e.recruit_count;
 		if(!count)
@@ -48,6 +52,16 @@ void unit_set::fill(const player_info* player, const province_info* province, co
 
 int unit_info::get(const char* id) const {
 	return name_info::getnum(this, unit_type, id);
+}
+
+bool unit_info::is(const landscape_info* landscape) const {
+	if(this->landscape[0] == 0 || !landscape)
+		return true;
+	for(auto p : this->landscape) {
+		if(p == landscape)
+			return true;
+	}
+	return false;
 }
 
 cost_info unit_set::getcost() const {

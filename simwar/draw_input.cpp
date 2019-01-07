@@ -1100,6 +1100,7 @@ static void choose_move() {
 		army a3(0, const_cast<province_info*>(province), 0, false, raid);
 		a1.fill(player, 0);
 		a1.count = troop_info::remove_moved(a1.data, a1.count);
+		a1.count = troop_info::remove_restricted(a1.data, a1.count, province);
 		a3.fill(province->getplayer(), province);
 		if(!choose_conquer(player, hero, action, province, a1, troops_move, a3, 0))
 			return;

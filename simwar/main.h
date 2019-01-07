@@ -266,8 +266,10 @@ struct unit_info : name_info, combat_info, cost_info {
 	char						level;
 	nation_info*				nation;
 	char						recruit_count, recruit_time;
-	landscape_info*				recruit_landscape;
+	landscape_info*				landscape[4];
+	//
 	int							get(const char* id) const;
+	bool						is(const landscape_info* landscape) const;
 };
 struct troop_info {
 	explicit operator bool() const { return type != 0; }
@@ -291,6 +293,7 @@ struct troop_info {
 	static bsreq				metadata[];
 	static unsigned				remove(troop_info** source, unsigned count, const province_info* province);
 	static unsigned				remove_moved(troop_info** source, unsigned count);
+	static unsigned				remove_restricted(troop_info** source, unsigned count, const province_info* province);
 	static void					retreat(const province_info* province, const player_info* player);
 	static unsigned				select(troop_info** result, unsigned result_maximum, const province_info* province);
 	static unsigned				select_move(troop_info** result, unsigned result_maximum, const province_info* province, const player_info* player);

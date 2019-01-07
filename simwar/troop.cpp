@@ -72,6 +72,21 @@ unsigned troop_info::remove_moved(troop_info** source, unsigned count) {
 	return ps - source;
 }
 
+unsigned troop_info::remove_restricted(troop_info** source, unsigned count, const province_info* province) {
+	auto ps = source;
+	auto pe = source + count;
+	if(!province)
+		return 0;
+	auto landscape = province->getlandscape();
+	for(auto pb = source; pb < pe; pb++) {
+		auto p = *pb;
+		if(!p->type->is(landscape))
+			continue;
+		*ps++ = p;
+	}
+	return ps - source;
+}
+
 unsigned troop_info::remove(troop_info** source, unsigned count, const province_info* province) {
 	auto ps = source;
 	auto pe = source + count;
