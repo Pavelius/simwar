@@ -103,11 +103,12 @@ unsigned province_info::remove_hero_present(aref<province_info*> source, const p
 void province_info::getinfo(stringbuilder& sb, bool show_landscape, const army* defenders) const {
 	if(show_landscape)
 		sb.adds(landscape->name);
+	sb.adds(":gold:%1i", getincome());
+	sb.adds(":house:%1i", getlevel());
 	auto value = getdefend();
 	if(defenders)
 		value = defenders->get("defend", 0);
-	sb.adds(":gold:%1i :house:%2i :shield_grey:%3i",
-		getincome(), getlevel(), value);
+	sb.adds(":shield_grey:%1i", value);
 }
 
 void province_info::getsupport(stringbuilder& sb) const {
