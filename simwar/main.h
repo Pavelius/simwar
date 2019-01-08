@@ -27,6 +27,7 @@ enum gender_s : unsigned char {
 bsreq action_type[];
 bsreq calendar_type[];
 bsreq character_type[];
+bsreq cost_type[];
 bsreq gender_type[];
 bsreq landscape_type[];
 bsreq msg_type[];
@@ -47,9 +48,8 @@ struct unit_info;
 struct unit_set;
 
 struct cost_info {
-	short						gold, income;
-	char						fame;
-	constexpr cost_info() : gold(0), income(0), fame(0) {}
+	short						gold, fame;
+	constexpr cost_info() : gold(0), fame(0) {}
 	void operator+=(const cost_info& e) { gold += e.gold; fame += e.fame; }
 	void operator+=(const int value) { gold += value; }
 	void operator-=(const cost_info& e) { gold -= e.gold; fame -= e.fame; }
@@ -95,7 +95,8 @@ struct name_info {
 	int							fix(tip_info* ti, int value) const { return fix(ti, name, value); }
 };
 struct nation_info : name_info {};
-struct action_info : name_info, combat_info, cost_info {
+struct action_info : name_info, combat_info {
+	cost_info					cost;
 	char						recruit, support, economy, movement;
 	char						order;
 	char						good;
@@ -118,7 +119,8 @@ struct season_info : name_info {
 struct calendar_info : name_info {
 	const season_info*			season;
 };
-struct landscape_info : name_info, combat_info, cost_info {
+struct landscape_info : name_info, combat_info {
+	char						income;
 	int							getincome(tip_info* ti) const;
 };
 struct province_info : name_info {
@@ -220,6 +222,7 @@ struct hero_info : name_info {
 	//
 	void						cancelaction();
 	void						check_leave();
+	const action_info*			choose_action() const;
 	const tactic_info*			choose_tactic() const;
 	int							get(const char* id) const;
 	int							getattack() const { return get("attack"); }
@@ -255,7 +258,6 @@ struct hero_info : name_info {
 	unsigned					remove_this(hero_info** source, unsigned count) const;
 	static unsigned				remove_hired(hero_info** source, unsigned count);
 	void						resolve();
-	unsigned					select(action_info** source, unsigned maximum) const;
 	static unsigned				select(hero_info** source, unsigned maximum_count, const player_info* player);
 	void						setaction(const action_info* value) { action = value; }
 	void						setaction(const action_info* action, province_info* province, const tactic_info* tactic, const cost_info& cost, const army& logistic, const unit_set& production);
@@ -276,10 +278,12 @@ private:
 	const tactic_info*			best_tactic;
 	trait_info*					traits[2];
 };
-struct unit_info : name_info, combat_info, cost_info {
-	char						level;
+struct unit_info : name_info, combat_info {
+	cost_info					cost;
 	nation_info*				nation;
 	char						recruit_count, recruit_time;
+	char						level;
+	char						income;
 	landscape_info*				landscape[4];
 	//
 	int							get(const char* id) const;
@@ -321,18 +325,17 @@ private:
 	province_info*				province;
 	province_info*				move;
 };
-struct player_info : name_info, cost_info {
+struct player_info : name_info {
 	explicit operator bool() const { return type != NoPlayer; }
-	operator cost_info&() { return *static_cast<cost_info*>(this); }
 	static void					check_heroes();
 	void						check_hire();
 	int							choose(const hero_info* hero, answer_info& source, const char* format, ...) const;
+	cost_info					cost;
 	static int					compare_hire_bet(const void* p1, const void* p2);
 	static void					gain_profit();
 	static unsigned				getactions(hero_info** source, unsigned maximum_count, int order);
 	province_info*				getbestprovince() const;
 	static void					getcalendar(stringbuilder& sb);
-	const cost_info&			getcost() const { return *this; }
 	int							getherocount() const;
 	int							getincome(tip_info* ti = 0) const;
 	int							getindex() const;

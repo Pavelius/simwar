@@ -153,9 +153,9 @@ bool province_info::battle(string& sb, player_info* attacker_player, player_info
 		arrival(attacker_player);
 		if(!raid) {
 			if(attacker_player) {
-				attacker_player->fame += 1;
+				attacker_player->cost.fame += 1;
 				if(attackers.general)
-					attacker_player->fame += imax(0, attackers.general->getnobility());
+					attacker_player->cost.fame += imax(0, attackers.general->getnobility());
 			}
 			player = attacker_player;
 		} else {
@@ -163,15 +163,15 @@ bool province_info::battle(string& sb, player_info* attacker_player, player_info
 			sb.addn(msg.raid_spoils, spoils);
 			cost_info e; e.gold = spoils;
 			if(attacker_player)
-				*attacker_player += e;
+				attacker_player->cost += e;
 			if(defender_player)
-				*defender_player -= e;
+				defender_player->cost -= e;
 		}
 		defenders.addloyalty(-1);
 	} else {
 		retreat(attacker_player);
 		if(defender_player && defenders.general)
-			defender_player->fame += imax(0, defenders.general->getnobility());
+			defender_player->cost.fame += imax(0, defenders.general->getnobility());
 		attackers.addloyalty(-1);
 	}
 	return iswin;

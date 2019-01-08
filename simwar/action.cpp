@@ -13,8 +13,7 @@ bsreq action_type[] = {
 	BSREQ(action_info, support, number_type),
 	BSREQ(action_info, movement, number_type),
 	BSREQ(action_info, order, number_type),
-	BSREQ(action_info, gold, number_type),
-	BSREQ(action_info, fame, number_type),
+	BSREQ(action_info, cost, number_type),
 	BSREQ(action_info, wait, number_type),
 	BSREQ(action_info, good, number_type),
 {}};

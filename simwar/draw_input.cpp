@@ -420,7 +420,7 @@ static int render_player(int x, int y, const player_info* player) {
 	sb.add("###%+1, ", player->getname());
 	player->getcalendar(sb);
 	sb.add("\n");
-	auto cost = player->getcost();
+	auto cost = player->cost;
 	auto income = player->getincome(&ti);
 	sb.add(":gold:%1i[%4\"%3\"%+2i]", cost.gold, income, tips, (income >= 0) ? "+" : "-");
 	sb.add(" :flag_grey:%1i", cost.fame);
@@ -608,6 +608,8 @@ static void render_board(const rect& rco, const player_info* player, callback_pr
 }
 
 static int render_hero(int x, int y, int width, const hero_info* hero, callback_proc proc = 0, bool show_state = true) {
+	if(!hero)
+		return 0;
 	draw::state push;
 	draw::font = metrics::font;
 	auto pa = hero->getavatar();
@@ -865,7 +867,7 @@ struct unit_list : list {
 			szupper(result, 1);
 			break;
 		case 1:
-			source.data[line]->cost_info::get(result, result_maximum);
+			source.data[line]->cost.get(result, result_maximum);
 			break;
 		default:
 			return "";
@@ -938,27 +940,6 @@ struct army_list : list {
 
 };
 
-static action_info* choose_action(const player_info* player, hero_info* hero) {
-	action_info* source[16];
-	auto count = hero->select(source, lenghtof(source));
-	count = player->remove_restricted(source, count);
-	action_info::sort(source, count);
-	while(ismodal()) {
-		render_left_side(player, current_province, false);
-		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
-		auto y = gui.padding + gui.border;
-		y += render_hero(x, y, hero) + 1;
-		for(unsigned i = 0; i < count; i++) {
-			auto& e = *source[i];
-			y += windowb(x, y, gui.hero_window_width, e.getname(), cmd(breakparam, (int)&e), gui.border) + 1;
-		}
-		y += windowb(x, y, gui.hero_window_width, msg.cancel, cmd(breakparam, 0), 0, KeyEscape) + 1;
-		domodal();
-		control_standart();
-	}
-	return (action_info*)getresult();
-}
-
 static const province_info* choose_province(const player_info* player, const hero_info* hero, const action_info* action, aref<province_info*> selection, color selection_color) {
 	while(ismodal()) {
 		rect rc = {0, 0, draw::getwidth(), draw::getheight()};
@@ -1019,7 +1000,7 @@ static void render_two_window(const player_info* player, hero_info* hero, const 
 static bool recruit(const player_info* player, hero_info* hero, const action_info* action, const province_info* province, unit_set& s1, unit_set& s2, cost_info& cost) {
 	unit_list u1(s1); u1.id = 10;
 	unit_list u2(s2); u2.id = 11;
-	auto player_cost = player->getcost();
+	auto player_cost = player->cost;
 	auto start_cost = cost;
 	while(ismodal()) {
 		cost = s2.getcost();
@@ -1098,10 +1079,10 @@ static void choose_move() {
 	if(!hero)
 		return;
 	auto player = hero->getplayer();
-	auto action = choose_action(player, hero);
+	auto action = hero->choose_action();
 	if(!action)
 		return;
-	cost_info cost = *action;
+	cost_info cost = action->cost;
 	const tactic_info* tactic = 0;
 	province_info* province = 0;
 	if(action->isplaceable()) {
@@ -1156,7 +1137,7 @@ int answer_info::choose(const hero_info* hero, bool cancel_button, answer_info::
 			render_left_side(hero->getplayer(), current_province, false);
 		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
 		auto y = gui.padding + gui.border;
-		y += render_hero(x, y, gui.hero_window_width, hero) + gui.padding;
+		y += render_hero(x, y, gui.hero_window_width, hero);
 		for(auto& e : elements)
 			y += windowb(x, y, gui.hero_window_width, e.getname(), cmd(breakparam, e.param));
 		if(cancel_button)

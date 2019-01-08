@@ -73,7 +73,7 @@ void hero_info::setaction(const action_info* action, province_info* province, co
 	settactic(tactic);
 	pay += cost;
 	if(player)
-		*player -= pay;
+		player->cost -= pay;
 	for(auto p : logistic)
 		p->setmove(province);
 	for(auto p : production)
@@ -131,7 +131,7 @@ void hero_info::cancelaction() {
 			e.clear();
 	}
 	if(player)
-		*player += pay;
+		player->cost += pay;
 	pay.clear();
 	tactic = 0;
 }
@@ -160,18 +160,21 @@ unsigned hero_info::remove_this(hero_info** source, unsigned count) const {
 	return ps - source;
 }
 
-unsigned hero_info::select(action_info** source, unsigned maximum_count) const {
-	auto ps = source;
-	auto pe = ps + maximum_count;
+const action_info* hero_info::choose_action() const {
+	answer_info ai;
 	for(auto& e : action_data) {
 		if(!e)
 			continue;
 		if(!isallow(&e))
 			continue;
-		if(ps < pe)
-			*ps++ = &e;
+		if(player) {
+			if(!player->isallow(&e))
+				continue;
+		}
+		ai.add((int)&e, e.getname());
 	}
-	return ps - source;
+	ai.sort();
+	return (action_info*)ai.choose(this);
 }
 
 void hero_info::check_leave() {

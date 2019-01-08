@@ -6,8 +6,7 @@ bsreq player_info::metadata[] = {
 	BSREQ(player_info, nameof, text_type),
 	BSREQ(player_info, text, text_type),
 	BSREQ(player_info, type, player_ai_type),
-	BSREQ(player_info, gold, number_type),
-	BSREQ(player_info, fame, number_type),
+	BSREQ(player_info, cost, number_type),
 {}};
 adat<player_info, player_max> player_data;
 bsdata player_manager("player", player_data, player_info::metadata);
@@ -19,9 +18,7 @@ void player_info::post(const hero_info* hero, const province_info* province, con
 extern bsdata calendar_manager;
 
 bool player_info::isallow(const action_info* action) const {
-	auto pc = static_cast<const cost_info*>(this);
-	auto ac = static_cast<const cost_info*>(action);
-	if(*ac > *pc)
+	if(action->cost > cost)
 		return false;
 	return true;
 }
@@ -120,7 +117,7 @@ void player_info::gain_profit() {
 	for(auto& e : player_data) {
 		if(!e)
 			continue;
-		e.gold += e.getincome();
+		e.cost.gold += e.getincome();
 	}
 }
 
@@ -146,8 +143,8 @@ static int compare_heroes_by_order(const void* p1, const void* p2) {
 	auto e2 = *((hero_info**)p2);
 	auto pl1 = e1->getplayer();
 	auto pl2 = e2->getplayer();
-	auto sp1 = pl1 ? pl1->getcost().fame : 0;
-	auto sp2 = pl2 ? pl2->getcost().fame : 0;
+	auto sp1 = pl1 ? pl1->cost.fame : 0;
+	auto sp2 = pl2 ? pl2->cost.fame : 0;
 	if(sp1 < sp2)
 		return -1;
 	else if(sp1 > sp2)
@@ -193,13 +190,13 @@ int player_info::compare_hire_bet(const void* p1, const void* p2) {
 		return -1;
 	if(e2->hire_gold > e1->hire_gold)
 		return 1;
-	if(e2->fame < e1->fame)
+	if(e2->cost.fame < e1->cost.fame)
 		return -1;
-	if(e2->fame > e1->fame)
+	if(e2->cost.fame > e1->cost.fame)
 		return 1;
-	if(e2->gold < e1->gold)
+	if(e2->cost.gold < e1->cost.gold)
 		return -1;
-	if(e2->gold > e1->gold)
+	if(e2->cost.gold > e1->cost.gold)
 		return 1;
 	return 0;
 }
@@ -253,7 +250,7 @@ void player_info::hire_heroes() {
 		} else {
 			sb.add(msg.hero_hire_fail, hero->getname(), source.data[0]->getname());
 			player->post(hero, 0, sb);
-			player->gold += player->hire_gold;
+			player->cost.gold += player->hire_gold;
 			player->hire_gold = 0;
 		}
 	}
@@ -263,20 +260,20 @@ void player_info::check_hire() {
 	if(!game.hire_hero)
 		return;
 	auto base_multiplier = 10;
-	answer_info aw;
+	answer_info ai;
 	for(auto i = 0; i < 7; i++) {
 		auto value = (i + 1)*base_multiplier;
-		if(gold>=value)
-			aw.add(value, msg.pay_gold, value);
+		if(cost.gold>=value)
+			ai.add(value, msg.pay_gold, value);
 	}
-	aw.add(0, msg.cancel);
-	if(aw.elements.getcount() <= 1)
+	if(ai.elements.getcount()==0)
 		return;
-	auto pay_value = choose(game.hire_hero, aw, msg.hero_hire, game.hire_hero->getname());
+	ai.add(0, msg.cancel);
+	auto pay_value = choose(game.hire_hero, ai, msg.hero_hire, game.hire_hero->getname());
 	if(!pay_value)
 		return;
 	hire_gold = pay_value;
-	gold -= hire_gold;
+	cost.gold -= hire_gold;
 }
 
 bool player_info::isallowgame() {

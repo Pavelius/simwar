@@ -10,7 +10,7 @@ bsreq unit_type[] = {
 	BSREQ(unit_info, raid, number_type),
 	BSREQ(unit_info, sword, number_type),
 	BSREQ(unit_info, shield, number_type),
-	BSREQ(unit_info, gold, number_type),
+	BSREQ(unit_info, cost, cost_type),
 	BSREQ(unit_info, income, number_type),
 	BSREQ(unit_info, level, number_type),
 	BSREQ(unit_info, nation, nation_type),
@@ -22,7 +22,7 @@ adat<unit_info, 64> unit_data;
 BSMETA(unit);
 
 void unit_set::fill(const player_info* player, const province_info* province, const hero_info* hero, const action_info* action) {
-	auto player_cost = *player;
+	auto player_cost = player->cost;
 	auto level = 0;
 	const landscape_info* landscape = 0;
 	nation_info* nation = 0;
@@ -34,7 +34,7 @@ void unit_set::fill(const player_info* player, const province_info* province, co
 	for(auto& e : unit_data) {
 		if(!e)
 			continue;
-		if(e > player_cost)
+		if(e.cost > player_cost)
 			continue;
 		if(e.level > level)
 			continue;
@@ -67,6 +67,6 @@ bool unit_info::is(const landscape_info* landscape) const {
 cost_info unit_set::getcost() const {
 	cost_info result;
 	for(auto& e : *this)
-		result += *e;
+		result += e->cost;
 	return result;
 }

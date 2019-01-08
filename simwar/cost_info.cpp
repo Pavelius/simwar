@@ -1,5 +1,10 @@
 #include "main.h"
 
+bsreq cost_type[] = {
+	BSREQ(cost_info, gold, number_type),
+	BSREQ(cost_info, fame, number_type),
+{}};
+
 char* cost_info::get(char* result, const char* result_maximum) const {
 	result[0] = 0;
 	szprint(result, result_maximum, ":gold:%1i", gold);
