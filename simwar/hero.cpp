@@ -71,8 +71,7 @@ void hero_info::setaction(const action_info* action, province_info* province, co
 	setaction(action);
 	setprovince(province);
 	settactic(tactic);
-	pay = cost;
-	pay += *action;
+	pay += cost;
 	if(player)
 		*player -= pay;
 	for(auto p : logistic)

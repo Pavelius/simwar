@@ -50,10 +50,10 @@ struct cost_info {
 	short						gold, income;
 	char						fame;
 	constexpr cost_info() : gold(0), income(0), fame(0) {}
-	constexpr void operator+=(const cost_info& e) { gold += e.gold; fame += e.fame; }
-	constexpr void operator+=(const int value) { gold += value; }
-	constexpr void operator-=(const cost_info& e) { gold -= e.gold; fame -= e.fame; }
-	constexpr bool operator>(const cost_info& e) const { return gold > e.gold || fame > e.fame; }
+	void operator+=(const cost_info& e) { gold += e.gold; fame += e.fame; }
+	void operator+=(const int value) { gold += value; }
+	void operator-=(const cost_info& e) { gold -= e.gold; fame -= e.fame; }
+	bool operator>(const cost_info& e) const { return gold > e.gold || fame > e.fame; }
 	void						clear();
 	char*						get(char* result, const char* result_maximum) const;
 };
@@ -202,11 +202,15 @@ struct answer_info {
 	struct element {
 		int						param;
 		const char*				text;
+		const char*				getname() const { return text; }
 	};
+	typedef void(*tips_type)(stringbuilder& sb, const element& e);
 	adat<element, 8>			elements;
 	answer_info() { p = buffer; buffer[0] = 0; }
 	void						add(int param, const char* format, ...);
 	void						addv(int param, const char* format, const char* format_param);
+	int							choose(const hero_info* hero, bool cancel_button = true, answer_info::tips_type getinfo = 0) const;
+	void						sort();
 private:
 	char*						p;
 	char						buffer[8196];

@@ -1020,8 +1020,10 @@ static bool recruit(const player_info* player, hero_info* hero, const action_inf
 	unit_list u1(s1); u1.id = 10;
 	unit_list u2(s2); u2.id = 11;
 	auto player_cost = player->getcost();
+	auto start_cost = cost;
 	while(ismodal()) {
 		cost = s2.getcost();
+		cost += start_cost;
 		const char* error_info = 0;
 		if(s2.getcount() == 0)
 			error_info = msg.not_choose_units;
@@ -1092,7 +1094,6 @@ static void end_turn() {
 }
 
 static void choose_move() {
-	cost_info cost;
 	hero_info* hero = (hero_info*)hot.param;
 	if(!hero)
 		return;
@@ -1100,6 +1101,7 @@ static void choose_move() {
 	auto action = choose_action(player, hero);
 	if(!action)
 		return;
+	cost_info cost = *action;
 	const tactic_info* tactic = 0;
 	province_info* province = 0;
 	if(action->isplaceable()) {
@@ -1148,22 +1150,32 @@ static void choose_move() {
 	hero->setaction(action, province, tactic, cost, troops_move, units_product);
 }
 
-const tactic_info* hero_info::choose_tactic() const {
+int answer_info::choose(const hero_info* hero, bool cancel_button, answer_info::tips_type getinfo) const {
 	while(ismodal()) {
-		render_left_side(getplayer(), current_province, false);
+		if(hero)
+			render_left_side(hero->getplayer(), current_province, false);
 		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
 		auto y = gui.padding + gui.border;
-		y += render_hero(x, y, gui.hero_window_width, this) + gui.padding;
-		for(auto& e : tactic_data) {
-			if(!e)
-				continue;
-			y += windowb(x, y, gui.hero_window_width, e.getname(), cmd(breakparam, (int)&e));
-		}
-		y += windowb(x, y, gui.hero_window_width, msg.cancel, cmd(buttoncancel), 0, KeyEscape);
+		y += render_hero(x, y, gui.hero_window_width, hero) + gui.padding;
+		for(auto& e : elements)
+			y += windowb(x, y, gui.hero_window_width, e.getname(), cmd(breakparam, e.param));
+		if(cancel_button)
+			y += windowb(x, y, gui.hero_window_width, msg.cancel, cmd(buttoncancel), 0, KeyEscape);
 		domodal();
 		control_standart();
 	}
-	return (tactic_info*)getresult();
+	return getresult();
+}
+
+const tactic_info* hero_info::choose_tactic() const {
+	answer_info ai;
+	for(auto& e : tactic_data) {
+		if(!e)
+			continue;
+		ai.add((int)&e, e.getname());
+	}
+	ai.sort();
+	return (tactic_info*)ai.choose(this);
 }
 
 int	player_info::choose(const hero_info* hero, answer_info& source, const char* format, ...) const {
