@@ -81,6 +81,8 @@ void hero_info::setaction(const action_info* action, province_info* province, co
 }
 
 void hero_info::resolve() {
+	if(!action)
+		return;
 	string sb;
 	// Далее идут действия, которые действуют на провинцию
 	if(!province)

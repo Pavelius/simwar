@@ -14,6 +14,7 @@ bsreq action_type[] = {
 	BSREQ(action_info, movement, number_type),
 	BSREQ(action_info, order, number_type),
 	BSREQ(action_info, cost, number_type),
+	BSREQ(action_info, trophies, number_type),
 	BSREQ(action_info, wait, number_type),
 	BSREQ(action_info, good, number_type),
 {}};

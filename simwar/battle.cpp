@@ -10,13 +10,11 @@ const char* numeric(int value, const char* s1, const char* s2, const char* s5) {
 	return s2;
 }
 
-class combatside : public army {
+struct combatside : public army {
 
 	int strenght;
 	int	casualties;
 	int wounds;
-
-public:
 
 	combatside(province_info* province, player_info* player, bool attack, bool raid) : army(player, province, 0, attack, raid),
 		strenght(0), casualties(0), wounds(0) {
@@ -120,15 +118,6 @@ public:
 			sb.add(".");
 	}
 
-	int getspoils(tip_info* ti) const {
-		auto result = name_info::fix(ti, msg.raid, 2);
-		if(general) {
-			auto value = general->getattack() + general->getraid();
-			result += general->fix(ti, value);
-		}
-		return result;
-	}
-
 	void addloyalty(int value) {
 		if(general)
 			general->setloyalty(general->getloyalty() + value);
@@ -148,24 +137,29 @@ bool province_info::battle(string& sb, player_info* attacker_player, player_info
 	attackers.applycasualty(sb);
 	defenders.applycasualty(sb);
 	auto iswin = (&winner == &attackers);
+	if(attackers.player)
+		attackers.player->cost.fame += defenders.casualties - attackers.casualties;
+	if(defenders.player)
+		defenders.player->cost.fame += attackers.casualties - defenders.casualties;
 	if(iswin) {
 		retreat(defender_player);
 		arrival(attacker_player);
 		if(!raid) {
-			if(attacker_player) {
-				attacker_player->cost.fame += 1;
-				if(attackers.general)
-					attacker_player->cost.fame += imax(0, attackers.general->getnobility());
-			}
 			player = attacker_player;
+			if(attackers.general)
+				attacker_player->cost.fame += imax(0, attackers.general->getnobility());
 		} else {
-			auto spoils = attackers.getspoils(0);
-			sb.addn(msg.raid_spoils, spoils);
-			cost_info e; e.gold = spoils;
-			if(attacker_player)
-				attacker_player->cost += e;
-			if(defender_player)
-				defender_player->cost -= e;
+			auto trophies = action->trophies;
+			if(trophies) {
+				trophies.gold += defenders.casualties;
+				if(attackers.general)
+					trophies.gold += imax(0, attackers.general->getraid());
+				if(attacker_player)
+					attacker_player->cost += trophies;
+				if(defender_player)
+					defender_player->cost -= trophies;
+				sb.addn(msg.raid_spoils, trophies.gold);
+			}
 		}
 		defenders.addloyalty(-1);
 	} else {

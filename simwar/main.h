@@ -50,6 +50,7 @@ struct unit_set;
 struct cost_info {
 	short						gold, fame;
 	constexpr cost_info() : gold(0), fame(0) {}
+	constexpr explicit operator bool() const { return gold || fame; }
 	void operator+=(const cost_info& e) { gold += e.gold; fame += e.fame; }
 	void operator+=(const int value) { gold += value; }
 	void operator-=(const cost_info& e) { gold -= e.gold; fame -= e.fame; }
@@ -96,7 +97,7 @@ struct name_info {
 };
 struct nation_info : name_info {};
 struct action_info : name_info, combat_info {
-	cost_info					cost;
+	cost_info					cost, trophies;
 	char						recruit, support, economy, movement;
 	char						order;
 	char						good;

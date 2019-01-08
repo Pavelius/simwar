@@ -19,7 +19,7 @@
 #nation northerners
 #nation southerners
 
-#action raid order(2) raid(1) support(-3)
+#action raid order(2) raid(1) support(-3) trophies(2)
 #action attack order(4) attack(1) support(-6) cost(5)
 #action defend order(5) defend(1) cost(1)
 #action recruit order(3) recruit(1)
