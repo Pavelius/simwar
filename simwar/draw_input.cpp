@@ -967,11 +967,15 @@ static color getcolor(province_flag_s id) {
 	}
 }
 
-static void render_two_window(const player_info* player, hero_info* hero, const action_info* action, list& u1, list& u2, const char* error_text, const char* footer) {
+static void render_two_window(const player_info* player, hero_info* hero, const action_info* action, list& u1, list& u2, const char* error_text, stringbuilder& sb, const cost_info& cost) {
+	if(cost) {
+		char tem1[256]; cost.get(tem1, zendof(tem1));
+		sb.adds("%1: %2", msg.total, tem1);
+	}
 	auto th = 0;
-	if(footer) {
+	if(sb) {
 		rect rt = {0, 0, gui.window_width, 0};
-		th = textf(rt, footer) + gui.padding;
+		th = textf(rt, sb) + gui.padding;
 	}
 	render_left_side(player, 0);
 	auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
@@ -992,7 +996,7 @@ static void render_two_window(const player_info* player, hero_info* hero, const 
 	x = x + w + gui.padding;
 	u2.view({x, y, x + w - pw, y3});
 	x = x1; y = y3 + gui.padding;
-	y += render_text(x, y, gui.window_width, footer);
+	y += render_text(x, y, gui.window_width, sb);
 	domodal();
 	control_standart();
 }
@@ -1010,9 +1014,8 @@ static bool recruit(const player_info* player, hero_info* hero, const action_inf
 			error_info = msg.not_choose_units;
 		else if(cost > player_cost)
 			error_info = msg.not_enought_gold;
-		char tem1[1024]; cost.get(tem1, zendof(tem1));
-		char footer[1024]; zprint(footer, "%1: %2", msg.total, tem1);
-		render_two_window(player, hero, action, u1, u2, error_info, footer);
+		string sb;
+		render_two_window(player, hero, action, u1, u2, error_info, sb, cost);
 		if(hot.key == u1.id) {
 			auto p1 = u1.getcurrent();
 			if(p1) {
@@ -1030,20 +1033,20 @@ static bool recruit(const player_info* player, hero_info* hero, const action_inf
 	return getresult() != 0;
 }
 
-static bool choose_conquer(const player_info* player, hero_info* hero, const action_info* action, const province_info* province, army& s1, army& s2, const army& a3, int minimal_count) {
+static bool choose_conquer(const player_info* player, hero_info* hero, const action_info* action, const province_info* province, army& s1, army& s2, const army& a3, int minimal_count, cost_info& cost) {
 	if(!s1.getcount() && minimal_count == 0)
 		return true;
-	stringcreator sc;
 	army_list u1(s1); u1.id = 10;
 	army_list u2(s2); u2.id = 11;
 	char tips_defend[2048]; tip_info tid(tips_defend, zendof(tips_defend));
 	char tips_attack[2048]; tip_info tia(tips_attack, zendof(tips_attack));
 	auto th = texth() * 3 + 2;
 	auto defender_strenght = a3.getstrenght(&tid, true);
+	auto player_cost = player->cost;
+	auto start_cost = cost;
 	while(ismodal()) {
 		const char* error_info = 0;
-		char footer[4096]; footer[0] = 0;
-		stringbuilder sb(sc, footer);
+		string sb;
 		if(s1.attack) {
 			auto attacker_strenght = s2.getstrenght(&tia, true);
 			sb.adds(msg.total_strenght, tips_attack, tips_defend);
@@ -1054,9 +1057,13 @@ static bool choose_conquer(const player_info* player, hero_info* hero, const act
 			else
 				sb.adds(msg.predict_success);
 		}
+		cost = start_cost;
+		cost.gold += action->cost_per_unit * s2.getcount();
 		if(minimal_count && s2.getcount() < minimal_count)
 			error_info = msg.not_choose_units;
-		render_two_window(player, hero, action, u1, u2, error_info, footer);
+		else if(cost > player_cost)
+			error_info = msg.not_enought_gold;
+		render_two_window(player, hero, action, u1, u2, error_info, sb, cost);
 		if(hot.key == u1.id) {
 			auto p1 = u1.getcurrent();
 			u1.source.remove(u1.current);
@@ -1067,6 +1074,8 @@ static bool choose_conquer(const player_info* player, hero_info* hero, const act
 			u1.source.add(p1);
 		}
 	}
+	if(!getresult())
+		cost = start_cost;
 	return getresult() != 0;
 }
 
@@ -1105,7 +1114,7 @@ static void choose_move() {
 		a1.count = troop_info::remove_moved(a1.data, a1.count);
 		a1.count = troop_info::remove_restricted(a1.data, a1.count, province);
 		a3.fill(province->getplayer(), province);
-		if(!choose_conquer(player, hero, action, province, a1, troops_move, a3, 0))
+		if(!choose_conquer(player, hero, action, province, a1, troops_move, a3, 0, cost))
 			return;
 	}
 	if(action->movement) {
@@ -1115,7 +1124,7 @@ static void choose_move() {
 		a1.count = troop_info::remove(a1.data, a1.count, province);
 		a1.count = troop_info::remove_moved(a1.data, a1.count);
 		a1.count = troop_info::remove_restricted(a1.data, a1.count, province);
-		if(!choose_conquer(player, hero, action, province, a1, troops_move, a3, 1))
+		if(!choose_conquer(player, hero, action, province, a1, troops_move, a3, 1, cost))
 			return;
 	}
 	if(action->raid || action->attack || action->defend) {

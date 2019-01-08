@@ -61,7 +61,7 @@ struct cost_info {
 struct string : stringcreator, stringbuilder {
 	gender_s					gender;
 	cost_info					cost;
-	string(gender_s gender = Male) : stringbuilder(*this, buffer, buffer + sizeof(buffer) / sizeof(buffer[0])), gender(gender) {}
+	string(gender_s gender = Male) : stringbuilder(*this, buffer, buffer + sizeof(buffer) / sizeof(buffer[0])), gender(gender) { buffer[0] = 0; }
 	void						parseidentifier(char* result, const char* result_max, const char* identifier) override;
 private:
 	char						buffer[8192];
@@ -98,6 +98,7 @@ struct name_info {
 struct nation_info : name_info {};
 struct action_info : name_info, combat_info {
 	cost_info					cost, trophies;
+	char						cost_per_unit;
 	char						recruit, support, economy, movement;
 	char						order;
 	char						good;
@@ -197,6 +198,7 @@ struct army : adat<troop_info*, 32> {
 	army(player_info* player, province_info* province, hero_info* general, bool attack, bool raid);
 	void						fill(const player_info* player, const province_info* province);
 	int							get(const char* id, tip_info* ti, bool include_number = true) const;
+	int							getraid() const;
 	int							getstrenght(tip_info* ti, bool include_number = true) const;
 	int							getshield() const;
 	int							getsword() const;

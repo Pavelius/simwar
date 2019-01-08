@@ -28,6 +28,17 @@ int army::getsword() const {
 	return result;
 }
 
+int army::getraid() const {
+	auto result = 0;
+	if(general)
+		result += general->getraid();
+	if(tactic)
+		result += tactic->raid;
+	for(auto p : *this)
+		result += p->get("raid");
+	return result;
+}
+
 int army::getshield() const {
 	auto result = 0;
 	if(general)

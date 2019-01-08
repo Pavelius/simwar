@@ -137,10 +137,10 @@ bool province_info::battle(string& sb, player_info* attacker_player, player_info
 	attackers.applycasualty(sb);
 	defenders.applycasualty(sb);
 	auto iswin = (&winner == &attackers);
-	if(attackers.player)
-		attackers.player->cost.fame += defenders.casualties - attackers.casualties;
-	if(defenders.player)
-		defenders.player->cost.fame += attackers.casualties - defenders.casualties;
+	if(attacker_player)
+		attacker_player->cost.fame += defenders.casualties - attackers.casualties;
+	if(defender_player)
+		defender_player->cost.fame += attackers.casualties - defenders.casualties;
 	if(iswin) {
 		retreat(defender_player);
 		arrival(attacker_player);
@@ -148,18 +148,17 @@ bool province_info::battle(string& sb, player_info* attacker_player, player_info
 			player = attacker_player;
 			if(attackers.general)
 				attacker_player->cost.fame += imax(0, attackers.general->getnobility());
-		} else {
-			auto trophies = action->trophies;
-			if(trophies) {
-				trophies.gold += defenders.casualties;
-				if(attackers.general)
-					trophies.gold += imax(0, attackers.general->getraid());
-				if(attacker_player)
-					attacker_player->cost += trophies;
-				if(defender_player)
-					defender_player->cost -= trophies;
-				sb.addn(msg.raid_spoils, trophies.gold);
-			}
+		}
+		auto trophies = action->trophies;
+		if(raid)
+			trophies.gold += attackers.getraid();
+		trophies.gold += defenders.casualties;
+		if(trophies.gold) {
+			if(attacker_player)
+				attacker_player->cost += trophies;
+			if(defender_player)
+				defender_player->cost -= trophies;
+			sb.addn(msg.raid_spoils, trophies.gold);
 		}
 		defenders.addloyalty(-1);
 	} else {
