@@ -27,10 +27,23 @@ struct bsdata_serial : bsfile {
 		buffer[0] = 0;
 	}
 
+	static const char* skipcr(const char* p) {
+		if(*p == 13) {
+			p++;
+			if(*p == 10)
+				p++;
+		} else if(*p == 10) {
+			p++;
+			if(*p == 13)
+				p++;
+		}
+		return p;
+	}
+
 	static const char* skipline(const char* p) {
 		while(p[0] && p[0] != 10 && p[0] != 13)
 			p++;
-		return skipws(szskipcr(p));
+		return p;
 	}
 
 	static const char* skipws(const char* p) {
@@ -38,17 +51,9 @@ struct bsdata_serial : bsfile {
 			if(p[0] == 9 || p[0] == 0x20) {
 				p++;
 				continue;
-			} else if(p[0] == '\\') {
-				p++;
-				if(p[0] == 10 || p[0] == 13)
-					p = szskipcr(p);
-				else
-					p++;
-				continue;
 			} else if(p[0] == '/' && p[1] == '/') {
 				// Comments
-				p = skipline(p + 2);
-				continue;
+				return skipline(p + 2);
 			}
 			break;
 		}
@@ -102,7 +107,7 @@ struct bsdata_serial : bsfile {
 		getpos(p, line, column);
 		errors.error(id, geturl(), line, column, xva_start(id));
 		errors.add();
-		skipline();
+		p = skipline(p);
 	}
 
 	void warning(bsparse_error_s id, ...) {
@@ -129,8 +134,7 @@ struct bsdata_serial : bsfile {
 	bool skip(char sym) {
 		if(*p != sym)
 			return false;
-		p++;
-		skipws();
+		p = skipws(p + 1);
 		return true;
 	}
 
@@ -147,10 +151,6 @@ struct bsdata_serial : bsfile {
 
 	void skipws() {
 		p = skipws(p);
-	}
-
-	void skipline() {
-		p = skipline(p);
 	}
 
 	void readstring(const char end) {
@@ -339,10 +339,17 @@ struct bsdata_serial : bsfile {
 	}
 
 	void parse() {
-		while(*p) {
+		while(true) {
+			skipws();
+			if(*p == 0)
+				return;
+			if(*p == 13 || *p == 10) {
+				p = skipcr(p);
+				clearvalue();
+				continue;
+			}
 			if(!readrecord())
 				return;
-			readtrail();
 		}
 	}
 

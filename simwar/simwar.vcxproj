@@ -125,11 +125,13 @@
     <ClCompile Include="bsdata.cpp" />
     <ClCompile Include="bsdata_check.cpp" />
     <ClCompile Include="bsdata_locale.cpp" />
-    <ClCompile Include="bsdata_serial_copy.cpp">
+    <ClCompile Include="bsdata_serial_new.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="bslog.cpp" />
-    <ClCompile Include="bsdata_serial.cpp" />
+    <ClCompile Include="bsdata_serial.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="bsreq.cpp" />
     <ClCompile Include="bstream.cpp" />
     <ClCompile Include="build.cpp" />
@@ -204,6 +206,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\errors.txt" />
+    <Text Include="..\script\test_new.txt" />
     <Text Include="..\script\test.txt" />
     <Text Include="..\script\test_ru.txt" />
     <Text Include="..\text\ru\gender.txt" />

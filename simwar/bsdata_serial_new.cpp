@@ -86,12 +86,12 @@ struct bsdata_serial : bsfile {
 	}
 
 	void getpos(const char* p, int& line, int& column) {
-		line = 0;
-		column = 0;
+		line = 1;
+		column = 1;
 		auto ps = getstart();
 		while(*ps) {
 			line++;
-			auto pe = skipline(ps);
+			auto pe = skipcr(skipline(ps));
 			if(p >= ps && p < pe) {
 				column = p - ps + 1;
 				return;
@@ -168,16 +168,6 @@ struct bsdata_serial : bsfile {
 		if(p[0] == end)
 			p++;
 		ps[0] = 0;
-	}
-
-	bool iskey(const char* p) {
-		if((p[0] >= 'a' && p[0] <= 'z') || (p[0] >= 'A' && p[0] <= 'Z')) {
-			while(*p && ((*p >= '0' && *p <= '9') || *p == '_' || ischa(*p)))
-				p++;
-			p = skipws(p);
-			return p[0] != '(';
-		}
-		return true;
 	}
 
 	bool isnumber() const {
@@ -351,7 +341,6 @@ struct bsdata_serial : bsfile {
 			}
 			if(readidentifier()) {
 				if(p[0] == '(') {
-					p = skipws(p + 1);
 					auto requisit = type->find(buffer);
 					if(!requisit) {
 						error(ErrorNotFoundMember1pInBase2p, buffer, findbase(type));
@@ -360,7 +349,8 @@ struct bsdata_serial : bsfile {
 					readvalue(requisit);
 					skip(')');
 				}
-			}
+			} else
+				return false;
 		}
 		return true;
 	}
