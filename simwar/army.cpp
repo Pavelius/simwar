@@ -7,11 +7,12 @@ void army::fill(const player_info* player, const province_info* province) {
 	for(auto& e : troop_data) {
 		if(!e)
 			continue;
-		if(player && e.getplayer() != player)
+		// Игрок должен быть заполнен и это важно
+		if(e.getplayer() != player)
 			continue;
 		if(province && e.getprovince(player) != province)
 			continue;
-		if(raid && e.get("raid") <= 0)
+		if(raid && attack && e.get("raid") <= 0)
 			continue;
 		add(&e);
 	}

@@ -10,6 +10,7 @@ bsreq player_info::metadata[] = {
 {}};
 adat<player_info, player_max> player_data;
 bsdata player_manager("player", player_data, player_info::metadata);
+static adat<player_info*, player_max> players;
 
 void player_info::post(const hero_info* hero, const province_info* province, const char* text) const {
 	report_info::add(this, province, hero, text);
@@ -138,31 +139,27 @@ unsigned player_info::getactions(hero_info** source, unsigned maximum, int order
 	return ps - source;
 }
 
-static int compare_heroes_by_order(const void* p1, const void* p2) {
-	auto e1 = *((hero_info**)p1);
-	auto e2 = *((hero_info**)p2);
-	auto pl1 = e1->getplayer();
-	auto pl2 = e2->getplayer();
-	auto sp1 = pl1 ? pl1->cost.fame : 0;
-	auto sp2 = pl2 ? pl2->cost.fame : 0;
-	if(sp1 < sp2)
-		return -1;
-	else if(sp1 > sp2)
-		return 1;
-	return 0;
-}
-
 void player_info::resolve_actions() {
-	hero_info* heroes[64];
+	hero_info* heroes[hero_max];
 	build_info::build_units();
 	for(auto i = 1; i <= 5; i++) {
+		// Получим всех игроков
 		auto count = getactions(heroes, sizeof(heroes) / sizeof(heroes[0]), i);
 		if(!count)
 			continue;
-		qsort(heroes, count, sizeof(heroes[0]), compare_heroes_by_order);
+		// Все ходы героев идут в порядке игроков
+		for(auto p : players) {
+			for(unsigned j = 0; j < count; j++) {
+				auto hero = heroes[j];
+				if(hero->getplayer()==p)
+					hero->resolve();
+			}
+		}
+		// Нейтральные герои делают свои ходы в последнюю очередь
 		for(unsigned j = 0; j < count; j++) {
 			auto hero = heroes[j];
-			hero->resolve();
+			if(!hero->getplayer())
+				hero->resolve();
 		}
 	}
 }
@@ -291,6 +288,34 @@ static void neutrals_move() {
 	hero_info::neutral_hero_actions();
 }
 
+int player_info::compare_fame(const void* p1, const void* p2) {
+	auto e1 = *((player_info**)p1);
+	auto e2 = *((player_info**)p2);
+	auto v1 = e1->cost.fame;
+	auto v2 = e2->cost.fame;
+	if(v1 < v2)
+		return -1;
+	else if(v1 > v2)
+		return 1;
+	v1 = e1->cost.gold;
+	v2 = e2->cost.gold;
+	if(v1 < v2)
+		return -1;
+	else if(v1 > v2)
+		return 1;
+	return 0;
+}
+
+void player_info::create_order() {
+	players.clear();
+	for(auto& e : player_data) {
+		if(!e)
+			continue;
+		players.add(&e);
+	}
+	qsort(players.data, players.count, sizeof(players[0]), compare_fame);
+}
+
 void player_info::playgame() {
 	create_province_order();
 	while(isallowgame()) {
@@ -310,6 +335,7 @@ void player_info::playgame() {
 		}
 		game.turn++;
 		neutrals_move();
+		create_order();
 		resolve_actions();
 		gain_profit();
 		check_heroes();

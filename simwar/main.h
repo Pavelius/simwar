@@ -341,7 +341,9 @@ struct player_info : name_info {
 	void						check_hire();
 	int							choose(const hero_info* hero, answer_info& source, const char* format, ...) const;
 	cost_info					cost;
+	static int					compare_fame(const void* p1, const void* p2);
 	static int					compare_hire_bet(const void* p1, const void* p2);
+	static void					create_order();
 	static void					gain_profit();
 	static unsigned				getactions(hero_info** source, unsigned maximum_count, int order);
 	province_info*				getbestprovince() const;
