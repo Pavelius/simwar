@@ -93,8 +93,8 @@
 #trait noble nobility(1) good(1)
 
 #hero gordek avatar("art/portraits/gordek.bmp") traits(bloody, hireling) player(red) best_tactic(lighting_attack)
-#hero mistra avatar("art/portraits/mistra.bmp") traits(carefull, diplomat) player(red) best_tactic(careful_defence) gender(female)
-#hero antaris avatar("art/portraits/antaris.bmp") traits(bloody, diplomat) player(green) best_tactic(messy_fighting)
+#hero mistra avatar("art/portraits/mistra.bmp") traits(carefull, diplomat) best_tactic(careful_defence) gender(female)
+#hero antaris avatar("art/portraits/antaris.bmp") traits(bloody, diplomat) best_tactic(messy_fighting)
 #hero groomsh avatar("art/portraits/groomsh.bmp") traits(cunning, general) player(green) best_tactic(careful_defence)
 #hero bogart avatar("art/portraits/bogard.bmp") traits(bloody, general) best_tactic(messy_fighting)
 #hero argh avatar("art/portraits/argh.bmp") traits(mad, general) best_tactic(messy_fighting)

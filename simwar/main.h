@@ -8,7 +8,7 @@
 #pragma once
 
 const int player_max = 8;
-const int hero_max_per_player = 5;
+const int hero_max_per_player = 4;
 const int hero_max = player_max * hero_max_per_player;
 const int province_max = player_max * 16;
 
@@ -106,7 +106,9 @@ struct action_info : name_info, combat_info {
 	//
 	static int					compare(const void* p1, const void* p2);
 	bool						isplaceable() const;
+	static const action_info*	getaction(char attack, char defend, char raid);
 	province_flag_s				getprovince() const;
+	static unsigned				select(action_info** source, unsigned count, char attack = 0, char defend = 0, char raid = 0);
 	static void					sort(action_info** source, unsigned count);
 };
 struct character_info : combat_info {
@@ -260,6 +262,7 @@ struct hero_info : name_info {
 	static void					initialize();
 	bool						isallow(const action_info* action) const;
 	bool						isready() const { return (wait == 0) && (wound == 0); }
+	static void					neutral_hero_actions();
 	static void					refresh_heroes();
 	unsigned					remove_this(hero_info** source, unsigned count) const;
 	static unsigned				remove_hired(hero_info** source, unsigned count);

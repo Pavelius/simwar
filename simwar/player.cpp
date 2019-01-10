@@ -287,6 +287,10 @@ bool player_info::isallowgame() {
 	return true;
 }
 
+static void neutrals_move() {
+	hero_info::neutral_hero_actions();
+}
+
 void player_info::playgame() {
 	create_province_order();
 	while(isallowgame()) {
@@ -304,7 +308,7 @@ void player_info::playgame() {
 				break;
 			}
 		}
-		// Действия без интерактива
+		neutrals_move();
 		game.turn++;
 		resolve_actions();
 		gain_profit();

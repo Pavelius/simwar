@@ -269,3 +269,29 @@ void hero_info::getbrief(stringbuilder& sb) const {
 	}
 	sb.addn("%1: %2i", msg.loyalty, getloyalty());
 }
+
+void hero_info::neutral_hero_actions() {
+	auto default_patrol = action_info::getaction(0, 1, 0);
+	if(!default_patrol)
+		return;
+	province_info* source[province_max];
+	auto count = province_info::select(source, lenghtof(source), 0, FriendlyProvince);
+	if(!count)
+		return;
+	zshuffle(source, count);
+	player_info* player = 0;
+	for(auto& e : hero_data) {
+		if(!e)
+			continue;
+		if(e.getplayer() != player)
+			continue;
+		if(game.hire_hero == &e)
+			continue;
+		if(e.action!=game.default_action)
+			continue;
+		if(!count)
+			break;
+		e.action = default_patrol;
+		e.province = source[--count];
+	}
+}

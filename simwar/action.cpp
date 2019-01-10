@@ -43,3 +43,29 @@ int action_info::compare(const void* p1, const void* p2) {
 void action_info::sort(action_info** source, unsigned count) {
 	qsort(source, count, sizeof(source[0]), compare);
 }
+
+unsigned action_info::select(action_info** source, unsigned count, char attack, char defend, char raid) {
+	auto ps = source;
+	auto pe = ps + count;
+	for(auto& e : action_data) {
+		if(!e)
+			continue;
+		if(e.attack < attack)
+			continue;
+		if(e.defend < defend)
+			continue;
+		if(e.raid < raid)
+			continue;
+		if(ps<pe)
+			*ps++ = &e;
+	}
+	return ps - source;
+}
+
+const action_info* action_info::getaction(char attack, char defend, char raid) {
+	action_info* source[1];
+	auto count = select(source, lenghtof(source), attack, defend, raid);
+	if(!count)
+		return 0;
+	return source[0];
+}
