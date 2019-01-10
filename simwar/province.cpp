@@ -18,7 +18,10 @@ bsreq province_info::metadata[] = {
 adat<province_info, province_max> province_data;
 unsigned char			province_order[province_max];
 bsdata					province_manager("province", province_data, province_info::metadata);
-static unsigned short	province_movement[province_max];
+static unsigned short	path_cost[province_max];
+static unsigned char	path_stack[province_max * 4];
+static unsigned short	path_push;
+static unsigned short	path_pop;
 
 province_flag_s province_info::getstatus(const player_info* player) const {
 	if(this->player == player)
@@ -42,11 +45,67 @@ int province_info::getincome(tip_info* ti) const {
 }
 
 static void clear_movement() {
-	memset(province_movement, 0, sizeof(province_movement));
+	memset(path_cost, 0, sizeof(path_cost));
+}
+
+int	province_info::getindex() const {
+	return province_data.data - this;
+}
+
+int	province_info::getmovecost() const {
+	auto result = getindex();
+	if(result == -1)
+		return -1;
+	return path_cost[result];
+}
+
+static bool has(province_info** source, province_info** source_end, const province_info* province) {
+	for(auto p = source; p<source_end; p++){
+		if(*p == province)
+			return true;
+	}
+	return false;
+}
+
+unsigned province_info::select_visible(province_info** source, unsigned maximum, const player_info* player) {
+	auto count = select(source, maximum, player, FriendlyProvince);
+	if(!count)
+		return 0;
+	auto ps = source + count;
+	auto pe = ps + maximum;
+	for(unsigned i = 0; i < count; i++) {
+		for(auto p : source[i]->neighbors) {
+			if(!p)
+				continue;
+			if(has(source, ps, p))
+				continue;
+			if(ps < pe)
+				*ps++ = p;
+		}
+	}
+	return ps - source;
 }
 
 void province_info::createwave() {
 	clear_movement();
+	path_stack[path_push++] = getindex();
+	path_cost[getindex()] = 1;
+	while(path_push != path_pop) {
+		auto p = province_data.data + path_stack[path_pop++];
+		auto n = p->getindex();
+		auto w = path_cost[n] + 1;
+		if(w >= 250)
+			continue;
+		for(auto pn : p->neighbors) {
+			auto i = pn->getindex();
+			if(!path_cost[i] || path_cost[i] > w) {
+				path_cost[i] = w;
+				path_stack[path_push++] = i;
+				if(path_push >= sizeof(path_stack) / sizeof(path_stack[0]))
+					return;
+			}
+		}
+	}
 }
 
 hero_info* province_info::gethero(const player_info* player) const {

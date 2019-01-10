@@ -141,11 +141,13 @@ struct province_info : name_info {
 	player_info*				getplayer() const { return player; }
 	point						getposition() const { return position; }
 	int							getincome(tip_info* ti = 0) const;
+	int							getindex() const;
 	void						getinfo(stringbuilder& sb, bool show_landscape, const army* support_units = 0) const;
 	landscape_info*				getlandscape() const { return landscape; }
 	int							getlevel() const { return level; }
 	nation_info*				getnation() const { return nation; }
 	province_info*				getneighbors(const player_info* player) const;
+	int							getmovecost() const;
 	province_flag_s				getstatus(const player_info* player) const;
 	int							getsupport(const player_info* player) const;
 	void						getsupport(stringbuilder& sb) const;
@@ -154,6 +156,7 @@ struct province_info : name_info {
 	void						render_neighbors(const rect& rc) const;
 	void						retreat(const player_info* player);
 	static unsigned				select(province_info** source, unsigned maximum, const player_info* player = 0, province_flag_s state = AnyProvince);
+	static unsigned				select_visible(province_info** source, unsigned maximum, const player_info* player);
 	void						seteconomy(int value);
 	void						setplayer(player_info* value) { player = value; }
 	void						setsupport(const player_info* player, int value);

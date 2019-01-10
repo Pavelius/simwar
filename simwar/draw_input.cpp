@@ -472,28 +472,28 @@ static void render_shield(int x, int y, const province_info* province, const pla
 	fore = old_stroke;
 }
 
-static void render_province(rect rc, point mouse, const player_info* player, callback_proc proc, aref<province_info*> selection, color selection_color, bool set_current_province) {
+static void render_province(rect rc, point mouse, const player_info* player, callback_proc proc, aref<province_info*> visible, aref<province_info*> selection, color selection_color, bool set_current_province) {
 	if(!draw::font)
 		return;
 	draw::state push;
 	const int max_size = 128;
 	string sb;
-	for(auto& e : province_data) {
-		if(!e)
+	for(auto province : visible) {
+		if(!province)
 			continue;
-		auto pt = getscreen(rc, e.getposition());
+		auto pt = getscreen(rc, province->getposition());
 		if((rc.x1 > pt.x + max_size) || (rc.y1 > pt.y + max_size) || (rc.x2 < pt.x - max_size) || (rc.y2 < pt.y - max_size))
 			continue;
 		draw::font = metrics::h1;
 		fore = colors::black;
 		fore_stroke = colors::white.mix(selection_color);
-		auto text_width = draw::textw(e.getname());
+		auto text_width = draw::textw(province->getname());
 		army defenders;
-		defenders.province = &e;
-		defenders.count = troop_info::select(defenders.data, defenders.getmaximum(), &e);
+		defenders.province = province;
+		defenders.count = troop_info::select(defenders.data, defenders.getmaximum(), province);
 		rect rc = {pt.x - text_width / 2, pt.y - draw::texth() / 2, pt.x + text_width / 2, pt.y + draw::texth() / 2};
-		auto status = e.getstatus(player);
-		auto inlist = selection.is(&e);
+		auto status = province->getstatus(player);
+		auto inlist = selection.is(province);
 		if(inlist)
 			fore_stroke = colors::white.mix(selection_color);
 		else
@@ -507,23 +507,23 @@ static void render_province(rect rc, point mouse, const player_info* player, cal
 				hot.cursor = CursorHand;
 				if(hot.key == MouseLeft && hot.pressed) {
 					if(proc)
-						draw::execute(proc, (int)&e);
+						draw::execute(proc, (int)province);
 				}
 			} else {
 				if(hot.key == MouseLeft && hot.pressed)
-					draw::execute(choose_current_province, (int)&e);
+					draw::execute(choose_current_province, (int)province);
 			}
 		}
-		render_shield(pt.x - text_width / 2 - 20, pt.y, &e, player);
-		draw::text(pt.x - text_width / 2, pt.y - draw::texth() / 2, e.getname(), -1, TextStroke);
+		render_shield(pt.x - text_width / 2 - 20, pt.y, province, player);
+		draw::text(pt.x - text_width / 2, pt.y - draw::texth() / 2, province->getname(), -1, TextStroke);
 		pt.y += draw::texth() / 2;
 		draw::font = metrics::font;
-		auto hero = e.gethero(player);
+		auto hero = province->gethero(player);
 		if(status == FriendlyProvince)
 			defenders.general = hero;
 		sb.clear();
-		sb.add("%+1 ", e.getnation()->getname());
-		e.getinfo(sb, false, &defenders);
+		sb.add("%+1 ", province->getnation()->getname());
+		province->getinfo(sb, false, &defenders);
 		auto w = textfw(sb);
 		textf(pt.x - w / 2, pt.y, w, sb, 0, 0, 0, 0, 0, TextStroke);
 		pt.y += texth();
@@ -544,7 +544,7 @@ static void render_province(rect rc, point mouse, const player_info* player, cal
 			text(pt.x - textw(sb) / 2, pt.y, sb);
 			pt.y += texth();
 		}
-		defenders.count = troop_info::select_move(defenders.data, defenders.getmaximum(), &e, player);
+		defenders.count = troop_info::select_move(defenders.data, defenders.getmaximum(), province, player);
 		if(defenders) {
 			sb.clear();
 			troop_info::sort(defenders.data, defenders.getcount());
@@ -556,7 +556,7 @@ static void render_province(rect rc, point mouse, const player_info* player, cal
 			sb.clear();
 			fore = fore.mix(colors::blue);
 			build_info* build_array[16];
-			auto count = build_info::select(build_array, lenghtof(build_array), &e);
+			auto count = build_info::select(build_array, lenghtof(build_array), province);
 			if(count) {
 				build_info::sort(build_array, count);
 				build_info::getpresent(sb, build_array, count);
@@ -567,7 +567,7 @@ static void render_province(rect rc, point mouse, const player_info* player, cal
 	}
 }
 
-static void render_board(const rect& rco, const player_info* player, callback_proc proc, aref<province_info*> selection, color selection_color, bool set_current_province, bool show_lines) {
+static void render_board(const rect& rco, const player_info* player, callback_proc proc, aref<province_info*> visible, aref<province_info*> selection, color selection_color, bool set_current_province, bool show_lines) {
 	auto rc = rco;
 	draw::state push;
 	draw::area(rc); // Drag and drop analize this result
@@ -604,7 +604,7 @@ static void render_board(const rect& rco, const player_info* player, callback_pr
 	if(current_province && show_lines)
 		current_province->render_neighbors(rco);
 	if(player)
-		render_province(last_board, last_mouse, player, proc, selection, selection_color, set_current_province);
+		render_province(last_board, last_mouse, player, proc, visible, selection, selection_color, set_current_province);
 }
 
 static int render_hero(int x, int y, int width, const hero_info* hero, callback_proc proc = 0, bool show_state = true) {
@@ -656,9 +656,16 @@ static int render_province(int x, int y, const province_info* province) {
 	return window(x, y, gui.window_width, sb) + gui.border * 2 + gui.padding;
 }
 
-static void render_left_side(const player_info* player, const province_info* province, bool set_current_province = false) {
+static void render_board(const player_info* player, callback_proc proc, aref<province_info*> selection, color selection_color, bool set_current_province, bool show_lines) {
 	rect rc = {0, 0, draw::getwidth(), draw::getheight()};
-	render_board(rc, player, 0, {}, colors::blue, set_current_province, province != 0);
+	province_info* source[province_max];
+	auto count = province_info::select_visible(source, lenghtof(source), player);
+	aref<province_info*> a1 = {source, count};
+	render_board(rc, player, proc, a1, selection, selection_color, set_current_province, show_lines);
+}
+
+static void render_left_side(const player_info* player, const province_info* province, bool set_current_province = false) {
+	render_board(player, 0, {}, colors::blue, set_current_province, province != 0);
 	auto x = gui.border + gui.border;
 	auto y = gui.padding + gui.border;
 	if(player)
@@ -942,8 +949,7 @@ struct army_list : list {
 
 static const province_info* choose_province(const player_info* player, const hero_info* hero, const action_info* action, aref<province_info*> selection, color selection_color) {
 	while(ismodal()) {
-		rect rc = {0, 0, draw::getwidth(), draw::getheight()};
-		render_board(rc, player, breakparam, selection, selection_color, false, false);
+		render_board(player, breakparam, selection, selection_color, false, false);
 		auto x = gui.border + gui.border;
 		auto y = gui.padding + gui.border;
 		if(player)
