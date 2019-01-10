@@ -60,7 +60,7 @@ int	province_info::getmovecost() const {
 }
 
 static bool has(province_info** source, province_info** source_end, const province_info* province) {
-	for(auto p = source; p<source_end; p++){
+	for(auto p = source; p < source_end; p++) {
 		if(*p == province)
 			return true;
 	}
@@ -305,5 +305,16 @@ void province_info::retreat(const player_info* player) {
 		auto p = source[i];
 		if(p->getprovince() == this)
 			p->clear();
+	}
+}
+
+void province_info::initialize() {
+	for(auto& e : province_data) {
+		if(!e)
+			continue;
+		if(!e.player)
+			continue;
+		if(e.getsupport(e.player) == 0)
+			e.setsupport(e.player, game.support_change * 2);
 	}
 }

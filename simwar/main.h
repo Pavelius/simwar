@@ -153,6 +153,7 @@ struct province_info : name_info {
 	province_flag_s				getstatus(const player_info* player) const;
 	int							getsupport(const player_info* player) const;
 	void						getsupport(stringbuilder& sb) const;
+	static void					initialize();
 	static bsreq				metadata[];
 	static unsigned				remove_hero_present(aref<province_info*> source, const player_info* player);
 	void						render_neighbors(const rect& rc) const;
@@ -270,7 +271,7 @@ struct hero_info : name_info {
 	static unsigned				select(hero_info** source, unsigned maximum_count, const player_info* player);
 	void						setaction(const action_info* value) { action = value; }
 	void						setaction(const action_info* action, province_info* province, const tactic_info* tactic, const cost_info& cost, const army& logistic, const unit_set& production);
-	void						setloyalty(int value) { loyalty = value; }
+	void						setloyalty(int value);
 	void						setplayer(player_info* player);
 	void						setprovince(province_info* value) { province = value; }
 	void						settactic(const tactic_info* value) { tactic = value; }

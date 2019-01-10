@@ -67,5 +67,6 @@ void game_info::initialize() {
 		hire_turns_range[1] = 7;
 	if(hire_turns_range[0] > hire_turns_range[1])
 		hire_turns_range[0] = hire_turns_range[1] - 1;
+	province_info::initialize();
 	hero_info::initialize();
 }

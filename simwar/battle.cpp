@@ -142,8 +142,11 @@ bool province_info::battle(string& sb, player_info* attacker_player, player_info
 	if(defender_player)
 		defender_player->cost.fame += attackers.casualties - defenders.casualties;
 	if(iswin) {
-		retreat(defender_player);
-		arrival(attacker_player);
+		if(!raid) {
+			retreat(defender_player);
+			arrival(attacker_player);
+		} else
+			retreat(attacker_player);
 		if(!raid) {
 			player = attacker_player;
 			if(attackers.general)
@@ -151,7 +154,7 @@ bool province_info::battle(string& sb, player_info* attacker_player, player_info
 		}
 		auto trophies = action->trophies;
 		if(raid)
-			trophies.gold += attackers.getraid();
+			trophies.gold += getincome(0);
 		trophies.gold += defenders.casualties;
 		if(trophies.gold) {
 			if(attacker_player)

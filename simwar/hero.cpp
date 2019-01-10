@@ -193,7 +193,10 @@ void hero_info::check_leave() {
 
 void hero_info::setplayer(player_info* player) {
 	this->player = player;
-	loyalty = game.loyalty_base + game.loyalty_noble_modifier*getgood();
+	if(player)
+		loyalty = game.loyalty_base + game.loyalty_noble_modifier*getgood();
+	else
+		loyalty = 0;
 }
 
 void hero_info::initialize() {
@@ -296,4 +299,11 @@ void hero_info::neutral_hero_actions() {
 		e.action = default_patrol;
 		e.province = source[--count];
 	}
+}
+
+void hero_info::setloyalty(int value) {
+	if(!player)
+		loyalty = 0;
+	else
+		loyalty = value;
 }
