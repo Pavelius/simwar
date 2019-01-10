@@ -258,10 +258,10 @@ struct hero_info : name_info {
 	const tactic_info*			gettactic() const { return tactic; }
 	int							getwait() const { return wait; }
 	int							getwound() const { return wound; }
-	static bsreq				metadata[];
 	static void					initialize();
 	bool						isallow(const action_info* action) const;
 	bool						isready() const { return (wait == 0) && (wound == 0); }
+	static bsreq				metadata[];
 	static void					neutral_hero_actions();
 	static void					refresh_heroes();
 	unsigned					remove_this(hero_info** source, unsigned count) const;

@@ -283,6 +283,8 @@ void hero_info::neutral_hero_actions() {
 	for(auto& e : hero_data) {
 		if(!e)
 			continue;
+		if(!e.isready())
+			continue;
 		if(e.getplayer() != player)
 			continue;
 		if(game.hire_hero == &e)
