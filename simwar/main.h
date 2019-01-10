@@ -54,7 +54,7 @@ struct cost_info {
 	void operator+=(const cost_info& e) { gold += e.gold; fame += e.fame; }
 	void operator+=(const int value) { gold += value; }
 	void operator-=(const cost_info& e) { gold -= e.gold; fame -= e.fame; }
-	bool operator>(const cost_info& e) const { return gold > e.gold || fame > e.fame; }
+	bool operator>(const cost_info& e) const { return gold > e.gold; }
 	void						clear();
 	char*						get(char* result, const char* result_maximum) const;
 };
