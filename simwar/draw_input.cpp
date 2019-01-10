@@ -1181,6 +1181,8 @@ int	player_info::choose(const hero_info* hero, answer_info& source, const char* 
 }
 
 void player_info::show_reports() const {
+	if(type == PlayerComputer)
+		return;
 	for(auto& e : report_data) {
 		if(e.getturn() != game.turn)
 			continue;

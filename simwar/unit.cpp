@@ -27,7 +27,7 @@ void unit_set::fill(const player_info* player, const province_info* province, co
 	const landscape_info* landscape = 0;
 	nation_info* nation = 0;
 	if(province) {
-		level = province->geteconomy();
+		level = province->getlevel();
 		nation = province->getnation();
 		landscape = province->getlandscape();
 	}

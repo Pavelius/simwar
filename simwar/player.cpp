@@ -308,8 +308,8 @@ void player_info::playgame() {
 				break;
 			}
 		}
-		neutrals_move();
 		game.turn++;
+		neutrals_move();
 		resolve_actions();
 		gain_profit();
 		check_heroes();
