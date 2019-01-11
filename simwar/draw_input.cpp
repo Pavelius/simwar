@@ -1017,6 +1017,7 @@ bool hero_info::choose_units(const action_info* action, const province_info* pro
 				break;
 			s2.add(s1.data[i]);
 		}
+		return true;
 	}
 	unit_list u1(s1); u1.id = 10;
 	unit_list u2(s2); u2.id = 11;
@@ -1134,6 +1135,10 @@ const tactic_info* hero_info::choose_tactic() const {
 			continue;
 		ai.add((int)&e, e.getname());
 	}
+	if(!ai)
+		return 0;
+	if(player->iscomputer())
+		return (tactic_info*)ai.elements.data[rand() % ai.elements.count].param;
 	ai.sort();
 	return (tactic_info*)ai.choose(this);
 }
