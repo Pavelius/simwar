@@ -240,16 +240,15 @@ void player_info::hire_heroes() {
 		auto player = source.data[i];
 		string sb(hero->getgender());
 		if(i == 0) {
-			sb.add(msg.hero_hire_success, hero->getname(), player->getname());
+			sb.add(msg.hero_hire_success, hero->getname(), player->getname(), player->hire_gold);
 			player->post(hero, 0, sb);
-			player->hire_gold = 0;
 			hero->setplayer(const_cast<player_info*>(player));
 		} else {
-			sb.add(msg.hero_hire_fail, hero->getname(), source.data[0]->getname());
-			player->post(hero, 0, sb);
 			player->cost.gold += player->hire_gold;
-			player->hire_gold = 0;
+			sb.add(msg.hero_hire_fail, hero->getname(), source.data[0]->getname(), player->hire_gold);
+			player->post(hero, 0, sb);
 		}
+		player->hire_gold = 0;
 	}
 }
 
