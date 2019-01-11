@@ -280,9 +280,6 @@
     <Text Include="..\text\ru\gender.txt">
       <Filter>Ядро</Filter>
     </Text>
-    <Text Include="..\script\test_new.txt">
-      <Filter>Скрипты</Filter>
-    </Text>
     <Text Include="..\script\test.txt">
       <Filter>Скрипты</Filter>
     </Text>

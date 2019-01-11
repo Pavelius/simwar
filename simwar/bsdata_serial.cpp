@@ -93,7 +93,7 @@ struct bsdata_serial : bsfile {
 		auto ps = getstart();
 		while(*ps) {
 			line++;
-			auto pe = skipline(ps);
+			auto pe = skipcr(skipline(ps));
 			if(p >= ps && p < pe) {
 				column = p - ps + 1;
 				return;
@@ -287,57 +287,6 @@ struct bsdata_serial : bsfile {
 		return true;
 	}
 
-	bool readrecord() {
-		if(!skip('#'))
-			return false;
-		// Read data base name
-		if(!readidentifier()) {
-			error(ErrorExpectedIdentifier);
-			return true;
-		}
-		skipws();
-		const bsreq* fields = 0;
-		auto pd = findbase(buffer);
-		if(pd)
-			fields = pd->fields;
-		else
-			warning(ErrorNotFoundBase1p, buffer);
-		// Read key value
-		if(iskey(p))
-			readvalue(fields);
-		else if(pd)
-			value_object = pd->add();
-		else
-			value_object = 0;
-		readfields(value_object, fields);
-		return true;
-	}
-
-	void readtrail() {
-		auto pb = buffer;
-		auto pe = pb + sizeof(buffer) - 1;
-		while(true) {
-			auto sym = *p;
-			if(!sym)
-				break;
-			if(sym == '\n' || sym == '\r') {
-				while(*p == '\n' || *p == '\r') {
-					p = szskipcr(p);
-					skipws();
-				}
-				if(*p == '#')
-					break;
-				if(pb != buffer && pb < pe)
-					*pb++ = '\n';
-				continue;
-			}
-			if(pb < pe)
-				*pb++ = sym;
-			p++;
-		}
-		*pb = 0;
-	}
-
 	void parse() {
 		while(true) {
 			skipws();
@@ -348,8 +297,29 @@ struct bsdata_serial : bsfile {
 				clearvalue();
 				continue;
 			}
-			if(!readrecord())
-				return;
+			// Прочитаем имя базы
+			if(!readidentifier()) {
+				error(ErrorExpectedIdentifier);
+				continue;
+			}
+			skipws();
+			// Найдем ее поля и саму базу
+			const bsreq* fields = 0;
+			auto pd = findbase(buffer);
+			if(pd)
+				fields = pd->fields;
+			else {
+				error(ErrorNotFoundBase1p, buffer);
+				continue;
+			}
+			// Read key value
+			if(iskey(p))
+				readvalue(fields);
+			else if(pd)
+				value_object = pd->add();
+			else
+				value_object = 0;
+			readfields(value_object, fields);
 		}
 	}
 
