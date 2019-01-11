@@ -23,7 +23,6 @@ int main(int argc, char* argv[]) {
 	draw::setcaption(msg.title);
 	if(!game.read("test"))
 		return 0;
-	return 0;
 	player_info::playgame();
 	return 0;
 }
