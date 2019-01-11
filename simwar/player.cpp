@@ -306,6 +306,13 @@ int player_info::compare_fame(const void* p1, const void* p2) {
 	return 0;
 }
 
+void player_info::computer_move() {
+	hero_info* source[hero_max];
+	auto hero_count = hero_info::select(source, lenghtof(source), this);
+	for(unsigned i = 0; i < hero_count; i++)
+		source[i]->make_move();
+}
+
 void player_info::create_order() {
 	players.clear();
 	for(auto& e : player_data) {
@@ -326,11 +333,8 @@ void player_info::playgame() {
 			e.check_hire();
 			e.show_reports();
 			switch(e.type) {
-			case PlayerHuman:
-				e.make_move();
-				break;
-			case PlayerComputer:
-				break;
+			case PlayerHuman: e.make_move(); break;
+			case PlayerComputer: e.computer_move(); break;
 			}
 		}
 		game.turn++;

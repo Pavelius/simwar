@@ -125,9 +125,6 @@
     <ClCompile Include="bsdata.cpp" />
     <ClCompile Include="bsdata_check.cpp" />
     <ClCompile Include="bsdata_locale.cpp" />
-    <ClCompile Include="bsdata_serial_new.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="bslog.cpp" />
     <ClCompile Include="bsdata_serial.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>

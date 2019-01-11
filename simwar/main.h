@@ -218,6 +218,7 @@ struct answer_info {
 	typedef void(*tips_type)(stringbuilder& sb, const element& e);
 	adat<element, 8>			elements;
 	answer_info() { p = buffer; buffer[0] = 0; }
+	constexpr explicit operator bool() const { return elements.count != 0; }
 	void						add(int param, const char* format, ...);
 	void						addv(int param, const char* format, const char* format_param);
 	int							choose(const hero_info* hero, bool cancel_button = true, answer_info::tips_type getinfo = 0) const;
@@ -232,7 +233,10 @@ struct hero_info : name_info {
 	void						cancelaction();
 	void						check_leave();
 	const action_info*			choose_action() const;
+	const province_info*		choose_province(const action_info* action, aref<province_info*> source, province_flag_s mode) const;
 	const tactic_info*			choose_tactic() const;
+	bool						choose_troops(const action_info* action, const province_info* province, army& a1, army& a2, army& a3, int minimal_count, cost_info& cost) const;
+	bool						choose_units(const action_info* action, const province_info* province, unit_set& a1, unit_set& a2, cost_info& cost) const;
 	int							get(const char* id) const;
 	int							getattack() const { return get("attack"); }
 	const action_info*			getaction() const { return action; }
@@ -262,6 +266,7 @@ struct hero_info : name_info {
 	static void					initialize();
 	bool						isallow(const action_info* action) const;
 	bool						isready() const { return (wait == 0) && (wound == 0); }
+	void						make_move();
 	static bsreq				metadata[];
 	static void					neutral_hero_actions();
 	static void					refresh_heroes();
@@ -343,6 +348,7 @@ struct player_info : name_info {
 	cost_info					cost;
 	static int					compare_fame(const void* p1, const void* p2);
 	static int					compare_hire_bet(const void* p1, const void* p2);
+	void						computer_move();
 	static void					create_order();
 	static void					gain_profit();
 	static unsigned				getactions(hero_info** source, unsigned maximum_count, int order);
@@ -355,6 +361,7 @@ struct player_info : name_info {
 	int							getsupport(tip_info* ti = 0) const;
 	static unsigned				gettroops(troop_info** source, unsigned maximum_count, const province_info* province = 0, const player_info* player = 0, const player_info* player_move = 0);
 	static void					hire_heroes();
+	bool						iscomputer() const { return !this || type == PlayerComputer; }
 	bool						isallow(const action_info* action) const;
 	static bool					isallowgame();
 	void						make_move();

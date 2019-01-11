@@ -947,16 +947,24 @@ struct army_list : list {
 
 };
 
-static const province_info* choose_province(const player_info* player, const hero_info* hero, const action_info* action, aref<province_info*> selection, color selection_color) {
+static color get_mode_color(province_flag_s id) {
+	switch(id) {
+	case NoFriendlyProvince: return colors::red;
+	case FriendlyProvince: return colors::green;
+	default: return colors::gray;
+	}
+}
+
+const province_info* hero_info::choose_province(const action_info* action, aref<province_info*> source, province_flag_s mode) const {
 	while(ismodal()) {
-		render_board(player, breakparam, selection, selection_color, false, false);
+		render_board(player, breakparam, source, get_mode_color(mode), false, false);
 		auto x = gui.border + gui.border;
 		auto y = gui.padding + gui.border;
 		if(player)
 			y += render_player(x, y, player);
 		x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
 		y = gui.padding + gui.border;
-		y += render_hero(x, y, hero) + 1;
+		y += render_hero(x, y, this) + 1;
 		y += windowb(x, y, gui.hero_window_width, action->getname(), cmd(), gui.border) + 1;
 		y += windowb(x, y, gui.hero_window_width, msg.cancel, cmd(breakparam, 0), 0, KeyEscape) + 1;
 		domodal();
@@ -965,15 +973,7 @@ static const province_info* choose_province(const player_info* player, const her
 	return (province_info*)getresult();
 }
 
-static color getcolor(province_flag_s id) {
-	switch(id) {
-	case NoFriendlyProvince: return colors::red;
-	case FriendlyProvince: return colors::green;
-	default: return colors::gray;
-	}
-}
-
-static void render_two_window(const player_info* player, hero_info* hero, const action_info* action, list& u1, list& u2, const char* error_text, stringbuilder& sb, const cost_info& cost) {
+static void render_two_window(const player_info* player, const hero_info* hero, const action_info* action, list& u1, list& u2, const char* error_text, stringbuilder& sb, const cost_info& cost) {
 	if(cost) {
 		char tem1[256]; cost.get(tem1, zendof(tem1));
 		sb.adds("%1: %2", msg.total, tem1);
@@ -1007,7 +1007,7 @@ static void render_two_window(const player_info* player, hero_info* hero, const 
 	control_standart();
 }
 
-static bool recruit(const player_info* player, hero_info* hero, const action_info* action, const province_info* province, unit_set& s1, unit_set& s2, cost_info& cost) {
+bool hero_info::choose_units(const action_info* action, const province_info* province, unit_set& s1, unit_set& s2, cost_info& cost) const {
 	unit_list u1(s1); u1.id = 10;
 	unit_list u2(s2); u2.id = 11;
 	auto player_cost = player->cost;
@@ -1021,7 +1021,7 @@ static bool recruit(const player_info* player, hero_info* hero, const action_inf
 		else if(cost > player_cost)
 			error_info = msg.not_enought_gold;
 		string sb;
-		render_two_window(player, hero, action, u1, u2, error_info, sb, cost);
+		render_two_window(player, this, action, u1, u2, error_info, sb, cost);
 		if(hot.key == u1.id) {
 			auto p1 = u1.getcurrent();
 			if(p1) {
@@ -1039,7 +1039,7 @@ static bool recruit(const player_info* player, hero_info* hero, const action_inf
 	return getresult() != 0;
 }
 
-static bool choose_conquer(const player_info* player, hero_info* hero, const action_info* action, const province_info* province, army& s1, army& s2, const army& a3, int minimal_count, cost_info& cost) {
+bool hero_info::choose_troops(const action_info* action, const province_info* province, army& s1, army& s2, army& a3, int minimal_count, cost_info& cost) const {
 	if(!s1.getcount() && minimal_count == 0)
 		return true;
 	army_list u1(s1); u1.id = 10;
@@ -1069,7 +1069,7 @@ static bool choose_conquer(const player_info* player, hero_info* hero, const act
 			error_info = msg.not_choose_units;
 		else if(cost > player_cost)
 			error_info = msg.not_enought_gold;
-		render_two_window(player, hero, action, u1, u2, error_info, sb, cost);
+		render_two_window(player, this, action, u1, u2, error_info, sb, cost);
 		if(hot.key == u1.id) {
 			auto p1 = u1.getcurrent();
 			u1.source.remove(u1.current);
@@ -1087,63 +1087,6 @@ static bool choose_conquer(const player_info* player, hero_info* hero, const act
 
 static void end_turn() {
 	breakmodal(0);
-}
-
-static void choose_move() {
-	hero_info* hero = (hero_info*)hot.param;
-	if(!hero)
-		return;
-	auto player = hero->getplayer();
-	auto action = hero->choose_action();
-	if(!action)
-		return;
-	cost_info cost = action->cost;
-	const tactic_info* tactic = 0;
-	province_info* province = 0;
-	if(action->isplaceable()) {
-		auto choose_mode = action->getprovince();
-		province_info* provinces[128];
-		auto count = province_info::select(provinces, sizeof(provinces) / sizeof(provinces[0]), player, choose_mode);
-		count = province_info::remove_hero_present({provinces, count}, player);
-		province = const_cast<province_info*>(choose_province(player, hero, action, {provinces, count}, getcolor(choose_mode)));
-		if(!province)
-			return;
-		current_province = province;
-	}
-	auto raid = action->raid > 0;
-	army troops_move(const_cast<player_info*>(player), const_cast<province_info*>(province), hero, true, raid);
-	unit_set units_product;
-	if(action->raid || action->attack) {
-		army a1(const_cast<player_info*>(player), const_cast<province_info*>(province), hero, true, raid);
-		army a3(0, const_cast<province_info*>(province), 0, false, raid);
-		a1.fill(player, 0);
-		a1.count = troop_info::remove_moved(a1.data, a1.count);
-		a1.count = troop_info::remove_restricted(a1.data, a1.count, province);
-		a3.fill(province->getplayer(), province);
-		if(!choose_conquer(player, hero, action, province, a1, troops_move, a3, 0, cost))
-			return;
-	}
-	if(action->movement) {
-		army a1(const_cast<player_info*>(player), province, hero, false, false);
-		army a3;
-		a1.fill(player, 0);
-		a1.count = troop_info::remove(a1.data, a1.count, province);
-		a1.count = troop_info::remove_moved(a1.data, a1.count);
-		a1.count = troop_info::remove_restricted(a1.data, a1.count, province);
-		if(!choose_conquer(player, hero, action, province, a1, troops_move, a3, 1, cost))
-			return;
-	}
-	if(action->raid || action->attack || action->defend) {
-		tactic = hero->choose_tactic();
-		if(!tactic)
-			return;
-	}
-	if(action->recruit) {
-		unit_set a1; a1.fill(player, province, hero, action);
-		if(!recruit(player, hero, action, province, a1, units_product, cost))
-			return;
-	}
-	hero->setaction(action, province, tactic, cost, troops_move, units_product);
 }
 
 int answer_info::choose(const hero_info* hero, bool cancel_button, answer_info::tips_type getinfo) const {
@@ -1192,6 +1135,12 @@ void player_info::show_reports() const {
 			current_province = e.getprovince();
 		show_report(this, e.getprovince(), e.gethero(), e.get());
 	}
+}
+
+static void choose_move() {
+	auto hero = (hero_info*)hot.param;
+	if(hero)
+		hero->make_move();
 }
 
 void player_info::make_move() {

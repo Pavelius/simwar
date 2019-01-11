@@ -175,9 +175,6 @@
     <ClCompile Include="season.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
-    <ClCompile Include="bsdata_serial_new.cpp">
-      <Filter>Коллекции</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="draw.h">

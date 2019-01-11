@@ -175,6 +175,10 @@ const action_info* hero_info::choose_action() const {
 		}
 		ai.add((int)&e, e.getname());
 	}
+	if(!ai)
+		return 0;
+	if(player->iscomputer())
+		return (action_info*)ai.elements.data[rand()%ai.elements.count].param;
 	ai.sort();
 	return (action_info*)ai.choose(this);
 }
@@ -306,4 +310,77 @@ void hero_info::setloyalty(int value) {
 		loyalty = 0;
 	else
 		loyalty = value;
+}
+
+void hero_info::make_move() {
+	auto player = getplayer();
+	auto action = choose_action();
+	if(!action)
+		return;
+	cost_info cost = action->cost;
+	const tactic_info* tactic = 0;
+	province_info* province = 0;
+	if(action->isplaceable()) {
+		auto choose_mode = action->getprovince();
+		province_info* provinces[128];
+		auto count = province_info::select(provinces, sizeof(provinces) / sizeof(provinces[0]), player, choose_mode);
+		count = province_info::remove_hero_present({provinces, count}, player);
+		if(!count)
+			return;
+		if(player->iscomputer())
+			province = provinces[rand() % count];
+		else
+			province = const_cast<province_info*>(choose_province(action, {provinces, count}, choose_mode));
+		if(!province)
+			return;
+	}
+	auto raid = action->raid > 0;
+	army troops_move(const_cast<player_info*>(player), const_cast<province_info*>(province), this, true, raid);
+	unit_set units_product;
+	if(action->raid || action->attack) {
+		army a1(const_cast<player_info*>(player), const_cast<province_info*>(province), this, true, raid);
+		army a3(0, const_cast<province_info*>(province), 0, false, raid);
+		a1.fill(player, 0);
+		a1.count = troop_info::remove_moved(a1.data, a1.count);
+		a1.count = troop_info::remove_restricted(a1.data, a1.count, province);
+		a3.fill(province->getplayer(), province);
+		if(!choose_troops(action, province, a1, troops_move, a3, 0, cost))
+			return;
+	}
+	if(action->movement) {
+		army a1(const_cast<player_info*>(player), province, this, false, false);
+		army a3;
+		a1.fill(player, 0);
+		a1.count = troop_info::remove(a1.data, a1.count, province);
+		a1.count = troop_info::remove_moved(a1.data, a1.count);
+		a1.count = troop_info::remove_restricted(a1.data, a1.count, province);
+		if(player->iscomputer()) {
+			zshuffle(a1.data, a1.getcount());
+		} else {
+			if(!choose_troops(action, province, a1, troops_move, a3, 1, cost))
+				return;
+		}
+	}
+	if(action->raid || action->attack || action->defend) {
+		tactic = choose_tactic();
+		if(!tactic)
+			return;
+	}
+	if(action->recruit) {
+		unit_set a1; a1.fill(player, province, this, action);
+		if(player->iscomputer()) {
+			zshuffle(a1.data, a1.getcount());
+			cost_info total;
+			for(unsigned i = 0; i < a1.count; i++) {
+				total += a1.data[i]->cost;
+				if(total > player->cost)
+					break;
+				units_product.add(a1.data[i]);
+			}
+		} else {
+			if(!choose_units(action, province, a1, units_product, cost))
+				return;
+		}
+	}
+	setaction(action, province, tactic, cost, troops_move, units_product);
 }

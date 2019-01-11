@@ -117,7 +117,7 @@ troop type(barbarians) province(white_harbor)
 troop type(cavalry) province(white_harbor)
 
 // Green player start
-player green cost(50, 0) type(human)
+player green cost(50, 0) type(computer)
 province elder_mountains player(green)
 troop type(orcs) province(elder_mountains)
 troop type(orcs) province(black_wood)
