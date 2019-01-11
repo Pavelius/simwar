@@ -323,6 +323,38 @@ void player_info::create_order() {
 	qsort(players.data, players.count, sizeof(players[0]), compare_fame);
 }
 
+void player_info::desert_units() {
+	if(!game.desert_base)
+		return;
+	for(auto p : players) {
+		if(p->cost.gold > -game.desert_base)
+			continue;
+		troop_info* source[32];
+		auto count = troop_info::select(source, lenghtof(source), p);
+		if(!count)
+			continue;
+		zshuffle(source, count);
+		unsigned desert_count = -p->cost.gold / game.desert_base;
+		if(desert_count > count)
+			desert_count = count;
+		if(!desert_count)
+			continue;
+		string sb;
+		sb.add(msg.troops_desert);
+		auto start = sb.get();
+		for(unsigned i = 0; i < desert_count; i++) {
+			if(!sb.ispos(start))
+				sb.add(", ");
+			else
+				sb.add(": ");
+			sb.add("%+1", source[i]->getname());
+			source[i]->kill(0);
+		}
+		sb.add(".");
+		p->post(0, 0, sb);
+	}
+}
+
 void player_info::playgame() {
 	create_province_order();
 	while(isallowgame()) {
@@ -341,6 +373,7 @@ void player_info::playgame() {
 		neutrals_move();
 		create_order();
 		resolve_actions();
+		desert_units();
 		gain_profit();
 		check_heroes();
 		hire_heroes();

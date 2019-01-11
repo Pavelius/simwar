@@ -98,6 +98,20 @@ void troop_info::clear() {
 	memset(this, 0, sizeof(*this));
 }
 
+unsigned troop_info::select(troop_info** result, unsigned result_maximum, const player_info* player) {
+	auto ps = result;
+	auto pe = ps + result_maximum;
+	for(auto& e : troop_data) {
+		if(!e)
+			continue;
+		if(e.getplayer() != player)
+			continue;
+		if(ps < pe)
+			*ps++ = &e;
+	}
+	return ps - result;
+}
+
 unsigned troop_info::select(troop_info** result, unsigned result_maximum, const province_info* province) {
 	auto ps = result;
 	auto pe = ps + result_maximum;

@@ -175,6 +175,9 @@
     <ClCompile Include="season.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
+    <ClCompile Include="ability.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="draw.h">
@@ -279,6 +282,9 @@
     </Text>
     <Text Include="..\script\test.txt">
       <Filter>Скрипты</Filter>
+    </Text>
+    <Text Include="..\text\ru\ability.txt">
+      <Filter>Ядро</Filter>
     </Text>
   </ItemGroup>
 </Project>

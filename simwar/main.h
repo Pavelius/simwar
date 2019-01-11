@@ -23,6 +23,10 @@ enum player_ai_s : unsigned char {
 enum gender_s : unsigned char {
 	Male, Female
 };
+enum ability_s : unsigned char {
+	Attack, Defend, Raid, Sword, Shield,
+	Diplomacy, Good, Nobility,
+};
 
 bsreq action_type[];
 bsreq calendar_type[];
@@ -77,7 +81,9 @@ struct tip_info {
 struct combat_info {
 	char						attack, defend, raid;
 	char						sword, shield;
+	char						ability[Shield + 1];
 	int							get(const char* id) const;
+	int							get(ability_s id) const { return ability[id]; }
 };
 struct name_info {
 	const char*					id;
@@ -250,7 +256,6 @@ struct hero_info : name_info {
 	int							getdefend() const { return get("defend"); }
 	int							getdiplomacy() const { return get("diplomacy"); }
 	int							getex(const char* id) const { return get(id) + getbonus(id); }
-	int							gethirecost(const player_info* player) const;
 	int							getincome() const;
 	int							getloyalty() const { return loyalty; }
 	int							getnobility() const { return get("nobility"); }
@@ -331,6 +336,7 @@ struct troop_info {
 	static unsigned				remove_restricted(troop_info** source, unsigned count, const province_info* province);
 	static void					retreat(const province_info* province, const player_info* player);
 	static unsigned				select(troop_info** result, unsigned result_maximum, const province_info* province);
+	static unsigned				select(troop_info** result, unsigned result_maximum, const player_info* player);
 	static unsigned				select_move(troop_info** result, unsigned result_maximum, const province_info* province, const player_info* player);
 	void						setmove(province_info* value) { move = value; }
 	void						setprovince(province_info* value) { province = value; }
@@ -350,6 +356,7 @@ struct player_info : name_info {
 	static int					compare_hire_bet(const void* p1, const void* p2);
 	void						computer_move();
 	static void					create_order();
+	static void					desert_units();
 	static void					gain_profit();
 	static unsigned				getactions(hero_info** source, unsigned maximum_count, int order);
 	province_info*				getbestprovince() const;
@@ -393,9 +400,9 @@ struct game_info {
 	action_info*				default_action;
 	char						income_per_level, casualties;
 	char						support_maximum, support_minimum, support_attack, support_defend, support_change;
+	short						desert_base;
 	char						economy_minimum, economy_maximum;
 	char						loyalty_maximum, loyalty_base, loyalty_noble_modifier;
-	char						hire_cost;
 	char						hire_turns, hire_turns_range[2];
 	hero_info*					hire_hero;
 	int							turn;

@@ -20,9 +20,9 @@ struct bsdata_serial : bsfile {
 	const bsreq*	value_type;
 	void*			value_object;
 	const char*		p;
-	bsdata::parser&	errors;
+	bsdata::parser&	parser;
 
-	bsdata_serial(bsdata::parser& errors, const char* url, const bsfile* parent = 0) : bsfile(url, parent), errors(errors), p(getstart()) {
+	bsdata_serial(bsdata::parser& parser, const char* url, const bsfile* parent = 0) : bsfile(url, parent), parser(parser), p(getstart()) {
 		clearvalue();
 		buffer[0] = 0;
 	}
@@ -60,28 +60,8 @@ struct bsdata_serial : bsfile {
 		return p;
 	}
 
-	bsdata* findbase(const bsreq* type) const {
-		if(errors.custom) {
-			for(auto p = errors.custom; *p; p++) {
-				if((*p)->fields == type)
-					return *p;
-			}
-		}
-		return bsdata::find(type);
-	}
-
-	bsdata* findbase(const char* id) const {
-		if(errors.custom) {
-			for(auto p = errors.custom; *p; p++) {
-				if(strcmp((*p)->id, id)==0)
-					return *p;
-			}
-		}
-		return bsdata::find(id);
-	}
-
 	const char* getbasename(const bsreq* type) const {
-		auto p = findbase(type);
+		auto p = parser.findbase(type);
 		if(!p)
 			return "";
 		return p->id;
@@ -105,16 +85,16 @@ struct bsdata_serial : bsfile {
 	void error(bsparse_error_s id, ...) {
 		int line, column;
 		getpos(p, line, column);
-		errors.error(id, geturl(), line, column, xva_start(id));
-		errors.add();
+		parser.error(id, geturl(), line, column, xva_start(id));
+		parser.add();
 		p = skipline(p);
 	}
 
 	void warning(bsparse_error_s id, ...) {
 		int line, column;
 		getpos(p, line, column);
-		errors.error(id, geturl(), line, column, xva_start(id));
-		errors.add();
+		parser.error(id, geturl(), line, column, xva_start(id));
+		parser.add();
 	}
 
 	void clearvalue() {
@@ -211,7 +191,7 @@ struct bsdata_serial : bsfile {
 		} else
 			return false; // Not found value tag
 		if(need_identifier) {
-			auto value_data = findbase(hint_type);
+			auto value_data = parser.findbase(hint_type);
 			if(value_data)
 				value_object = value_data->find(value_data->fields->getkey(), buffer);
 			else
@@ -275,18 +255,6 @@ struct bsdata_serial : bsfile {
 		return true;
 	}
 
-	bool readfields(void* object, const bsreq* fields) {
-		while(*p && !islinefeed()) {
-			const bsreq* req = 0;
-			if(readidentifier())
-				req = fields->find(buffer);
-			if(!req)
-				warning(ErrorNotFoundMember1pInBase2p, buffer, getbasename(fields));
-			readreq(object, req, 0);
-		}
-		return true;
-	}
-
 	void parse() {
 		while(true) {
 			skipws();
@@ -305,7 +273,7 @@ struct bsdata_serial : bsfile {
 			skipws();
 			// Найдем ее поля и саму базу
 			const bsreq* fields = 0;
-			auto pd = findbase(buffer);
+			auto pd = parser.findbase(buffer);
 			if(pd)
 				fields = pd->fields;
 			else {
@@ -319,7 +287,16 @@ struct bsdata_serial : bsfile {
 				value_object = pd->add();
 			else
 				value_object = 0;
-			readfields(value_object, fields);
+			// Загрузим данные объекта
+			auto object = value_object;
+			while(*p && !islinefeed()) {
+				const bsreq* req = 0;
+				if(readidentifier())
+					req = parser.getrequisit(fields, buffer);
+				if(!req)
+					warning(ErrorNotFoundMember1pInBase2p, buffer, getbasename(fields));
+				readreq(object, req, 0);
+			}
 		}
 	}
 
@@ -334,4 +311,16 @@ void bsdata::read(const char* url, bsdata::parser& parser) {
 void bsdata::read(const char* url) {
 	parser errors;
 	read(url, errors);
+}
+
+const bsreq* bsdata::parser::getrequisit(const bsreq* fields, const char* buffer) const {
+	return fields->find(buffer);
+}
+
+bsdata* bsdata::parser::findbase(const bsreq* type) const {
+	return bsdata::find(type);
+}
+
+bsdata* bsdata::parser::findbase(const char* id) const {
+	return bsdata::find(id);
 }

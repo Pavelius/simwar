@@ -22,14 +22,16 @@ struct bsdata : array {
 		bsreq*			type;
 	};
 	struct parser {
-		bsdata**		custom;
-		constexpr parser() : custom(0), count(0) {}
+		constexpr parser() : count(0) {}
 		void			add() { count++; }
 		void			add(bsparse_error_s id, const char* url, int line, int column, ...);
 		bool			check(const requisit* requisits, unsigned requisits_count);
 		bool			check(const char* url, bsval source);
 		virtual void	error(bsparse_error_s id, const char* url, int line, int column, const char* format_param) {}
+		virtual bsdata*	findbase(const bsreq* type) const;
+		virtual bsdata*	findbase(const char* id) const;
 		int				getcount() const { return count; }
+		virtual const bsreq* getrequisit(const bsreq* fields, const char* buffer) const;
 	private:
 		int				count;
 	};

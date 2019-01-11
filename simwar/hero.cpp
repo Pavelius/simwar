@@ -213,10 +213,6 @@ void hero_info::initialize() {
 	}
 }
 
-int	hero_info::gethirecost(const player_info* player) const {
-	return game.hire_cost;
-}
-
 void hero_info::getinfo(stringbuilder& sb) const {
 	auto ph = metadata;
 	for(auto ppf = character_type; *ppf; ppf++) {

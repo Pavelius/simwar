@@ -118,6 +118,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ability.cpp" />
     <ClCompile Include="action.cpp" />
     <ClCompile Include="answer.cpp" />
     <ClCompile Include="archive.cpp" />
@@ -205,6 +206,7 @@
     <Text Include="..\errors.txt" />
     <Text Include="..\script\test.txt" />
     <Text Include="..\script\test_ru.txt" />
+    <Text Include="..\text\ru\ability.txt" />
     <Text Include="..\text\ru\gender.txt" />
     <Text Include="..\text\ru\msg.txt" />
     <Text Include="..\text\ru\player_ai.txt" />

@@ -43,7 +43,7 @@ game support_change(4)
 game loyalty_base(15)
 game loyalty_maximum(100)
 game loyalty_noble_modifier(2)
-game hire_cost(20)
+game desert_base(5)
 
 gui opacity(220)
 gui opacity_disabled(50)

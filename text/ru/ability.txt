@@ -1,0 +1,8 @@
+attack: Атака
+defend: Защита
+raid: Рейд
+sword: Меч
+shield: Щит
+diplomacy: Дипломатия
+good: Доброта|Злость
+nobility: Власть|Жадность

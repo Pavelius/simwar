@@ -41,6 +41,7 @@ struct msg_info {
 	const char* squads;
 	const char* turns;
 	const char* title;
+	const char* troops_desert;
 	const char* end_turn;
 	const char* exit;
 	const char* loadgame;
