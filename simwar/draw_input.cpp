@@ -1094,12 +1094,16 @@ bool hero_info::choose_troops(const action_info* action, const province_info* pr
 		render_two_window(player, this, action, u1, u2, error_info, sb, cost);
 		if(hot.key == u1.id) {
 			auto p1 = u1.getcurrent();
-			u1.source.remove(u1.current);
-			u2.source.add(p1);
+			if(p1) {
+				u1.source.remove(u1.current);
+				u2.source.add(p1);
+			}
 		} else if(hot.key == u2.id) {
 			auto p1 = u2.getcurrent();
-			u2.source.remove(u2.current);
-			u1.source.add(p1);
+			if(p1) {
+				u2.source.remove(u2.current);
+				u1.source.add(p1);
+			}
 		}
 	}
 	if(!getresult())

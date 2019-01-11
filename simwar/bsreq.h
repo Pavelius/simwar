@@ -12,7 +12,7 @@ bsreq::isubtype<decltype(c::f)>::value}
 
 // Metadata field descriptor
 struct bsreq {
-	enum subtype_s : unsigned char { Scalar, Enum, ADat, ARef, ARem, CFlags };
+	enum subtype_s : unsigned char { Scalar, Enum, ADat, ARef, ARem, CFlags, ACol};
 	// Get count of reference
 	template<class T> struct iref : static_int<0> {};
 	template<class T> struct iref<T*> : static_int<1 + iref<T>::value> {};
