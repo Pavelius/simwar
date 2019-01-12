@@ -289,7 +289,7 @@
     <Text Include="..\maps\test_ru.txt">
       <Filter>Скрипты</Filter>
     </Text>
-    <Text Include="..\maps\test2_ru.txt">
+    <Text Include="..\maps\silentseas_ru.txt">
       <Filter>Скрипты</Filter>
     </Text>
   </ItemGroup>
@@ -297,7 +297,7 @@
     <None Include="..\maps\test.map">
       <Filter>Скрипты</Filter>
     </None>
-    <None Include="..\maps\test2.map">
+    <None Include="..\maps\silentseas.map">
       <Filter>Скрипты</Filter>
     </None>
   </ItemGroup>

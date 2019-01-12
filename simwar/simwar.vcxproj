@@ -205,7 +205,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\errors.txt" />
-    <Text Include="..\maps\test2_ru.txt" />
+    <Text Include="..\maps\silentseas_ru.txt" />
     <Text Include="..\maps\test_ru.txt" />
     <Text Include="..\text\ru\ability.txt" />
     <Text Include="..\text\ru\gender.txt" />
@@ -214,8 +214,8 @@
     <Text Include="..\text\ru\player_ai.txt" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\maps\silentseas.map" />
     <None Include="..\maps\test.map" />
-    <None Include="..\maps\test2.map" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

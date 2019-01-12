@@ -5,7 +5,7 @@ static void exit_game(const menu_info* p) {
 }
 
 static void load_game(const menu_info* p) {
-	if(!game.readmap("test"))
+	if(!game.readmap("silentseas"))
 		return;
 	player_info::playgame();
 }
