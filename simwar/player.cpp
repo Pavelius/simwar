@@ -108,7 +108,7 @@ unsigned player_info::gettroops(troop_info** source, unsigned maximum_count, con
 
 province_info* player_info::getbestprovince() const {
 	province_info* elements[player_max];
-	auto count = province_info::select(elements, sizeof(elements) / sizeof(elements[0]), this, FriendlyProvince);
+	auto count = province_info::select(elements, lenghtof(elements), this);
 	if(!count)
 		return 0;
 	return elements[0];

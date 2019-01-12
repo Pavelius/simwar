@@ -67,8 +67,22 @@ static bool has(province_info** source, province_info** source_end, const provin
 	return false;
 }
 
-unsigned province_info::select_visible(province_info** source, unsigned maximum, const player_info* player) {
-	auto count = select(source, maximum, player, FriendlyProvince);
+unsigned province_info::select_friendly(province_info** source, unsigned maximum, const player_info* player) {
+	auto ps = source;
+	auto pe = ps + maximum;
+	for(auto& e : province_data) {
+		if(!e)
+			continue;
+		if(e.getstatus(player) != FriendlyProvince)
+			continue;
+		if(ps < pe)
+			*ps++ = &e;
+	}
+	return ps - source;
+}
+
+unsigned province_info::select(province_info** source, unsigned maximum, const player_info* player) {
+	auto count = select_friendly(source, maximum, player);
 	if(!count)
 		return 0;
 	auto ps = source + count;
@@ -121,32 +135,28 @@ hero_info* province_info::gethero(const player_info* player) const {
 	return 0;
 }
 
-unsigned province_info::select(province_info** source, unsigned maximum, const player_info* player, province_flag_s state) {
-	auto ps = source;
-	auto pe = ps + maximum;
-	for(auto& e : province_data) {
-		if(!e)
-			continue;
+unsigned province_info::remove_mode(aref<province_info*> source, const player_info* player, province_flag_s state) {
+	auto ps = source.data;
+	for(auto p : source) {
 		switch(state) {
 		case NoFriendlyProvince:
-			if(e.getstatus(player) == FriendlyProvince)
+			if(p->getstatus(player) == FriendlyProvince)
 				continue;
 			break;
 		case FriendlyProvince:
-			if(e.getstatus(player) != FriendlyProvince)
+			if(p->getstatus(player) != FriendlyProvince)
 				continue;
 			break;
 		case NeutralProvince:
-			if(e.getstatus(player) != NeutralProvince)
+			if(p->getstatus(player) != NeutralProvince)
 				continue;
 			break;
 		default:
 			break;
 		}
-		if(ps < pe)
-			*ps++ = &e;
+		*ps++ = p;
 	}
-	return ps - source;
+	return ps - source.data;
 }
 
 unsigned province_info::remove_hero_present(aref<province_info*> source, const player_info* player) {

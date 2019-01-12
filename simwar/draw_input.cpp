@@ -659,9 +659,9 @@ static int render_province(int x, int y, const province_info* province) {
 static void render_board(const player_info* player, callback_proc proc, aref<province_info*> selection, color selection_color, bool set_current_province, bool show_lines) {
 	rect rc = {0, 0, draw::getwidth(), draw::getheight()};
 	province_info* source[province_max];
-	auto count = province_info::select_visible(source, lenghtof(source), player);
-	aref<province_info*> a1 = {source, count};
-	render_board(rc, player, proc, a1, selection, selection_color, set_current_province, show_lines);
+	auto count = province_info::select(source, lenghtof(source), player);
+	//aref<province_info*> a1 = ;
+	render_board(rc, player, proc, {source, count}, selection, selection_color, set_current_province, show_lines);
 }
 
 static void render_left_side(const player_info* player, const province_info* province, bool set_current_province = false) {

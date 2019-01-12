@@ -256,7 +256,7 @@ void hero_info::neutral_hero_actions() {
 	if(!default_patrol)
 		return;
 	province_info* source[province_max];
-	auto count = province_info::select(source, lenghtof(source), 0, FriendlyProvince);
+	auto count = province_info::select_friendly(source, lenghtof(source), 0);
 	if(!count)
 		return;
 	zshuffle(source, count);
@@ -297,7 +297,8 @@ void hero_info::make_move() {
 	if(action->isplaceable()) {
 		auto choose_mode = action->getprovince();
 		province_info* provinces[128];
-		auto count = province_info::select(provinces, sizeof(provinces) / sizeof(provinces[0]), player, choose_mode);
+		auto count = province_info::select(provinces, lenghtof(provinces), player);
+		count = province_info::remove_mode({provinces, count}, player, choose_mode);
 		count = province_info::remove_hero_present({provinces, count}, player);
 		if(!count)
 			return;

@@ -155,10 +155,11 @@ struct province_info : name_info {
 	static void					initialize();
 	static bsreq				metadata[];
 	static unsigned				remove_hero_present(aref<province_info*> source, const player_info* player);
+	static unsigned				remove_mode(aref<province_info*> source, const player_info* player, province_flag_s state);
 	void						render_neighbors(const rect& rc) const;
 	void						retreat(const player_info* player);
-	static unsigned				select(province_info** source, unsigned maximum, const player_info* player = 0, province_flag_s state = AnyProvince);
-	static unsigned				select_visible(province_info** source, unsigned maximum, const player_info* player);
+	static unsigned				select(province_info** source, unsigned maximum, const player_info* player);
+	static unsigned				select_friendly(province_info** source, unsigned maximum, const player_info* player);
 	void						seteconomy(int value);
 	void						setplayer(player_info* value) { player = value; }
 	void						setsupport(const player_info* player, int value);
