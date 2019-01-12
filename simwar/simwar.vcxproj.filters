@@ -292,6 +292,12 @@
     <Text Include="..\maps\silentseas_ru.txt">
       <Filter>Скрипты</Filter>
     </Text>
+    <Text Include="..\scripts\tactics.txt">
+      <Filter>Скрипты</Filter>
+    </Text>
+    <Text Include="..\scripts\earth_calendar.txt">
+      <Filter>Скрипты</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\maps\test.map">

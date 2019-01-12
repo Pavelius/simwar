@@ -3,26 +3,28 @@
 #include "io.h"
 
 class bsfile {
-	const bsfile* parent;
-	const char* url;
-	const char* start;
+	const bsfile*	parent;
+	const char*		url;
+	const char*		start;
 public:
 	bsfile(const char* url, const bsfile* parent = 0) : parent(0), url(url), start(loadt(url)) {}
 	~bsfile() { delete start; }
 	operator bool() const { return start != 0; }
+	const bsfile*	getparent() const { return parent; }
 	const char*		getstart() const { return start; }
 	const char*		geturl() const { return url; }
 };
 
 struct bsdata_serial : bsfile {
-	char			buffer[128 * 256];
+	
+	char			buffer[1024];
 	int				value;
 	const bsreq*	value_type;
 	void*			value_object;
 	const char*		p;
 	bsdata::parser&	parser;
 
-	bsdata_serial(bsdata::parser& parser, const char* url, const bsfile* parent = 0) : bsfile(url, parent), parser(parser), p(getstart()) {
+	bsdata_serial(const char* url, bsdata::parser& parser, bsdata_serial* parent) : bsfile(url, parent), parser(parser), p(getstart()) {
 		clearvalue();
 		buffer[0] = 0;
 	}
@@ -255,6 +257,29 @@ struct bsdata_serial : bsfile {
 		return true;
 	}
 
+	bool directive() {
+		if(strcmp(buffer, "include") == 0) {
+			if(p[0] != '\"') {
+				error(ErrorExpected1p, "\"");
+				return true;
+			}
+			p++;
+			readstring('\"');
+			for(auto p = getparent(); p; p = p->getparent()) {
+				if(strcmp(p->geturl(), buffer) == 0)
+					return true;
+			}
+			bsdata_serial e(buffer, parser, this);
+			if(!e) {
+				error(ErrorFile1pNotFound, buffer);
+				return true;
+			}
+			e.parse();
+		} else
+			return false;
+		return true;
+	}
+
 	void parse() {
 		while(true) {
 			skipws();
@@ -271,6 +296,10 @@ struct bsdata_serial : bsfile {
 				continue;
 			}
 			skipws();
+			if(directive()) {
+				p = skipline(p);
+				continue;
+			}
 			// Найдем ее поля и саму базу
 			const bsreq* fields = 0;
 			auto pd = parser.findbase(buffer);
@@ -303,7 +332,7 @@ struct bsdata_serial : bsfile {
 };
 
 void bsdata::read(const char* url, bsdata::parser& parser) {
-	bsdata_serial e(parser, url);
+	bsdata_serial e(url, parser, 0);
 	if(e)
 		e.parse();
 }

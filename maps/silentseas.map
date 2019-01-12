@@ -1,19 +1,5 @@
-calendar january season(winter)
-calendar february season(winter)
-calendar march season(spring)
-calendar april season(spring)
-calendar may season(spring)
-calendar june season(summer)
-calendar july season(summer)
-calendar august season(summer)
-calendar september season(autumn)
-calendar october season(autumn)
-calendar november season(autumn)
-calendar december season(winter)
-
-tactic lighting_attack attack(2) defend(2)
-tactic careful_defence shield(1)
-tactic messy_fighting sword(1)
+include "scripts/tactics.txt"
+include "scripts/earth_calendar.txt"
 
 nation orcs
 nation northerners
@@ -39,7 +25,6 @@ game economy_minimum(-5)
 game economy_maximum(5)
 game support_attack(20)
 game support_defend(20)
-game support_change(4)
 game loyalty_base(15)
 game loyalty_maximum(100)
 game loyalty_noble_modifier(2)

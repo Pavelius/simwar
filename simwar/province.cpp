@@ -325,6 +325,6 @@ void province_info::initialize() {
 		if(!e.player)
 			continue;
 		if(e.getsupport(e.player) == 0)
-			e.setsupport(e.player, game.support_change * 2);
+			e.setsupport(e.player, 10);
 	}
 }

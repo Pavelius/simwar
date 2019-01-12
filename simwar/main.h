@@ -396,7 +396,7 @@ struct game_info {
 	const char*					map;
 	action_info*				default_action;
 	char						income_per_level, casualties;
-	char						support_maximum, support_minimum, support_attack, support_defend, support_change;
+	char						support_maximum, support_minimum, support_attack, support_defend;
 	short						desert_base;
 	char						economy_minimum, economy_maximum;
 	char						loyalty_maximum, loyalty_base, loyalty_noble_modifier;
