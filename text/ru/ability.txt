@@ -3,6 +3,6 @@ defend: Защита
 raid: Рейд
 sword: Меч
 shield: Щит
-diplomacy: Дипломатия
 good: Доброта|Злость
+magic: Магия
 nobility: Власть|Жадность

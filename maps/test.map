@@ -69,7 +69,7 @@ province holy_mountain position(1231, 351) landscape(plains) level(2) nation(nor
 province druid_hills position(1336, 206) landscape(hills) nation(northerners)
 
 trait general defend(1) attack(1)
-trait diplomat defend(1) diplomacy(1)
+trait wizard defend(1) magic(1)
 trait hireling attack(1) raid(2) nobility(-1)
 trait rogue raid(3) nobility(-1)
 
@@ -80,8 +80,8 @@ trait cunning attack(1) raid(1)
 trait noble nobility(1) good(1)
 
 hero gordek avatar("art/portraits/gordek.bmp") traits(bloody, hireling) player(red) best_tactic(lighting_attack)
-hero mistra avatar("art/portraits/mistra.bmp") traits(carefull, diplomat) best_tactic(careful_defence) gender(female)
-hero antaris avatar("art/portraits/antaris.bmp") traits(bloody, diplomat) best_tactic(messy_fighting)
+hero mistra avatar("art/portraits/mistra.bmp") traits(carefull, wizard) best_tactic(careful_defence) gender(female) best_land(forest)
+hero antaris avatar("art/portraits/antaris.bmp") traits(bloody, wizard) best_tactic(messy_fighting) best_land(mountains)
 hero groomsh avatar("art/portraits/groomsh.bmp") traits(cunning, general) player(green) best_tactic(careful_defence)
 hero bogart avatar("art/portraits/bogard.bmp") traits(bloody, general) best_tactic(messy_fighting)
 hero argh avatar("art/portraits/argh.bmp") traits(mad, general) best_tactic(messy_fighting)

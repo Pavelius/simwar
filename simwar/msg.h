@@ -10,18 +10,8 @@ struct msg_info {
 	const char* lead;
 	const char* moved;
 	const char* raid_spoils;
-	const char* attack;
-	const char* defend;
-	const char* raid;
-	const char* sword;
-	const char* shield;
 	const char* diplomacy;
 	const char* loyalty;
-	const char* good;
-	const char* good_negative;
-	const char* nobility;
-	const char* nobility_negative;
-	const char* will;
 	const char* support;
 	const char* total_strenght, *total;
 	const char* predict_fail, *predict_partial, *predict_success;

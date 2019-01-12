@@ -5,8 +5,8 @@ name_info ability_data[] = {{"attack"},
 {"raid"},
 {"sword"},
 {"shield"},
-{"diplomacy"},
 {"good"},
+{"magic"},
 {"nobility"},
 };
 assert_enum(ability, LastAbility);

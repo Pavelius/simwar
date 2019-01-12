@@ -25,7 +25,7 @@ enum gender_s : unsigned char {
 };
 enum ability_s : unsigned char {
 	Attack, Defend, Raid, Sword, Shield,
-	Diplomacy, Good, Nobility,
+	Good, Magic, Nobility,
 	LastAbility = Nobility
 };
 
@@ -243,6 +243,7 @@ struct hero_info : character_info {
 	const action_info*			getaction() const { return action; }
 	const char*					getavatar() const { return avatar; }
 	const tactic_info*			getbesttactic() const { return best_tactic; }
+	const landscape_info*		getbestland() const { return best_land; }
 	void						getbrief(stringbuilder& sb) const;
 	void						getinfo(stringbuilder& sb) const;
 	gender_s					getgender() const { return gender; }
@@ -287,6 +288,7 @@ private:
 	province_info*				province;
 	const tactic_info*			tactic;
 	const tactic_info*			best_tactic;
+	const landscape_info*		best_land;
 	trait_info*					traits[2];
 };
 struct unit_info : character_info {

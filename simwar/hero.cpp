@@ -9,6 +9,7 @@ bsreq hero_info::metadata[] = {
 	BSREQ(hero_info, avatar, text_type),
 	BSREQ(hero_info, tactic, tactic_type),
 	BSREQ(hero_info, best_tactic, tactic_type),
+	BSREQ(hero_info, best_land, landscape_type),
 	BSREQ(hero_info, traits, trait_type),
 	BSREQ(hero_info, player, player_info::metadata),
 	BSREQ(hero_info, province, province_info::metadata),
@@ -46,8 +47,6 @@ int	hero_info::getincome() const {
 bool hero_info::isallow(const action_info* action) const {
 	if(action->getraid() > 0)
 		return (getattack() + getraid()) > 0;
-	if(action->support > 0)
-		return (action->support + get(Diplomacy)) > 0;
 	return true;
 }
 
@@ -69,7 +68,6 @@ void hero_info::resolve() {
 	if(!action)
 		return;
 	string sb;
-	// Далее идут действия, которые действуют на провинцию
 	if(!province)
 		return;
 	if(action->getattack() || action->getraid()) {
@@ -81,8 +79,7 @@ void hero_info::resolve() {
 			enemy->post(province->gethero(enemy), province, sb);
 		}
 	}
-	if(action->support)
-		province->addsupport(player, action->support + get(Diplomacy));
+	province->addsupport(player, action->support);
 	province->addsupport(player, get(Good));
 	province->addeconomy(action->economy);
 	setloyalty(getloyalty() + action->get(Good)*get(Good));

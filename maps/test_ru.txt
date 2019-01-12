@@ -22,7 +22,7 @@ economy: Инвестировать|инвестирует.
 mobilization: Переместить войска|перемещает войска.
 
 general: Генерал
-diplomat: Дипломат
+wizard: Волшебник
 hireling: Наемник
 carefull: Осторожный
 bloody: Кровожадный
