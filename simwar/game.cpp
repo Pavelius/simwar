@@ -62,7 +62,7 @@ struct game_log : bslog {
 
 };
 
-bool game_info::read(const char* name) {
+bool game_info::readmap(const char* name) {
 	char temp[260];
 	auto result = true;
 	const auto url_errors = "errors.txt";
@@ -70,8 +70,8 @@ bool game_info::read(const char* name) {
 	io::file::remove(url_errors);
 	if(true) {
 		game_log errors(url_errors);
-		bsdata::read(zprint(temp, "script/%1.txt", name), errors);
-		bsdata::readl(zprint(temp, "script/%1_%2.txt", name, "ru"), key_requisits);
+		bsdata::read(zprint(temp, "maps/%1.map", name), errors);
+		bsdata::readl(zprint(temp, "maps/%1_%2.txt", name, "ru"), key_requisits);
 		errors.check(required_reqisits, lenghtof(required_reqisits));
 		if(result) {
 			if(!initializemap())

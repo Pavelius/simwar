@@ -5,9 +5,13 @@ static void exit_game(const menu_info* p) {
 }
 
 static void load_game(const menu_info* p) {
-	if(!game.read("test"))
+	if(!game.readmap("test"))
 		return;
 	player_info::playgame();
+}
+
+static void new_game(const menu_info* p) {
+	auto p = game.choose();
 }
 
 bsreq menu_type[] = {
@@ -15,7 +19,7 @@ bsreq menu_type[] = {
 	BSREQ(menu_info, name, text_type),
 {}};
 static menu_info menu_data[] = {
-{"new_game", "main_menu"},
+{"new_game", "main_menu", new_game},
 {"load_game", "main_menu", load_game},
 {"exit_game", "main_menu", exit_game},
 };
@@ -42,6 +46,6 @@ void menu_info::choose_block(const char* parent) {
 			break;
 		if(p->proc)
 			p->proc(p);
-		parent = p->parent;
+		parent = p->id;
 	}
 }

@@ -400,10 +400,16 @@ struct game_info {
 	int							year;
 	//
 	void						clear();
-	int							getyear() const;
 	void						initialize();
 	bool						initializemap();
-	bool						read(const char* name);
+	bool						readmap(const char* name);
+};
+struct game_header {
+	const char*					id;
+	const char*					name;
+	const char*					map;
+	static unsigned				select();
+	static game_header*			choose(game_header** source, unsigned count);
 };
 struct gui_info {
 	unsigned char				border, button_border;
