@@ -15,20 +15,19 @@ bsreq action_type[] = {
 	BSREQ(action_info, cost_per_unit, number_type),
 	BSREQ(action_info, trophies, cost_type),
 	BSREQ(action_info, wait, number_type),
-	BSREQ(action_info, good, number_type),
 {}};
 adat<action_info, 32> action_data; BSMETA(action);
 
 province_flag_s action_info::getprovince() const {
-	if(get(Attack) > 0 || get(Raid) > 0)
+	if(getattack() > 0 || getraid() > 0)
 		return NoFriendlyProvince;
-	else if(get(Defend) || recruit || economy || movement)
+	else if(getdefend() || recruit || economy || movement)
 		return FriendlyProvince;
 	return AnyProvince;
 }
 
 bool action_info::isplaceable() const {
-	return get(Attack) > 0 || get(Raid) > 0 || get(Defend) > 0
+	return getattack() > 0 || getraid() > 0 || getdefend() > 0
 		|| recruit || support || economy|| movement;
 }
 

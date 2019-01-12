@@ -33,20 +33,6 @@ void hero_info::refresh_heroes() {
 	}
 }
 
-int hero_info::get(ability_s id) const {
-	auto r = 0;
-	for(auto p : traits) {
-		if(!p)
-			continue;
-		r += p->get(id);
-	}
-	return r;
-}
-
-int hero_info::getbonus(const char* id) const {
-	return 0;
-}
-
 int	hero_info::getincome() const {
 	auto result = 0;
 	for(auto p : traits) {
@@ -58,10 +44,8 @@ int	hero_info::getincome() const {
 }
 
 bool hero_info::isallow(const action_info* action) const {
-	if(action->get(Raid) > 0)
+	if(action->getraid() > 0)
 		return (getattack() + getraid()) > 0;
-	if(action->support > 0)
-		return (action->support + getdiplomacy()) > 0;
 	return true;
 }
 
@@ -86,8 +70,8 @@ void hero_info::resolve() {
 	// ƒалее идут действи€, которые действуют на провинцию
 	if(!province)
 		return;
-	if(action->get(Attack) || action->get(Raid)) {
-		auto israid = (action->get(Raid) > 0);
+	if(action->getattack() || action->getraid()) {
+		auto israid = (action->getraid() > 0);
 		auto enemy = province->getplayer();
 		if(enemy != player) {
 			province->battle(sb, player, enemy, action, israid);
@@ -99,10 +83,10 @@ void hero_info::resolve() {
 		province->addsupport(player, action->support + getdiplomacy());
 	province->addsupport(player, getgood());
 	province->addeconomy(action->economy);
-	if(action->get(Defend))
-		province->addsupportex(player, -action->get(Defend) - imax(0, getdefend()), 0, game.support_maximum);
+	if(action->getdefend())
+		province->addsupportex(player, -action->getdefend() - imax(0, getdefend()), 0, game.support_maximum);
 	// ƒоброе или злое действие вли€ет на ло€льность геро€
-	setloyalty(getloyalty() + action->good*getgood());
+	setloyalty(getloyalty() + action->get(Good)*getgood());
 }
 
 unsigned hero_info::select(hero_info** source, unsigned maximum_count, const player_info* player) {
@@ -206,6 +190,10 @@ void hero_info::initialize() {
 	for(auto& e : hero_data) {
 		if(!e)
 			continue;
+		for(auto p : e.traits) {
+			for(auto i = Attack; i <= LastAbility; i = (ability_s)(i + 1))
+				e.ability[i] += p->get(i);
+		}
 		if(!e.player)
 			continue;
 		e.setplayer(e.player);
@@ -320,7 +308,7 @@ void hero_info::make_move() {
 		if(!province)
 			return;
 	}
-	auto raid = action->get(Raid) > 0;
+	auto raid = action->getraid() > 0;
 	army troops_move(const_cast<player_info*>(player), const_cast<province_info*>(province), this, true, raid);
 	unit_set units_product;
 	if(action->get(Raid) || action->get(Attack)) {

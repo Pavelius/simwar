@@ -102,16 +102,18 @@ struct character_info : name_info {
 };
 struct nation_info : name_info {};
 struct action_info : character_info {
+	char						recruit, support, economy, movement;
 	cost_info					cost, trophies;
 	char						cost_per_unit;
-	char						recruit, support, economy, movement;
 	char						order;
-	char						good;
 	char						wait;
 	//
 	static int					compare(const void* p1, const void* p2);
 	bool						isplaceable() const;
 	static const action_info*	getaction(char attack, char defend, char raid);
+	int							getattack() const { return get(Attack); }
+	int							getdefend() const { return get(Defend); }
+	int							getraid() const { return get(Raid); }
 	province_flag_s				getprovince() const;
 	static unsigned				select(action_info** source, unsigned count, char attack = 0, char defend = 0, char raid = 0);
 	static void					sort(action_info** source, unsigned count);
@@ -226,7 +228,7 @@ private:
 	char*						p;
 	char						buffer[8196];
 };
-struct hero_info : name_info {
+struct hero_info : character_info {
 	cost_info					pay;
 	//
 	void						cancelaction();
@@ -236,12 +238,10 @@ struct hero_info : name_info {
 	const tactic_info*			choose_tactic() const;
 	bool						choose_troops(const action_info* action, const province_info* province, army& a1, army& a2, army& a3, int minimal_count, cost_info& cost) const;
 	bool						choose_units(const action_info* action, const province_info* province, unit_set& a1, unit_set& a2, cost_info& cost) const;
-	int							get(ability_s id) const;
 	int							getattack() const { return get(Attack); }
 	const action_info*			getaction() const { return action; }
 	const char*					getavatar() const { return avatar; }
 	const tactic_info*			getbesttactic() const { return best_tactic; }
-	int							getbonus(const char* id) const;
 	void						getbrief(stringbuilder& sb) const;
 	void						getinfo(stringbuilder& sb) const;
 	gender_s					getgender() const { return gender; }
@@ -281,6 +281,7 @@ struct hero_info : name_info {
 	void						setwound(int v) { wound = v; }
 private:
 	char						wait, wound, loyalty;
+	char						level, experience;
 	gender_s					gender;
 	const action_info*			action;
 	const char*					avatar;
