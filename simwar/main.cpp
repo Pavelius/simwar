@@ -15,15 +15,14 @@ static bool initialize_messages(const char* locale_name) {
 }
 
 int main(int argc, char* argv[]) {
+	gui.initialize();
 	if(!initialize_messages("ru"))
 		return 0;
 	srand(clock());
 	draw::initialize();
 	draw::create(-1, -1, 800, 600, WFResize|WFMinmax, 32);
 	draw::setcaption(msg.title);
-	if(!game.read("test"))
-		return 0;
-	player_info::playgame();
+	menu_info::choose_block("main_menu");
 	return 0;
 }
 

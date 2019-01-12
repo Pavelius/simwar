@@ -175,6 +175,9 @@
     <ClCompile Include="ability.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
+    <ClCompile Include="menu.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="draw.h">
@@ -281,6 +284,9 @@
       <Filter>Скрипты</Filter>
     </Text>
     <Text Include="..\text\ru\ability.txt">
+      <Filter>Ядро</Filter>
+    </Text>
+    <Text Include="..\text\ru\menu.txt">
       <Filter>Ядро</Filter>
     </Text>
   </ItemGroup>

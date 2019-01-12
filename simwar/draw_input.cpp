@@ -58,6 +58,22 @@ static bsreq gui_type[] = {
 gui_info gui;
 bsdata gui_manger("gui", gui, gui_type);
 
+void gui_info::initialize() {
+	memset(this, 0, sizeof(*this));
+	opacity = 220;
+	opacity_disabled = 50;
+	border = 8;
+	padding = 4;
+	window_width = 400;
+	tips_width = 200;
+	hero_width = 64;
+	button_width = 64;
+	button_border = 4;
+	hero_window_width = 200;
+	opacity_hilighted = 200;
+	opacity_hilighted_province = 64;
+}
+
 static void set_focus_callback() {
 	auto id = getnext(draw::getfocus(), hot.param);
 	if(id)
@@ -1127,6 +1143,27 @@ int answer_info::choose(const hero_info* hero, bool cancel_button, answer_info::
 			y += windowb(x, y, gui.hero_window_width, msg.cancel, cmd(buttoncancel), 0, KeyEscape);
 		domodal();
 		control_standart();
+	}
+	return getresult();
+}
+
+int answer_info::choose(bool cancel_button) const {
+	auto button_height = texth() + gui.button_border * 2 + gui.padding;
+	if(!elements.getcount())
+		return 0;
+	auto total_height = elements.getcount() * button_height + gui.padding;
+	auto window_width = gui.window_width;
+	while(ismodal()) {
+		auto mx = getwidth();
+		auto my = getheight();
+		rectf({0, 0, mx, my}, colors::gray);
+		auto x = (getwidth() - window_width - gui.border*2) / 2;
+		auto y = (getheight() - total_height) / 2;
+		for(auto& e : elements)
+			y += windowb(x, y, window_width, e.getname(), cmd(breakparam, e.param)) + gui.padding;
+		if(cancel_button)
+			y += windowb(x, y, window_width, msg.cancel, cmd(buttoncancel), 0, KeyEscape);
+		domodal();
 	}
 	return getresult();
 }

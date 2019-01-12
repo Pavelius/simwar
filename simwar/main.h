@@ -223,6 +223,7 @@ struct answer_info {
 	constexpr explicit operator bool() const { return elements.count != 0; }
 	void						add(int param, const char* format, ...);
 	void						addv(int param, const char* format, const char* format_param);
+	int							choose(bool cancel_button = false) const;
 	int							choose(const hero_info* hero, bool cancel_button = true, answer_info::tips_type getinfo = 0) const;
 	void						sort();
 private:
@@ -409,10 +410,21 @@ struct gui_info {
 	unsigned char				opacity, opacity_disabled, opacity_hilighted, opacity_hilighted_province;
 	short						button_width, window_width, tips_width, hero_width, hero_window_width, control_border;
 	short						padding;
+	void						initialize();
 };
 struct unit_set : adat<unit_info*, 32> {
 	void						fill(const player_info* player, const province_info* province, const hero_info* hero, const action_info* action);
 	cost_info					getcost() const;
+};
+struct menu_info {
+	typedef void(*callback)(const menu_info* p);
+	const char*					id;
+	const char*					parent;
+	callback					proc;
+	const char*					name;
+	static const menu_info*		choose(const char* parent, bool cancel_button);
+	static void					choose_block(const char* parent);
+	static void					select(answer_info& ai, const char* parent);
 };
 extern name_info				ability_data[];
 extern adat<action_info, 32>	action_data;
