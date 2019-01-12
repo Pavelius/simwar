@@ -5,8 +5,11 @@ name_info ability_data[] = {{"attack"},
 {"raid"},
 {"sword"},
 {"shield"},
+{"diplomacy"},
+{"good"},
+{"nobility"},
 };
-assert_enum(ability, Shield);
+assert_enum(ability, LastAbility);
 bsreq ability_type[] = {
 	BSREQ(hero_info, id, text_type),
 	BSREQ(hero_info, name, text_type),

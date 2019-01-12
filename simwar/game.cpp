@@ -35,6 +35,32 @@ static bsdata::requisit required_reqisits[] = {{"name", true},
 {"loyalty_base", true},
 {"nation", true, {}, province_info::metadata},
 };
+bsreq ability_requisits[LastAbility + 2];
+
+struct game_log : bslog {
+
+	game_log(const char* name) : bslog(name) {}
+
+	virtual const bsreq* getrequisit(const bsreq* fields, const char* buffer) const override {
+		auto result = parser::getrequisit(fields, buffer);
+		if(result)
+			return result;
+		auto pbase = fields->find("ability");
+		if(!pbase)
+			return 0;
+		if(!ability_requisits[0].id) {
+			for(auto i = 0; i <= LastAbility; i++) {
+				ability_requisits[i].id = ability_data[i].id;
+				ability_requisits[i].type = number_type;
+				ability_requisits[i].count = 1;
+				ability_requisits[i].size = 1;
+				ability_requisits[i].offset = pbase->offset + i;
+			}
+		}
+		return ability_requisits->find(buffer);
+	}
+
+};
 
 bool game_info::read(const char* name) {
 	char temp[260];
@@ -43,7 +69,7 @@ bool game_info::read(const char* name) {
 	game.clear();
 	io::file::remove(url_errors);
 	if(true) {
-		bslog errors(url_errors);
+		game_log errors(url_errors);
 		bsdata::read(zprint(temp, "script/%1.txt", name), errors);
 		bsdata::readl(zprint(temp, "script/%1_%2.txt", name, "ru"), key_requisits);
 		errors.check(required_reqisits, lenghtof(required_reqisits));

@@ -12,67 +12,56 @@ void army::fill(const player_info* player, const province_info* province) {
 			continue;
 		if(province && e.getprovince(player) != province)
 			continue;
-		if(raid && attack && e.get("raid") <= 0)
+		if(raid && attack && e.get(Raid) <= 0)
 			continue;
 		add(&e);
 	}
 }
 
-int army::getsword() const {
+int army::getcasualty(ability_s id) const {
 	auto result = 0;
 	if(general)
-		result += general->getsword() * game.casualties;
+		result += general->get(id) * game.casualties;
 	if(tactic)
-		result += tactic->sword * game.casualties;
+		result += tactic->get(id) * game.casualties;
 	for(auto p : *this)
-		result += p->getsword();
+		result += p->get(id);
 	return result;
 }
 
-int army::getraid() const {
+int army::get(ability_s id) const {
 	auto result = 0;
 	if(general)
-		result += general->getraid();
+		result += general->get(id);
 	if(tactic)
-		result += tactic->raid;
+		result += tactic->get(id);
 	for(auto p : *this)
-		result += p->get("raid");
-	return result;
-}
-
-int army::getshield() const {
-	auto result = 0;
-	if(general)
-		result += general->getshield()*game.casualties;
-	if(tactic)
-		result += tactic->shield * game.casualties;
-	for(auto p : *this)
-		result += p->getshield();
+		result += p->get(id);
 	return result;
 }
 
 int army::getstrenght(tip_info* ti, bool include_number) const {
-	return get(attack ? "attack" : "defend", ti, include_number);
+	return get(attack ? Attack : Defend, ti, include_number);
 }
 
-int army::get(const char* id, tip_info* ti, bool include_number) const {
+int army::get(ability_s id, tip_info* ti, bool include_number) const {
 	auto r = 0;
 	if(ti && include_number)
 		zcpy(ti->result, "[\"");
 	if(general) {
-		auto value = general->get(id) + general->getbonus(id);
+		auto value = general->get(id);
 		if(raid)
-			value += general->get("raid") + general->getbonus("raid");
+			value += general->get(Raid);
 		r += general->fix(ti, value);
 		if(!attack) {
 			auto action = general->getaction();
-			r += action->fix(ti, action->defend);
+			r += action->fix(ti, action->get(Defend));
 		}
 	}
 	for(auto p : *this) {
-		auto value = p->get(id) + p->getbonus(id);
+		auto value = p->get(id);
 		if(raid)
-			value += p->get("raid") + p->getbonus("raid");
+			value += p->get(Raid);
 		r += p->fix(ti, value);
 	}
 	if(province) {
@@ -94,7 +83,7 @@ int army::get(const char* id, tip_info* ti, bool include_number) const {
 	if(tactic) {
 		auto value = tactic->get(id);
 		if(raid)
-			value += tactic->get("raid");
+			value += tactic->get(Raid);
 		r += tactic->fix(ti, value);
 	}
 	if(ti && include_number)

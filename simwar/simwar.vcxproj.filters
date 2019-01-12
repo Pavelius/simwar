@@ -115,9 +115,6 @@
     <ClCompile Include="unit.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
-    <ClCompile Include="combat_info.cpp">
-      <Filter>Логика</Filter>
-    </ClCompile>
     <ClCompile Include="draw_control.cpp">
       <Filter>Графика</Filter>
     </ClCompile>

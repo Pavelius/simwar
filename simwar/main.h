@@ -26,8 +26,10 @@ enum gender_s : unsigned char {
 enum ability_s : unsigned char {
 	Attack, Defend, Raid, Sword, Shield,
 	Diplomacy, Good, Nobility,
+	LastAbility = Nobility
 };
 
+bsreq ability_type[];
 bsreq action_type[];
 bsreq calendar_type[];
 bsreq character_type[];
@@ -78,13 +80,6 @@ struct tip_info {
 	constexpr tip_info(char* result, const char* result_max) :result(result), result_max(result_max), text("[%3%+1i]\t%2"), separator("\n") { result[0] = 0; }
 	template<unsigned N> constexpr tip_info(char(&result)[N]) : tip_info(result, result + sizeof(result)) {}
 };
-struct combat_info {
-	char						attack, defend, raid;
-	char						sword, shield;
-	char						ability[Shield + 1];
-	int							get(const char* id) const;
-	int							get(ability_s id) const { return ability[id]; }
-};
 struct name_info {
 	const char*					id;
 	const char*					name;
@@ -101,8 +96,12 @@ struct name_info {
 	static int					fix(tip_info* ti, const char* name, int value);
 	int							fix(tip_info* ti, int value) const { return fix(ti, name, value); }
 };
+struct character_info : name_info {
+	char						ability[LastAbility + 1];
+	int							get(ability_s id) const { return ability[id]; }
+};
 struct nation_info : name_info {};
-struct action_info : name_info, combat_info {
+struct action_info : character_info {
 	cost_info					cost, trophies;
 	char						cost_per_unit;
 	char						recruit, support, economy, movement;
@@ -117,19 +116,11 @@ struct action_info : name_info, combat_info {
 	static unsigned				select(action_info** source, unsigned count, char attack = 0, char defend = 0, char raid = 0);
 	static void					sort(action_info** source, unsigned count);
 };
-struct character_info : combat_info {
-	char						diplomacy;
-	char						good;
-	char						nobility;
-	int							get(const char* id) const;
-};
-struct season_info : name_info {
-
-};
+struct season_info : name_info {};
 struct calendar_info : name_info {
 	const season_info*			season;
 };
-struct landscape_info : name_info, combat_info {
+struct landscape_info : character_info {
 	char						income;
 	int							getincome(tip_info* ti) const;
 };
@@ -196,9 +187,8 @@ private:
 	const player_info*			player;
 	const province_info*		province;
 };
-struct trait_info : name_info, character_info {};
-struct tactic_info : name_info, combat_info {
-};
+struct trait_info : character_info {};
+struct tactic_info : character_info {};
 struct army : adat<troop_info*, 32> {
 	hero_info*					general;
 	player_info*				player;
@@ -209,11 +199,14 @@ struct army : adat<troop_info*, 32> {
 	constexpr army() : general(0), player(0), tactic(0), province(0), attack(false), raid(false) {}
 	army(player_info* player, province_info* province, hero_info* general, bool attack, bool raid);
 	void						fill(const player_info* player, const province_info* province);
-	int							get(const char* id, tip_info* ti, bool include_number = true) const;
-	int							getraid() const;
+	int							get(ability_s id, tip_info* ti, bool include_number = true) const;
+	int							getraid() const { return get(Raid); }
 	int							getstrenght(tip_info* ti, bool include_number = true) const;
-	int							getshield() const;
-	int							getsword() const;
+	int							getshield() const { return getcasualty(Shield); }
+	int							getsword() const { return getcasualty(Sword); }
+private:
+	int							get(ability_s id) const;
+	int							getcasualty(ability_s id) const;
 };
 struct answer_info {
 	struct element {
@@ -243,8 +236,8 @@ struct hero_info : name_info {
 	const tactic_info*			choose_tactic() const;
 	bool						choose_troops(const action_info* action, const province_info* province, army& a1, army& a2, army& a3, int minimal_count, cost_info& cost) const;
 	bool						choose_units(const action_info* action, const province_info* province, unit_set& a1, unit_set& a2, cost_info& cost) const;
-	int							get(const char* id) const;
-	int							getattack() const { return get("attack"); }
+	int							get(ability_s id) const;
+	int							getattack() const { return get(Attack); }
 	const action_info*			getaction() const { return action; }
 	const char*					getavatar() const { return avatar; }
 	const tactic_info*			getbesttactic() const { return best_tactic; }
@@ -252,19 +245,18 @@ struct hero_info : name_info {
 	void						getbrief(stringbuilder& sb) const;
 	void						getinfo(stringbuilder& sb) const;
 	gender_s					getgender() const { return gender; }
-	int							getgood() const { return get("good"); }
-	int							getdefend() const { return get("defend"); }
-	int							getdiplomacy() const { return get("diplomacy"); }
-	int							getex(const char* id) const { return get(id) + getbonus(id); }
+	int							getgood() const { return get(Good); }
+	int							getdefend() const { return get(Defend); }
+	int							getdiplomacy() const { return get(Diplomacy); }
 	int							getincome() const;
 	int							getloyalty() const { return loyalty; }
-	int							getnobility() const { return get("nobility"); }
+	int							getnobility() const { return get(Nobility); }
 	player_info*				getplayer() const { return player; }
 	province_info*				getprovince() const { return province; }
-	int							getraid() const { return get("raid"); }
-	int							getshield() const { return get("shield"); }
+	int							getraid() const { return get(Raid); }
+	int							getshield() const { return get(Shield); }
 	void						getstate(stringbuilder& sb) const;
-	int							getsword() const { return get("sword"); }
+	int							getsword() const { return get(Sword); }
 	const tactic_info*			gettactic() const { return tactic; }
 	int							getwait() const { return wait; }
 	int							getwound() const { return wound; }
@@ -298,7 +290,7 @@ private:
 	const tactic_info*			best_tactic;
 	trait_info*					traits[2];
 };
-struct unit_info : name_info, combat_info {
+struct unit_info : character_info {
 	cost_info					cost;
 	nation_info*				nation;
 	char						recruit_count, recruit_time;
@@ -306,7 +298,6 @@ struct unit_info : name_info, combat_info {
 	char						income;
 	landscape_info*				landscape[4];
 	//
-	int							get(const char* id) const;
 	bool						is(const landscape_info* landscape) const;
 };
 struct troop_info {
@@ -316,7 +307,7 @@ struct troop_info {
 	void						clear();
 	static int					compare(const void* p1, const void* p2);
 	int							fix(tip_info* ti, int value) const { return type->fix(ti, type->name, value); }
-	int							get(const char* id) const { return type->get(id); }
+	int							get(ability_s id) const { return type->get(id); }
 	int							getbonus(const char* id) const { return 0; }
 	int							getincome() const { return type->income; }
 	province_info*				getmove() const { return move; }
@@ -326,9 +317,9 @@ struct troop_info {
 	static void					getpresent(stringbuilder& sb, troop_info** source, unsigned count, const char* addition_text);
 	province_info*				getprovince() const { return province; }
 	province_info*				getprovince(const player_info* player) const;
-	int							getshield() const { return get("shield"); }
-	int							getsort() const { return type->attack + type->defend; }
-	int							getsword() const { return get("sword"); }
+	int							getshield() const { return get(Shield); }
+	int							getsort() const { return type->get(Attack) + type->get(Defend); }
+	int							getsword() const { return get(Sword); }
 	void						kill(player_info* player);
 	static bsreq				metadata[];
 	static unsigned				remove(troop_info** source, unsigned count, const province_info* province);
@@ -424,6 +415,7 @@ struct unit_set : adat<unit_info*, 32> {
 	void						fill(const player_info* player, const province_info* province, const hero_info* hero, const action_info* action);
 	cost_info					getcost() const;
 };
+extern name_info				ability_data[];
 extern adat<action_info, 32>	action_data;
 extern adat<build_info, 256>	build_data;
 extern game_info				game;

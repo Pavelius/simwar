@@ -5,9 +5,7 @@ bsreq action_type[] = {
 	BSREQ(action_info, name, text_type),
 	BSREQ(action_info, nameof, text_type),
 	BSREQ(action_info, text, text_type),
-	BSREQ(action_info, attack, number_type),
-	BSREQ(action_info, raid, number_type),
-	BSREQ(action_info, defend, number_type),
+	BSREQ(action_info, ability, number_type),
 	BSREQ(action_info, economy, number_type),
 	BSREQ(action_info, recruit, number_type),
 	BSREQ(action_info, support, number_type),
@@ -22,15 +20,15 @@ bsreq action_type[] = {
 adat<action_info, 32> action_data; BSMETA(action);
 
 province_flag_s action_info::getprovince() const {
-	if(attack > 0 || raid > 0)
+	if(get(Attack) > 0 || get(Raid) > 0)
 		return NoFriendlyProvince;
-	else if(defend || recruit || economy || movement)
+	else if(get(Defend) || recruit || economy || movement)
 		return FriendlyProvince;
 	return AnyProvince;
 }
 
 bool action_info::isplaceable() const {
-	return attack > 0 || raid > 0 || defend > 0
+	return get(Attack) > 0 || get(Raid) > 0 || get(Defend) > 0
 		|| recruit || support || economy|| movement;
 }
 
@@ -50,11 +48,11 @@ unsigned action_info::select(action_info** source, unsigned count, char attack, 
 	for(auto& e : action_data) {
 		if(!e)
 			continue;
-		if(e.attack < attack)
+		if(e.get(Attack) < attack)
 			continue;
-		if(e.defend < defend)
+		if(e.get(Defend) < defend)
 			continue;
-		if(e.raid < raid)
+		if(e.get(Raid) < raid)
 			continue;
 		if(ps<pe)
 			*ps++ = &e;

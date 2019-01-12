@@ -5,11 +5,7 @@ bsreq unit_type[] = {
 	BSREQ(unit_info, name, text_type),
 	BSREQ(unit_info, text, text_type),
 	BSREQ(unit_info, nameof, text_type),
-	BSREQ(unit_info, attack, number_type),
-	BSREQ(unit_info, defend, number_type),
-	BSREQ(unit_info, raid, number_type),
-	BSREQ(unit_info, sword, number_type),
-	BSREQ(unit_info, shield, number_type),
+	BSREQ(unit_info, ability, number_type),
 	BSREQ(unit_info, cost, cost_type),
 	BSREQ(unit_info, income, number_type),
 	BSREQ(unit_info, level, number_type),
@@ -48,10 +44,6 @@ void unit_set::fill(const player_info* player, const province_info* province, co
 		for(int i=0; i<count; i++)
 			add(&e);
 	}
-}
-
-int unit_info::get(const char* id) const {
-	return name_info::getnum(this, unit_type, id);
 }
 
 bool unit_info::is(const landscape_info* landscape) const {

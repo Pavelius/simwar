@@ -32,7 +32,7 @@ province_flag_s province_info::getstatus(const player_info* player) const {
 }
 
 int province_info::getdefend() const {
-	return landscape->defend + level;
+	return landscape->get(Defend) + level;
 }
 
 int province_info::getincome(tip_info* ti) const {
@@ -166,7 +166,7 @@ void province_info::getinfo(stringbuilder& sb, bool show_landscape, const army* 
 	sb.adds(":house:%1i", getlevel());
 	auto value = getdefend();
 	if(defenders)
-		value = defenders->get("defend", 0);
+		value = defenders->get(Defend, 0);
 	sb.adds(":shield_grey:%1i", value);
 }
 

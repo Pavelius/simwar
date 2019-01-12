@@ -33,9 +33,8 @@ void hero_info::refresh_heroes() {
 	}
 }
 
-int hero_info::get(const char* id) const {
+int hero_info::get(ability_s id) const {
 	auto r = 0;
-	assert(trait_type->find(id) != 0);
 	for(auto p : traits) {
 		if(!p)
 			continue;
@@ -59,7 +58,7 @@ int	hero_info::getincome() const {
 }
 
 bool hero_info::isallow(const action_info* action) const {
-	if(action->raid > 0)
+	if(action->get(Raid) > 0)
 		return (getattack() + getraid()) > 0;
 	if(action->support > 0)
 		return (action->support + getdiplomacy()) > 0;
@@ -87,8 +86,8 @@ void hero_info::resolve() {
 	// ƒалее идут действи€, которые действуют на провинцию
 	if(!province)
 		return;
-	if(action->attack || action->raid) {
-		auto israid = (action->raid > 0);
+	if(action->get(Attack) || action->get(Raid)) {
+		auto israid = (action->get(Raid) > 0);
 		auto enemy = province->getplayer();
 		if(enemy != player) {
 			province->battle(sb, player, enemy, action, israid);
@@ -100,8 +99,8 @@ void hero_info::resolve() {
 		province->addsupport(player, action->support + getdiplomacy());
 	province->addsupport(player, getgood());
 	province->addeconomy(action->economy);
-	if(action->defend)
-		province->addsupportex(player, -action->defend - imax(0, getdefend()), 0, game.support_maximum);
+	if(action->get(Defend))
+		province->addsupportex(player, -action->get(Defend) - imax(0, getdefend()), 0, game.support_maximum);
 	// ƒоброе или злое действие вли€ет на ло€льность геро€
 	setloyalty(getloyalty() + action->good*getgood());
 }
@@ -215,23 +214,14 @@ void hero_info::initialize() {
 
 void hero_info::getinfo(stringbuilder& sb) const {
 	auto ph = metadata;
-	for(auto ppf = character_type; *ppf; ppf++) {
-		auto pf = msg_type->find(ppf->id);
-		if(!pf)
-			continue;
-		auto pn = (const char*)pf->get(pf->ptr(&msg));
-		if(!pn)
-			continue;
-		auto value = get(ppf->id);
+	for(auto i = Attack; i<=LastAbility; i = (ability_s)(i+1)) {
+		auto value = get(i);
 		if(!value)
 			continue;
-		if(value < 0) {
-			char name[64]; ;
-			auto pf1 = msg_type->find(zprint(name, "%1_negative", pf->id));
-			if(pf1) {
-				pn = (const char*)pf1->get(pf1->ptr(&msg));
-				value = -value;
-			}
+		auto pn = ability_data[i].name;
+		if(value < 0 && ability_data[i].nameof) {
+			pn = ability_data[i].nameof;
+			value = -value;
 		}
 		sb.addn("%+2i %1", pn, value);
 	}
@@ -330,10 +320,10 @@ void hero_info::make_move() {
 		if(!province)
 			return;
 	}
-	auto raid = action->raid > 0;
+	auto raid = action->get(Raid) > 0;
 	army troops_move(const_cast<player_info*>(player), const_cast<province_info*>(province), this, true, raid);
 	unit_set units_product;
-	if(action->raid || action->attack) {
+	if(action->get(Raid) || action->get(Attack)) {
 		army a1(const_cast<player_info*>(player), const_cast<province_info*>(province), this, true, raid);
 		army a3(0, const_cast<province_info*>(province), 0, false, raid);
 		a1.fill(player, 0);
@@ -353,7 +343,7 @@ void hero_info::make_move() {
 		if(!choose_troops(action, province, a1, troops_move, a3, 1, cost))
 			return;
 	}
-	if(action->raid || action->attack || action->defend) {
+	if(action->get(Raid) || action->get(Attack) || action->get(Defend)) {
 		tactic = choose_tactic();
 		if(!tactic)
 			return;

@@ -138,7 +138,6 @@
     <ClCompile Include="collection.cpp" />
     <ClCompile Include="color.cpp" />
     <ClCompile Include="battle.cpp" />
-    <ClCompile Include="combat_info.cpp" />
     <ClCompile Include="converter.cpp" />
     <ClCompile Include="cost_info.cpp" />
     <ClCompile Include="crt.cpp" />
