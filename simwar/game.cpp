@@ -1,7 +1,7 @@
 #include "bslog.h"
 #include "main.h"
 
-static bsreq game_type[] = {
+bsreq game_type[] = {
 	BSREQ(game_info, income_per_level, number_type),
 	BSREQ(game_info, casualties, number_type),
 	BSREQ(game_info, support_maximum, number_type),
@@ -34,6 +34,7 @@ static bsdata::requisit required_reqisits[] = {{"name", true},
 {"loyalty_maximum", true},
 {"loyalty_base", true},
 {"nation", true, {}, province_info::metadata},
+{"home", true},
 };
 bsreq ability_requisits[LastAbility + 2];
 

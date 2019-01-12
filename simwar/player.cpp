@@ -43,11 +43,19 @@ void player_info::getcalendar(stringbuilder& sb) {
 	auto calendar_index = game.turn % count;
 	auto calendar = (calendar_info*)calendar_manager.get(calendar_index);
 	auto year = game.year + game.turn / count;
-	sb.add("%1 %2i года, %3", calendar->getname(), year, calendar->season->getname(), calendar->season->getnameof());
+	sb.add("%+1 %2i года, %3", calendar->getname(), year, calendar->season->getname(), calendar->season->getnameof());
 }
 
 int	player_info::getindex() const {
 	return player_data.indexof(this);
+}
+
+void player_info::getinfo(stringbuilder& sb) const {
+	char tips[512]; tip_info ti(tips);
+	getcalendar(sb);
+	auto income = getincome(&ti);
+	sb.adds(":gold:%1i[%4\"%3\"%+2i]", cost.gold, income, tips, (income >= 0) ? "+" : "-");
+	sb.adds(":flag_grey:%1i", cost.fame);
 }
 
 int player_info::getincome(tip_info* ti) const {

@@ -4,6 +4,9 @@
 using namespace draw;
 using namespace draw::controls;
 
+enum ui_command_s {
+	NoCommand, ChooseLeft, ChooseRight, ChooseList,
+};
 struct cmdid {
 	callback_proc		proc;
 	int					param;
@@ -39,6 +42,7 @@ static control*			current_focus_control;
 static control*			current_execute_control;
 extern rect				sys_static_area;
 int						distance(point p1, point p2);
+static amap<const char*, surface> bitmap_previews;
 
 static bsreq gui_type[] = {
 	BSREQ(gui_info, opacity, number_type),
@@ -353,7 +357,7 @@ static int window(int x, int y, int width, const char* string, int right_width =
 		rc.x1 = x;
 		rc.x2 = rc.x1 + w1;
 	}
-	window(rc, false);
+	window(rc, false, false);
 	render_text(x, y, rc.width(), string);
 	return height + gui.border * 2 + gui.padding;
 }
@@ -433,13 +437,8 @@ static int render_player(int x, int y, const player_info* player) {
 	char tips[1024]; tips[0] = 0;
 	tip_info ti(tips);
 	string sb;
-	sb.add("###%+1, ", player->getname());
-	player->getcalendar(sb);
-	sb.add("\n");
-	auto cost = player->cost;
-	auto income = player->getincome(&ti);
-	sb.add(":gold:%1i[%4\"%3\"%+2i]", cost.gold, income, tips, (income >= 0) ? "+" : "-");
-	sb.add(" :flag_grey:%1i", cost.fame);
+	sb.add("###%+1\n", player->getname());
+	player->getinfo(sb);
 	return window(x, y, gui.window_width, sb);
 }
 
@@ -985,7 +984,107 @@ const province_info* hero_info::choose_province(const action_info* action, aref<
 		domodal();
 		control_standart();
 	}
-	return (province_info*)getresult();
+	auto p = (province_info*)getresult();
+	if(p)
+		current_province = p;
+	return p;
+}
+
+struct game_header_list : list {
+
+	ui_command_s	id;
+	game_header*	source;
+	unsigned		count;
+	
+	constexpr game_header_list(ui_command_s id, game_header* source, unsigned count) : id(id), source(source), count(count) {}
+
+	const char* getname(char* result, const char* result_maximum, int line, int column) const override {
+		switch(column) {
+		case 0:
+			szprint(result, result_maximum, source[line].id);
+			szupper(result, 1);
+			break;
+		default:
+			return "";
+		}
+		return result;
+	}
+
+	int getmaximum() const override {
+		return count;
+	}
+
+	game_header* getcurrent() {
+		if(current < (int)count)
+			return source + current;
+		return 0;
+	}
+
+	bool keyinput(unsigned id) override {
+		switch(id) {
+		case KeyEnter:
+			hot.key = this->id;
+			break;
+		default:
+			return list::keyinput(id);
+		}
+		return true;
+	}
+
+};
+
+static int preview(int x, int y, int width, const char* url, const char* id) {
+	if(!id)
+		return 0;
+	char temp[260]; zprint(temp, "%1/%2", url, id);
+	auto p = bitmap_previews.find(id);
+	if(!p) {
+		p = bitmap_previews.add(id, surface());
+		surface e(temp, 0);
+		if(e.width) {
+			auto h1 = width * e.height / e.width;
+			p->value.resize(width, h1, 32, true);
+			if(e)
+				blit(p->value, 0, 0, width, h1, 0, e, 0, 0, e.width, e.height);
+		}
+	}
+	if(!p->value.height)
+		return 0;
+	blit(*draw::canvas, x, y, p->value.width, p->value.height, 0, p->value, 0, 0);
+	rectb({x, y, x + p->value.width, y + p->value.height}, colors::border);
+	return p->value.height;
+}
+
+game_header* game_header::choose(game_header* source, unsigned count) {
+	game_header_list u1(ChooseList, source, count);
+	int x, y;
+	auto height = 400;
+	auto width = 600;
+	auto cancel_button = true;
+	while(ismodal()) {
+		auto mx = getwidth();
+		auto my = getheight();
+		rectf({0, 0, mx, my}, colors::gray);
+		auto x1 = (getwidth() - width) / 2;
+		auto y1 = (getheight() - height) / 2;
+		auto w1 = 200;
+		window({x1, y1, x1 + width, y1 + height}, false, false);
+		u1.view({x1 + w1 + gui.padding, y1, x1 + width, y1 + height});
+		y = y1;
+		x = x1;
+		auto current = u1.getcurrent();
+		if(current)
+			y += preview(x1, y1, w1, "maps", current->map);
+		y = y1 + height + gui.border * 2;
+		x = x1 + width - gui.hero_window_width;
+		if(cancel_button) {
+			windowb(x, y, gui.hero_window_width, msg.cancel, cmd(buttoncancel), 0, KeyEscape);
+			x -= gui.hero_window_width;
+		}
+		domodal();
+		control_focus();
+	}
+	return (game_header*)getresult();
 }
 
 static void render_two_window(const player_info* player, const hero_info* hero, const action_info* action, list& u1, list& u2, const char* error_text, stringbuilder& sb, const cost_info& cost) {
@@ -1133,7 +1232,7 @@ static void end_turn() {
 int answer_info::choose(const hero_info* hero, bool cancel_button, answer_info::tips_type getinfo) const {
 	while(ismodal()) {
 		if(hero)
-			render_left_side(hero->getplayer(), current_province, false);
+			render_left_side(hero->getplayer(), 0, false);
 		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
 		auto y = gui.padding + gui.border;
 		y += render_hero(x, y, gui.hero_window_width, hero);

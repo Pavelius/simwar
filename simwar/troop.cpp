@@ -4,6 +4,7 @@ bsreq troop_info::metadata[] = {
 	BSREQ(troop_info, type, unit_type),
 	BSREQ(troop_info, province, province_info::metadata),
 	BSREQ(troop_info, move, province_info::metadata),
+	BSREQ(troop_info, home, province_info::metadata),
 {}};
 adat<troop_info, 256> troop_data;
 bsdata troop_manager("troop", troop_data, troop_info::metadata);
@@ -91,6 +92,7 @@ troop_info* troop_info::add(province_info* province, unit_info* type) {
 	memset(p, 0, sizeof(*p));
 	p->province = province;
 	p->type = type;
+	p->home = province;
 	return p;
 }
 
@@ -143,6 +145,8 @@ unsigned troop_info::select_move(troop_info** result, unsigned result_maximum, c
 }
 
 void troop_info::kill(player_info* player) {
+	if(home)
+		home->addsupport(getplayer(), -type->mourning);
 	clear();
 }
 

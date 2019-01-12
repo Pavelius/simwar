@@ -13,9 +13,7 @@ int name_info::fix(tip_info* ti, const char* name, int value) {
 			zcpy(temp, name);
 			szupper(temp, 1);
 		}
-		szprint(zend(ti->result), ti->result_max, ti->text, value, temp, (value>=0) ? "+" : "-");
-		if(ti->separator)
-			zcat(ti->result, ti->separator);
+		szprint(zend(ti->result), ti->result_max, "[%3%+1i]\t%2\n", value, temp, (value>=0) ? "+" : "-");
 	}
 	return value;
 }

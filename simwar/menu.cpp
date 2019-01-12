@@ -11,7 +11,9 @@ static void load_game(const menu_info* p) {
 }
 
 static void new_game(const menu_info* p) {
-	auto p = game.choose();
+	game_header games[64];
+	auto count = game_header::select(games, lenghtof(games));
+	auto choosen_map = game_header::choose(games, count);
 }
 
 bsreq menu_type[] = {

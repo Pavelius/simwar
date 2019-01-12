@@ -41,6 +41,8 @@ struct bsdata : array {
 	static bsdata*		first;
 	//
 	constexpr bsdata(const bsreq* fields) : id(""), fields(fields), next(0) {}
+	constexpr bsdata(const char* id, const bsreq* fields, void* source, unsigned size, unsigned maximum) : array(source, size, maximum), id(id), fields(fields), next() {}
+	constexpr bsdata(const char* id, const bsreq* fields, void* source, unsigned size, unsigned maximum, unsigned& count) : array(source, size, maximum, count), id(id), fields(fields), next() {}
 	template<typename T, unsigned N> bsdata(const char* id, adat<T, N>& e, const bsreq* fields) : array(e.data, sizeof(T), N, e.count), id(id), fields(fields) { globalize(); }
 	template<typename T, unsigned N> bsdata(const char* id, T(&e)[N], const bsreq* fields) : array(e, sizeof(T), N), id(id), fields(fields) { globalize(); }
 	template<typename T> bsdata(const char* id, T& e, const bsreq* fields) : array(&e, sizeof(T), 1), id(id), fields(fields) { globalize(); }

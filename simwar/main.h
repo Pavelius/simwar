@@ -34,6 +34,7 @@ bsreq action_type[];
 bsreq calendar_type[];
 bsreq character_type[];
 bsreq cost_type[];
+bsreq game_type[];
 bsreq gender_type[];
 bsreq landscape_type[];
 bsreq msg_type[];
@@ -75,10 +76,8 @@ private:
 struct tip_info {
 	char*						result;
 	const char*					result_max;
-	const char*					text;
-	const char*					separator;
-	constexpr tip_info(char* result, const char* result_max) :result(result), result_max(result_max), text("[%3%+1i]\t%2"), separator("\n") { result[0] = 0; }
-	template<unsigned N> constexpr tip_info(char(&result)[N]) : tip_info(result, result + sizeof(result)) {}
+	tip_info(char* result, const char* result_max) :result(result), result_max(result_max) { result[0] = 0; }
+	template<unsigned N> tip_info(char(&result)[N]) : tip_info(result, result + sizeof(result)) {}
 };
 struct name_info {
 	const char*					id;
@@ -296,6 +295,7 @@ struct unit_info : character_info {
 	char						recruit_count, recruit_time;
 	char						level;
 	char						income;
+	char						mourning;
 	landscape_info*				landscape[4];
 	//
 	bool						is(const landscape_info* landscape) const;
@@ -310,6 +310,7 @@ struct troop_info {
 	int							get(ability_s id) const { return type->get(id); }
 	int							getbonus(const char* id) const { return 0; }
 	int							getincome() const { return type->income; }
+	province_info*				gethome() const { return home; }
 	province_info*				getmove() const { return move; }
 	const char*					getname() const { return type->name; }
 	const char*					getnameof() const { return type->nameof; }
@@ -329,12 +330,14 @@ struct troop_info {
 	static unsigned				select(troop_info** result, unsigned result_maximum, const province_info* province);
 	static unsigned				select(troop_info** result, unsigned result_maximum, const player_info* player);
 	static unsigned				select_move(troop_info** result, unsigned result_maximum, const province_info* province, const player_info* player);
+	void						sethome(province_info* value) { home = value; }
 	void						setmove(province_info* value) { move = value; }
 	void						setprovince(province_info* value) { province = value; }
 	static void					sort(troop_info** source, unsigned count);
 private:
 	unit_info * type;
 	province_info*				province;
+	province_info*				home;
 	province_info*				move;
 };
 struct player_info : name_info {
@@ -355,6 +358,7 @@ struct player_info : name_info {
 	int							getherocount() const;
 	int							getincome(tip_info* ti = 0) const;
 	int							getindex() const;
+	void						getinfo(stringbuilder& sb) const;
 	const char*					getnameof() const { return nameof; }
 	int							getsupport(tip_info* ti = 0) const;
 	static unsigned				gettroops(troop_info** source, unsigned maximum_count, const province_info* province = 0, const player_info* player = 0, const player_info* player_move = 0);
@@ -408,8 +412,9 @@ struct game_header {
 	const char*					id;
 	const char*					name;
 	const char*					map;
-	static unsigned				select();
-	static game_header*			choose(game_header** source, unsigned count);
+	unsigned					players_count;
+	static unsigned				select(game_header* source, unsigned maximum);
+	static game_header*			choose(game_header* source, unsigned count);
 };
 struct gui_info {
 	unsigned char				border, button_border;

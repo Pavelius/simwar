@@ -178,6 +178,9 @@
     <ClCompile Include="menu.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
+    <ClCompile Include="game_header.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="draw.h">
@@ -265,9 +268,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="..\script\test_ru.txt">
-      <Filter>Скрипты</Filter>
-    </Text>
     <Text Include="..\errors.txt">
       <Filter>Ядро</Filter>
     </Text>
@@ -280,14 +280,25 @@
     <Text Include="..\text\ru\gender.txt">
       <Filter>Ядро</Filter>
     </Text>
-    <Text Include="..\script\test.txt">
-      <Filter>Скрипты</Filter>
-    </Text>
     <Text Include="..\text\ru\ability.txt">
       <Filter>Ядро</Filter>
     </Text>
     <Text Include="..\text\ru\menu.txt">
       <Filter>Ядро</Filter>
     </Text>
+    <Text Include="..\maps\test_ru.txt">
+      <Filter>Скрипты</Filter>
+    </Text>
+    <Text Include="..\maps\test2_ru.txt">
+      <Filter>Скрипты</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\maps\test.map">
+      <Filter>Скрипты</Filter>
+    </None>
+    <None Include="..\maps\test2.map">
+      <Filter>Скрипты</Filter>
+    </None>
   </ItemGroup>
 </Project>

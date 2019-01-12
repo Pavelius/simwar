@@ -10,6 +10,7 @@ bsreq unit_type[] = {
 	BSREQ(unit_info, income, number_type),
 	BSREQ(unit_info, level, number_type),
 	BSREQ(unit_info, nation, nation_type),
+	BSREQ(unit_info, mourning, number_type),
 	BSREQ(unit_info, recruit_count, number_type),
 	BSREQ(unit_info, recruit_time, number_type),
 	BSREQ(unit_info, landscape, landscape_type),
