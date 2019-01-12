@@ -9,7 +9,7 @@ bsreq hero_info::metadata[] = {
 	BSREQ(hero_info, avatar, text_type),
 	BSREQ(hero_info, tactic, tactic_type),
 	BSREQ(hero_info, best_tactic, tactic_type),
-	BSREQ(hero_info, best_land, landscape_type),
+	BSREQ(hero_info, origin, landscape_type),
 	BSREQ(hero_info, traits, trait_type),
 	BSREQ(hero_info, player, player_info::metadata),
 	BSREQ(hero_info, province, province_info::metadata),

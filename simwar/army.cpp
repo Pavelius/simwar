@@ -53,7 +53,7 @@ int army::get(ability_s id, tip_info* ti, bool include_number) const {
 		if(raid)
 			value += general->get(Raid);
 		if(province) {
-			if(general->getbestland() == province->getlandscape())
+			if(general->getorigin() == province->getlandscape())
 				value += general->get(Magic);
 		}
 		r += general->fix(ti, value);

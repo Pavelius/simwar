@@ -243,13 +243,13 @@ struct hero_info : character_info {
 	const action_info*			getaction() const { return action; }
 	const char*					getavatar() const { return avatar; }
 	const tactic_info*			getbesttactic() const { return best_tactic; }
-	const landscape_info*		getbestland() const { return best_land; }
 	void						getbrief(stringbuilder& sb) const;
 	void						getinfo(stringbuilder& sb) const;
 	gender_s					getgender() const { return gender; }
 	int							getdefend() const { return get(Defend); }
 	int							getincome() const;
 	int							getloyalty() const { return loyalty; }
+	const landscape_info*		getorigin() const { return origin; }
 	player_info*				getplayer() const { return player; }
 	province_info*				getprovince() const { return province; }
 	int							getraid() const { return get(Raid); }
@@ -288,7 +288,7 @@ private:
 	province_info*				province;
 	const tactic_info*			tactic;
 	const tactic_info*			best_tactic;
-	const landscape_info*		best_land;
+	const landscape_info*		origin;
 	trait_info*					traits[2];
 };
 struct unit_info : character_info {

@@ -27,7 +27,7 @@ hireling: Наемник
 carefull: Осторожный
 bloody: Кровожадный
 cunning: Хитрый
-rogue: Бродяга
+raider: Грабитель
 mad: Сумасшедший
 noble: Благородный
 
@@ -43,7 +43,7 @@ plains: Равнина
 mountains: Горы
 swamp: Болото
 forest: Лес
-desert: Пустыня
+waste: Пустошь
 hills: Холмы
 
 elder_mountains: Древние горы. Эти горы давно необитаемы. Несколько охотников из речной долины охотятся здесь.

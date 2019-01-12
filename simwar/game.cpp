@@ -35,6 +35,7 @@ static bsdata::requisit required_reqisits[] = {{"name", true},
 {"loyalty_base", true},
 {"nation", true, {}, province_info::metadata},
 {"home", true},
+{"origin", true},
 };
 bsreq ability_requisits[LastAbility + 2];
 
