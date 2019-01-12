@@ -15,9 +15,10 @@ struct combatside : public army {
 	int strenght;
 	int	casualties;
 	int wounds;
+	bool tactic_changed;
 
 	combatside(province_info* province, player_info* player, bool attack, bool raid) : army(player, province, 0, attack, raid),
-		strenght(0), casualties(0), wounds(0) {
+		strenght(0), casualties(0), wounds(0), tactic_changed(false) {
 		fill(player, province);
 		general = province->gethero(player);
 		shuffle();
@@ -54,6 +55,14 @@ struct combatside : public army {
 			else
 				tactic = tactic_data.data;
 		}
+		if(general) {
+			if(tactic != general->getbesttactic()) {
+				if((rand() % 100) < 30) {
+					tactic = general->getbesttactic();
+					tactic_changed = true;
+				}
+			}
+		}
 		strenght = army::getstrenght(&ti);
 		sb.add(format, getlead(text_lead, zendof(text_lead)), text_tips, province_name);
 	}
@@ -87,8 +96,11 @@ struct combatside : public army {
 			casualties = count;
 		}
 		if(tactic) {
-			sb.add(" ");
-			sb.add(tactic->text, getside());
+			if(tactic_changed && general) {
+				sb.gender = general->getgender();
+				sb.adds(msg.tactic_changed, general->getname());
+			}
+			sb.adds(tactic->text, getside());
 		}
 	}
 
@@ -150,7 +162,7 @@ bool province_info::battle(string& sb, player_info* attacker_player, player_info
 		if(!raid) {
 			player = attacker_player;
 			if(attackers.general)
-				attacker_player->cost.fame += imax(0, attackers.general->getnobility());
+				attacker_player->cost.fame += imax(0, attackers.general->get(Nobility));
 		}
 		auto trophies = action->trophies;
 		if(raid)
@@ -167,7 +179,7 @@ bool province_info::battle(string& sb, player_info* attacker_player, player_info
 	} else {
 		retreat(attacker_player);
 		if(defender_player && defenders.general)
-			defender_player->cost.fame += imax(0, defenders.general->getnobility());
+			defender_player->cost.fame += imax(0, defenders.general->get(Nobility));
 		attackers.addloyalty(-1);
 	}
 	return iswin;

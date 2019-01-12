@@ -246,12 +246,9 @@ struct hero_info : character_info {
 	void						getbrief(stringbuilder& sb) const;
 	void						getinfo(stringbuilder& sb) const;
 	gender_s					getgender() const { return gender; }
-	int							getgood() const { return get(Good); }
 	int							getdefend() const { return get(Defend); }
-	int							getdiplomacy() const { return get(Diplomacy); }
 	int							getincome() const;
 	int							getloyalty() const { return loyalty; }
-	int							getnobility() const { return get(Nobility); }
 	player_info*				getplayer() const { return player; }
 	province_info*				getprovince() const { return province; }
 	int							getraid() const { return get(Raid); }

@@ -660,7 +660,6 @@ static void render_board(const player_info* player, callback_proc proc, aref<pro
 	rect rc = {0, 0, draw::getwidth(), draw::getheight()};
 	province_info* source[province_max];
 	auto count = province_info::select(source, lenghtof(source), player);
-	//aref<province_info*> a1 = ;
 	render_board(rc, player, proc, {source, count}, selection, selection_color, set_current_province, show_lines);
 }
 

@@ -39,13 +39,15 @@ int	hero_info::getincome() const {
 		if(p)
 			result--;
 	}
-	result += getnobility();
+	result += get(Nobility);
 	return result;
 }
 
 bool hero_info::isallow(const action_info* action) const {
 	if(action->getraid() > 0)
 		return (getattack() + getraid()) > 0;
+	if(action->support > 0)
+		return (action->support + get(Diplomacy)) > 0;
 	return true;
 }
 
@@ -80,13 +82,10 @@ void hero_info::resolve() {
 		}
 	}
 	if(action->support)
-		province->addsupport(player, action->support + getdiplomacy());
-	province->addsupport(player, getgood());
+		province->addsupport(player, action->support + get(Diplomacy));
+	province->addsupport(player, get(Good));
 	province->addeconomy(action->economy);
-	if(action->getdefend())
-		province->addsupportex(player, -action->getdefend() - imax(0, getdefend()), 0, game.support_maximum);
-	// ƒоброе или злое действие вли€ет на ло€льность геро€
-	setloyalty(getloyalty() + action->get(Good)*getgood());
+	setloyalty(getloyalty() + action->get(Good)*get(Good));
 }
 
 unsigned hero_info::select(hero_info** source, unsigned maximum_count, const player_info* player) {
@@ -180,9 +179,10 @@ void hero_info::check_leave() {
 
 void hero_info::setplayer(player_info* player) {
 	this->player = player;
-	if(player)
-		loyalty = game.loyalty_base + game.loyalty_noble_modifier*getgood();
-	else
+	if(player) {
+		loyalty = game.loyalty_base;
+		loyalty += game.loyalty_noble_modifier*get(Good);
+	} else
 		loyalty = 0;
 }
 
