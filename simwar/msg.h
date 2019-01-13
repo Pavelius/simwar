@@ -4,6 +4,7 @@ struct msg_info {
 	const char*	attacking_force;
 	const char*	defending_force;
 	const char*	neutral_army, *neutral_army_of;
+	const char*	battle_magic;
 	const char* casualties;
 	const char* tactic_changed;
 	const char* winner;

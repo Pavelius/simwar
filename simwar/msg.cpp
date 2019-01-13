@@ -6,6 +6,7 @@ bsreq msg_type[] = {
 	BSREQ(msg_info, casualties, text_type),
 	BSREQ(msg_info, tactic_changed, text_type),
 	BSREQ(msg_info, defending_force, text_type),
+	BSREQ(msg_info, battle_magic, text_type),
 	BSREQ(msg_info, neutral_army, text_type),
 	BSREQ(msg_info, neutral_army_of, text_type),
 	BSREQ(msg_info, winner, text_type),

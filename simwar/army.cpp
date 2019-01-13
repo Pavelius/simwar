@@ -54,7 +54,7 @@ int army::get(ability_s id, tip_info* ti, bool include_number) const {
 			value += general->get(Raid);
 		if(province) {
 			if(general->getorigin() == province->getlandscape())
-				value += general->get(Magic);
+				value += name_info::fix(ti, msg.battle_magic, general->get(Magic));
 		}
 		r += general->fix(ti, value);
 		if(!attack) {

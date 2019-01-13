@@ -8,6 +8,7 @@ moved: в пути
 casualties: Потери
 tactic_changed: В последний момент %1 решил%а поменять тактику.
 raid_spoils: Добыча составила [%1i] золотых.
+battle_magic: Боевая магия.
 
 attack: Атака
 defend: Защита
