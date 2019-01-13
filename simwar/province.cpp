@@ -86,7 +86,7 @@ unsigned province_info::select(province_info** source, unsigned maximum, const p
 	if(!count)
 		return 0;
 	auto ps = source + count;
-	auto pe = ps + maximum;
+	auto pe = source + maximum;
 	for(unsigned i = 0; i < count; i++) {
 		for(auto p : source[i]->neighbors) {
 			if(!p)

@@ -160,6 +160,8 @@ struct province_info : name_info {
 	static unsigned				select(province_info** source, unsigned maximum, const player_info* player);
 	static unsigned				select_friendly(province_info** source, unsigned maximum, const player_info* player);
 	void						seteconomy(int value);
+	void						setlandscape(landscape_info* value) { landscape = value; }
+	void						setnation(nation_info* value) { nation = value; }
 	void						setplayer(player_info* value) { player = value; }
 	void						setsupport(const player_info* player, int value);
 private:
@@ -406,6 +408,7 @@ struct game_info {
 	int							year;
 	//
 	void						clear();
+	void						editor(const char* map_name);
 	void						initialize();
 	bool						initializemap();
 	bool						readmap(const char* name);
@@ -448,6 +451,7 @@ extern adat<hero_info, hero_max> hero_data;
 extern const char*				key_requisits[];
 extern adat<landscape_info, 32> landscape_data;
 extern msg_info					msg;
+extern adat<nation_info, 16>	nation_data;
 extern adat<player_info, player_max> player_data;
 extern adat<province_info, province_max> province_data;
 extern unsigned char			province_order[province_max];

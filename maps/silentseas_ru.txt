@@ -56,6 +56,14 @@ green_hills: Зеленые холмы
 snake_forest: Змеинный лес
 southen_coast: Южное побережье
 green_acres: Зеленые поля
+gracefull_plains: Плодовитые равнины
+khellos_coast: Побережье Келлоса
+hilly_land: Холмистая земля
+iron_peaks: Железные пики
+waste_of_battles: Пустошь битв
+iron_crags: Железные утесы
+dead_swamp: Болото смерти
+dead_forest: Лес смерти
 
 lighting_attack: Внезапная атака. %+1 применили внезапную атаку в надежде рассеять противника.
 careful_defence: Тщательная защита. %+1 выстроили защитное построение и хорошо подготовились отражать удар.

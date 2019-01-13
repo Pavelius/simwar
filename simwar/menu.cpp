@@ -16,6 +16,11 @@ static void new_game(const menu_info* p) {
 	auto choosen_map = game_header::choose(games, count);
 }
 
+static void map_editor(const menu_info* p) {
+	game.readmap("silentseas");
+	game.editor("editor.map");
+}
+
 bsreq menu_type[] = {
 	BSREQ(menu_info, id, text_type),
 	BSREQ(menu_info, name, text_type),

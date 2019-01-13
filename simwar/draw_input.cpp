@@ -709,12 +709,11 @@ static bool control_board() {
 	case KeyUp: camera.y -= step; break;
 	case KeyDown: camera.y += step; break;
 	case MouseLeft:
-		if(hot.pressed) {
-			if(last_board == hot.hilite) {
-				draw::drag::begin(last_board);
-				camera_drag = camera;
-			}
-		}
+		if(hot.pressed && last_board == hot.hilite) {
+			draw::drag::begin(last_board);
+			camera_drag = camera;
+		} else
+			return false;
 		break;
 	case Ctrl + Alpha + 'M': mouse_map_info(); break;
 	default:
@@ -995,7 +994,7 @@ struct game_header_list : list {
 	ui_command_s	id;
 	game_header*	source;
 	unsigned		count;
-	
+
 	constexpr game_header_list(ui_command_s id, game_header* source, unsigned count) : id(id), source(source), count(count) {}
 
 	const char* getname(char* result, const char* result_maximum, int line, int column) const override {
@@ -1229,6 +1228,24 @@ static void end_turn() {
 	breakmodal(0);
 }
 
+//void game_info::editor(const char* map_name) {
+//	while(ismodal()) {
+//		render_board(0, 0, {}, colors::gray, false, false);
+//		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
+//		auto y = gui.padding + gui.border;
+//		y += windowb(x, y, gui.hero_window_width, msg.accept, cmd(buttonok));
+//		domodal();
+//		control_standart();
+//		if(hot.key == MouseLeft && hot.pressed && last_board == hot.hilite) {
+//			auto pt = getmappos(last_board, hot.mouse);
+//			auto province = province_data.add();
+//			char temp[260]; zprint(temp, "province%1i", province->getindex());
+//			province->setnation(&nation_data[0]);
+//			province->setlandscape(&landscape_data[0]);
+//		}
+//	}
+//}
+
 int answer_info::choose(const hero_info* hero, bool cancel_button, answer_info::tips_type getinfo) const {
 	while(ismodal()) {
 		if(hero)
@@ -1256,7 +1273,7 @@ int answer_info::choose(bool cancel_button) const {
 		auto mx = getwidth();
 		auto my = getheight();
 		rectf({0, 0, mx, my}, colors::gray);
-		auto x = (getwidth() - window_width - gui.border*2) / 2;
+		auto x = (getwidth() - window_width - gui.border * 2) / 2;
 		auto y = (getheight() - total_height) / 2;
 		for(auto& e : elements)
 			y += windowb(x, y, window_width, e.getname(), cmd(breakparam, e.param)) + gui.padding;
