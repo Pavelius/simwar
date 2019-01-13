@@ -313,13 +313,6 @@ int player_info::compare_fame(const void* p1, const void* p2) {
 	return 0;
 }
 
-void player_info::computer_move() {
-	hero_info* source[hero_max];
-	auto hero_count = hero_info::select(source, lenghtof(source), this);
-	for(unsigned i = 0; i < hero_count; i++)
-		source[i]->make_move();
-}
-
 void player_info::create_order() {
 	players.clear();
 	for(auto& e : player_data) {
