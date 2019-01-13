@@ -24,9 +24,9 @@ enum gender_s : unsigned char {
 	Male, Female
 };
 enum ability_s : unsigned char {
-	Attack, Defend, Raid, Sword, Shield,
-	Good, Magic, Nobility,
-	LastAbility = Nobility
+	Good, Nobility,
+	Attack, Defend, Raid, Magic, Sword, Shield,
+	LastAbility = Shield
 };
 enum event_type_s : unsigned char {
 	GlobalEvent, PlayerEvent, ProvinceEvent, HeroEvent,
@@ -408,7 +408,6 @@ struct game_info {
 	int							year;
 	//
 	void						clear();
-	void						editor(const char* map_name);
 	void						initialize();
 	bool						initializemap();
 	bool						readmap(const char* name);
@@ -442,9 +441,17 @@ struct menu_info {
 	static void					choose_block(const char* parent);
 	static void					select(answer_info& ai, const char* parent);
 };
-struct event_info : character_info {
-	event_type_s				type;
+struct effect_info {
+	ability_s					type;
+	const char*					text;
+	cost_info					cost;
+	unit_info*					units[4];
+	char						loyalty;
+	char						economy;
+};
+struct event_info : name_info {
 	landscape_info*				landscape;
+	effect_info					effects[3]; // 0 - Провал, 1 и 2 - выигрыш
 };
 extern name_info				ability_data[];
 extern adat<action_info, 32>	action_data;

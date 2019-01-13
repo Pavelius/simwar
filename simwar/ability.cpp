@@ -1,13 +1,13 @@
 #include "main.h"
 
-name_info ability_data[] = {{"attack"},
+name_info ability_data[] = {{"good"},
+{"nobility"},
+{"attack"},
 {"defend"},
 {"raid"},
+{"magic"},
 {"sword"},
 {"shield"},
-{"good"},
-{"magic"},
-{"nobility"},
 };
 assert_enum(ability, LastAbility);
 bsreq ability_type[] = {
