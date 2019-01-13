@@ -71,7 +71,8 @@ struct cost_info {
 struct string : stringcreator, stringbuilder {
 	gender_s					gender;
 	cost_info					cost;
-	string(gender_s gender = Male) : stringbuilder(*this, buffer, buffer + sizeof(buffer) / sizeof(buffer[0])), gender(gender) { buffer[0] = 0; }
+	struct army*				army;
+	string(gender_s gender = Male) : stringbuilder(*this, buffer, buffer + sizeof(buffer) / sizeof(buffer[0])), gender(gender), army(0) { buffer[0] = 0; }
 	void						parseidentifier(char* result, const char* result_max, const char* identifier) override;
 private:
 	char						buffer[8192];

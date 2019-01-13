@@ -28,8 +28,13 @@ void string::parseidentifier(char* result, const char* result_max, const char* i
 		gms(gender, result, result_max, "он", identifier);
 	else if(strcmp(identifier, "ее") == 0)
 		gms(gender, result, result_max, "его", identifier);
-	else if(strcmp(identifier, "cost") == 0) {
+	else if(strcmp(identifier, "cost") == 0)
 		print(result, result_max, ":gold:%1i", cost.gold);
+	else if(strcmp(identifier, "strenght") == 0) {
+		if(army) {
+			tip_info ti(result, result_max);
+			army->getstrenght(&ti, true);
+		}
 	} else {
 		zcat(result, "[-");
 		zcat(result, identifier);
