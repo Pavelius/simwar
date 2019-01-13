@@ -87,7 +87,7 @@ unsigned troop_info::remove(troop_info** source, unsigned count, const province_
 	return ps - source;
 }
 
-troop_info* troop_info::add(province_info* province, unit_info* type) {
+troop_info* troop_info::add(province_info* province, const unit_info* type) {
 	auto p = troop_data.add();
 	memset(p, 0, sizeof(*p));
 	p->province = province;

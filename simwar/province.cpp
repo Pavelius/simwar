@@ -200,7 +200,7 @@ void province_info::build(unit_info* unit, int turns) {
 	p->wait = turns;
 }
 
-void province_info::add(unit_info* unit) {
+void province_info::add(const unit_info* unit) {
 	troop_info::add(this, unit);
 }
 
@@ -322,9 +322,19 @@ void province_info::initialize() {
 	for(auto& e : province_data) {
 		if(!e)
 			continue;
-		if(!e.player)
-			continue;
-		if(e.getsupport(e.player) == 0)
-			e.setsupport(e.player, 10);
+		if(e.player) {
+			if(e.getsupport(e.player) == 0)
+				e.setsupport(e.player, 10);
+		} else {
+			army a1; a1.fill(0, &e);
+			if(a1.getcount())
+				continue;
+			for(auto i = 0; i <= e.level; i++) {
+				auto pu = unit_info::getfirst(e.nation, e.landscape, 0);
+				if(!pu)
+					continue;
+				e.add(pu);
+			}
+		}
 	}
 }

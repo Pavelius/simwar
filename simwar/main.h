@@ -129,7 +129,7 @@ struct landscape_info : character_info {
 	int							getincome(tip_info* ti) const;
 };
 struct province_info : name_info {
-	void						add(unit_info* unit);
+	void						add(const unit_info* unit);
 	void						addeconomy(int value) { seteconomy(geteconomy() + value); }
 	void						addsupport(const player_info* player, int value) { setsupport(player, getsupport(player) + value); }
 	void						addsupportex(const player_info* player, int value, int minimal_value, int maximal_value);
@@ -305,11 +305,12 @@ struct unit_info : character_info {
 	char						mourning;
 	landscape_info*				landscape[4];
 	//
+	static const unit_info*		getfirst(const nation_info* nation, const landscape_info* landscape, int level);
 	bool						is(const landscape_info* landscape) const;
 };
 struct troop_info {
 	explicit operator bool() const { return type != 0; }
-	static troop_info*			add(province_info* province, unit_info* type);
+	static troop_info*			add(province_info* province, const unit_info* type);
 	static void					arrival(const province_info* province, const player_info* player);
 	void						clear();
 	static int					compare(const void* p1, const void* p2);
@@ -342,7 +343,7 @@ struct troop_info {
 	void						setprovince(province_info* value) { province = value; }
 	static void					sort(troop_info** source, unsigned count);
 private:
-	unit_info * type;
+	const unit_info*			type;
 	province_info*				province;
 	province_info*				home;
 	province_info*				move;

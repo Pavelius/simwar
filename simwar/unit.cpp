@@ -57,6 +57,21 @@ bool unit_info::is(const landscape_info* landscape) const {
 	return false;
 }
 
+const unit_info* unit_info::getfirst(const nation_info* nation, const landscape_info* landscape, int level) {
+	for(auto& e : unit_data) {
+		if(!e)
+			continue;
+		if(e.level != level)
+			continue;
+		if(e.nation != nation)
+			continue;
+		if(!e.is(landscape))
+			continue;
+		return &e;
+	}
+	return 0;
+}
+
 cost_info unit_set::getcost() const {
 	cost_info result;
 	for(auto& e : *this)
