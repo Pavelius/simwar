@@ -52,11 +52,11 @@ int army::get(ability_s id, tip_info* ti, bool include_number) const {
 		auto value = general->get(id);
 		if(raid)
 			value += general->get(Raid);
+		r += general->fix(ti, value);
 		if(province) {
 			if(general->getorigin() == province->getlandscape())
-				value += name_info::fix(ti, msg.battle_magic, general->get(Magic));
+				r += name_info::fix(ti, msg.battle_magic, general->get(Magic));
 		}
-		r += general->fix(ti, value);
 		if(!attack) {
 			auto action = general->getaction();
 			r += action->fix(ti, action->get(Defend));
