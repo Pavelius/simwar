@@ -35,7 +35,7 @@ int province_info::getdefend() const {
 	return landscape->get(Defend) + level;
 }
 
-int province_info::getincome(tip_info* ti) const {
+int province_info::getincome(stringbuilder* ti) const {
 	auto result = 0;
 	if(landscape)
 		result += landscape->getincome(ti);

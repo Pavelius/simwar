@@ -32,8 +32,8 @@ void string::parseidentifier(char* result, const char* result_max, const char* i
 		print(result, result_max, ":gold:%1i", cost.gold);
 	else if(strcmp(identifier, "strenght") == 0) {
 		if(army) {
-			tip_info ti(result, result_max);
-			army->getstrenght(&ti, true);
+			stringbuilder sb(*this, result, result_max);
+			army->getstrenght(&sb);
 		}
 	} else {
 		zcat(result, "[-");

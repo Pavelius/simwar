@@ -51,14 +51,16 @@ int	player_info::getindex() const {
 }
 
 void player_info::getinfo(stringbuilder& sb) const {
-	char tips[512]; tip_info ti(tips);
+	char tips[512];
+	stringcreator sc;
+	stringbuilder ti(sc, tips, zendof(tips));
 	getcalendar(sb);
 	auto income = getincome(&ti);
 	sb.adds(":gold:%1i[%4\"%3\"%+2i]", cost.gold, income, tips, (income >= 0) ? "+" : "-");
 	sb.adds(":flag_grey:%1i", cost.fame);
 }
 
-int player_info::getincome(tip_info* ti) const {
+int player_info::getincome(stringbuilder* ti) const {
 	auto result = 0, r = 0;
 	for(auto& e : province_data) {
 		if(!e)
@@ -87,7 +89,7 @@ int player_info::getincome(tip_info* ti) const {
 	return result;
 }
 
-int	player_info::getsupport(tip_info* ti) const {
+int	player_info::getsupport(stringbuilder* ti) const {
 	auto result = 0;
 	for(auto& e : hero_data) {
 		if(!e)

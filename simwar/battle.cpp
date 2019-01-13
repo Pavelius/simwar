@@ -45,7 +45,8 @@ struct combatside : public army {
 	void setstrenght(string& sb, const char* format, const char* province_name) {
 		char text_lead[260]; text_lead[0] = 0;
 		char text_tips[2048]; text_tips[0] = 0;
-		tip_info ti(text_tips, zendof(text_tips));
+		stringcreator sc;
+		stringbuilder ti(sc, text_tips, zendof(text_tips));
 		if(general)
 			tactic = general->gettactic();
 		if(!tactic) {

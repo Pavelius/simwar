@@ -434,8 +434,6 @@ static int windowh(const hero_info* hero, const char* format, const char* format
 static int render_player(int x, int y, const player_info* player) {
 	if(!player)
 		return 0;
-	char tips[1024]; tips[0] = 0;
-	tip_info ti(tips);
 	string sb;
 	sb.add("###%+1\n", player->getname());
 	player->getinfo(sb);
@@ -1179,18 +1177,18 @@ bool hero_info::choose_troops(const action_info* action, const province_info* pr
 	}
 	army_list u1(s1); u1.id = 10;
 	army_list u2(s2); u2.id = 11;
-	char tips_defend[2048]; tip_info tid(tips_defend, zendof(tips_defend));
-	char tips_attack[2048]; tip_info tia(tips_attack, zendof(tips_attack));
+	string tid;
 	auto th = texth() * 3 + 2;
-	auto defender_strenght = a3.getstrenght(&tid, true);
+	auto defender_strenght = a3.getstrenght(&tid);
 	auto player_cost = player->cost;
 	auto start_cost = cost;
 	while(ismodal()) {
 		const char* error_info = 0;
 		string sb;
 		if(s1.attack) {
-			auto attacker_strenght = s2.getstrenght(&tia, true);
-			sb.adds(msg.total_strenght, tips_attack, tips_defend);
+			string tia;
+			auto attacker_strenght = s2.getstrenght(&tia);
+			sb.adds(msg.total_strenght, (const char*)tia, (const char*)tid);
 			if(attacker_strenght <= defender_strenght)
 				sb.adds(msg.predict_fail);
 			else if(attacker_strenght <= defender_strenght + 2)

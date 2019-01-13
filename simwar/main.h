@@ -71,17 +71,12 @@ struct cost_info {
 struct string : stringcreator, stringbuilder {
 	gender_s					gender;
 	cost_info					cost;
-	struct army*				army;
+	const struct army*			army;
+	const player_info*			player;
 	string(gender_s gender = Male) : stringbuilder(*this, buffer, buffer + sizeof(buffer) / sizeof(buffer[0])), gender(gender), army(0) { buffer[0] = 0; }
 	void						parseidentifier(char* result, const char* result_max, const char* identifier) override;
 private:
 	char						buffer[8192];
-};
-struct tip_info {
-	char*						result;
-	const char*					result_max;
-	tip_info(char* result, const char* result_max) :result(result), result_max(result_max) { result[0] = 0; }
-	template<unsigned N> tip_info(char(&result)[N]) : tip_info(result, result + sizeof(result)) {}
 };
 struct name_info {
 	const char*					id;
@@ -96,8 +91,8 @@ struct name_info {
 	const char*					getname() const { return name; }
 	const char*					getnameof() const { return nameof; }
 	static int					getnum(const void* object, const bsreq* type, const char* id);
-	static int					fix(tip_info* ti, const char* name, int value);
-	int							fix(tip_info* ti, int value) const { return fix(ti, name, value); }
+	static int					fix(stringbuilder* ti, const char* name, int value);
+	int							fix(stringbuilder* ti, int value) const { return fix(ti, name, value); }
 };
 struct character_info : name_info {
 	char						ability[LastAbility + 1];
@@ -127,7 +122,7 @@ struct calendar_info : name_info {
 };
 struct landscape_info : character_info {
 	char						income;
-	int							getincome(tip_info* ti) const;
+	int							getincome(stringbuilder* ti) const;
 };
 struct province_info : name_info {
 	void						add(const unit_info* unit);
@@ -144,7 +139,7 @@ struct province_info : name_info {
 	hero_info*					gethero(const player_info* player) const;
 	player_info*				getplayer() const { return player; }
 	point						getposition() const { return position; }
-	int							getincome(tip_info* ti = 0) const;
+	int							getincome(stringbuilder* ti = 0) const;
 	int							getindex() const;
 	void						getinfo(stringbuilder& sb, bool show_landscape, const army* support_units = 0) const;
 	landscape_info*				getlandscape() const { return landscape; }
@@ -207,9 +202,9 @@ struct army : adat<troop_info*, 32> {
 	constexpr army() : general(0), player(0), tactic(0), province(0), attack(false), raid(false) {}
 	army(player_info* player, province_info* province, hero_info* general, bool attack, bool raid);
 	void						fill(const player_info* player, const province_info* province);
-	int							get(ability_s id, tip_info* ti, bool include_number = true) const;
+	int							get(ability_s id, stringbuilder* sb) const;
 	int							getraid() const { return get(Raid); }
-	int							getstrenght(tip_info* ti, bool include_number = true) const;
+	int							getstrenght(stringbuilder* sb) const;
 	int							getshield() const { return getcasualty(Shield); }
 	int							getsword() const { return getcasualty(Sword); }
 private:
@@ -315,7 +310,7 @@ struct troop_info {
 	static void					arrival(const province_info* province, const player_info* player);
 	void						clear();
 	static int					compare(const void* p1, const void* p2);
-	int							fix(tip_info* ti, int value) const { return type->fix(ti, type->name, value); }
+	int							fix(stringbuilder* sb, int value) const { return type->fix(sb, type->name, value); }
 	int							get(ability_s id) const { return type->get(id); }
 	int							getbonus(const char* id) const { return 0; }
 	int							getincome() const { return type->income; }
@@ -365,11 +360,11 @@ struct player_info : name_info {
 	province_info*				getbestprovince() const;
 	static void					getcalendar(stringbuilder& sb);
 	int							getherocount() const;
-	int							getincome(tip_info* ti = 0) const;
+	int							getincome(stringbuilder* sb = 0) const;
 	int							getindex() const;
 	void						getinfo(stringbuilder& sb) const;
 	const char*					getnameof() const { return nameof; }
-	int							getsupport(tip_info* ti = 0) const;
+	int							getsupport(stringbuilder* ti = 0) const;
 	static unsigned				gettroops(troop_info** source, unsigned maximum_count, const province_info* province = 0, const player_info* player = 0, const player_info* player_move = 0);
 	static void					hire_heroes();
 	bool						iscomputer() const { return !this || type == PlayerComputer; }

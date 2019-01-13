@@ -40,47 +40,47 @@ int army::get(ability_s id) const {
 	return result;
 }
 
-int army::getstrenght(tip_info* ti, bool include_number) const {
-	return get(attack ? Attack : Defend, ti, include_number);
+int army::getstrenght(stringbuilder* sb) const {
+	return get(attack ? Attack : Defend, sb);
 }
 
-int army::get(ability_s id, tip_info* ti, bool include_number) const {
+int army::get(ability_s id, stringbuilder* sb) const {
 	auto r = 0;
-	if(ti && include_number)
-		zcpy(ti->result, "[\"");
+	if(sb)
+		sb->adds("[\"");
 	if(general) {
 		auto value = general->get(id);
 		if(raid)
 			value += general->get(Raid);
-		r += general->fix(ti, value);
+		r += general->fix(sb, value);
 		if(province) {
 			if(general->getorigin() == province->getlandscape())
-				r += name_info::fix(ti, msg.battle_magic, general->get(Magic));
+				r += name_info::fix(sb, msg.battle_magic, general->get(Magic));
 		}
 		if(!attack) {
 			auto action = general->getaction();
-			r += action->fix(ti, action->get(Defend));
+			r += action->fix(sb, action->get(Defend));
 		}
 	}
 	for(auto p : *this) {
 		auto value = p->get(id);
 		if(raid)
 			value += p->get(Raid);
-		r += p->fix(ti, value);
+		r += p->fix(sb, value);
 	}
 	if(province) {
 		if(!attack) {
-			r += province->fix(ti, province->getdefend());
+			r += province->fix(sb, province->getdefend());
 			if(game.support_defend) {
 				auto value = province->getsupport(player) / game.support_defend;
 				char temp[256]; zprint(temp, "%1 %2", msg.support, province->getname());
-				r += name_info::fix(ti, temp, value);
+				r += name_info::fix(sb, temp, value);
 			}
 		} else {
 			if(game.support_attack) {
 				auto value = province->getsupport(player) / game.support_attack;
 				char temp[256]; zprint(temp, "%1 %2", msg.support, province->getname());
-				r += name_info::fix(ti, temp, value);
+				r += name_info::fix(sb, temp, value);
 			}
 		}
 	}
@@ -88,9 +88,9 @@ int army::get(ability_s id, tip_info* ti, bool include_number) const {
 		auto value = tactic->get(id);
 		if(raid)
 			value += tactic->get(Raid);
-		r += tactic->fix(ti, value);
+		r += tactic->fix(sb, value);
 	}
-	if(ti && include_number)
-		szprint(zend(ti->result), ti->result_max, "\"%1i]", r);
+	if(sb)
+		sb->adds("\"%1i]", r);
 	return r;
 }
