@@ -76,9 +76,6 @@
     <ClCompile Include="game.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
-    <ClCompile Include="bsdata_serial.cpp">
-      <Filter>Коллекции</Filter>
-    </ClCompile>
     <ClCompile Include="action.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
@@ -179,6 +176,15 @@
       <Filter>Логика</Filter>
     </ClCompile>
     <ClCompile Include="game_header.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
+    <ClCompile Include="bsdata_reader.cpp">
+      <Filter>Коллекции</Filter>
+    </ClCompile>
+    <ClCompile Include="event.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
+    <ClCompile Include="computer.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
   </ItemGroup>

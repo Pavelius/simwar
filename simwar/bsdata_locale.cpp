@@ -1,9 +1,6 @@
 #include "bsdata.h"
 #include "crt.h"
 
-typedef void(*bslocal_proc)(const char* id, const char** requisits, const char** strings, void* object, const bsreq* type);
-typedef bool(*bslocal_test)(const char* id, const char** requisits, void* object, const bsreq* type);
-
 static bool test_true(const char* id, const char** requisits, void* object, const bsreq* type) {
 	return true;
 }
@@ -87,8 +84,12 @@ static bool read_localization(const char* url, const char** requisits, void* obj
 	const int maximum_strings = 32;
 	auto p = pb;
 	while(*p) {
-		char name[128];
-		p = psidn(p, name, zendof(name));
+		char name[128]; name[0] = 0;
+		auto index = -1;
+		if(isnum(p[0]))
+			p = psnum(p, index);
+		else
+			p = psidn(p, name, zendof(name));
 		if(p[0] != ':')
 			break;
 		p = zskipsp(p + 1);

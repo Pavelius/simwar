@@ -280,6 +280,43 @@ struct bsdata_serial : bsfile {
 		return true;
 	}
 
+	int getspacecount(const char* p) {
+		auto p1 = p;
+		while(*p == ' ')
+			p++;
+		return p - p1;
+	}
+
+	void readobject(void* object, const bsreq* type, int level) {
+		while(*p && !islinefeed()) {
+			const bsreq* req = 0;
+			if(readidentifier())
+				req = parser.getrequisit(type, buffer);
+			if(!req)
+				warning(ErrorNotFoundMember1pInBase2p, buffer, getbasename(type));
+			readreq(object, req, 0);
+		}
+		auto index = 0;
+		while(*p && islinefeed()) {
+			auto p1 = skipcr(p);
+			auto new_level = getspacecount(p1);
+			if(new_level <= level)
+				return;
+			p = p1 + new_level;
+			if(!readidentifier()) {
+				error(ErrorExpectedIdentifier);
+				return;
+			}
+			auto req = parser.getrequisit(type, buffer);
+			if(!req) {
+				error(ErrorNotFoundMember1pInBase2p, buffer, getbasename(type));
+				return;
+			}
+			readobject((void*)req->ptr(object, index), req->type, level+1);
+			index++;
+		}
+	}
+
 	void parse() {
 		while(true) {
 			skipws();
@@ -316,16 +353,7 @@ struct bsdata_serial : bsfile {
 				value_object = pd->add();
 			else
 				value_object = 0;
-			// Загрузим данные объекта
-			auto object = value_object;
-			while(*p && !islinefeed()) {
-				const bsreq* req = 0;
-				if(readidentifier())
-					req = parser.getrequisit(fields, buffer);
-				if(!req)
-					warning(ErrorNotFoundMember1pInBase2p, buffer, getbasename(fields));
-				readreq(object, req, 0);
-			}
+			readobject(value_object, fields, 0);
 		}
 	}
 

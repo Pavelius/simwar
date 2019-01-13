@@ -28,6 +28,9 @@ enum ability_s : unsigned char {
 	Good, Magic, Nobility,
 	LastAbility = Nobility
 };
+enum event_type_s : unsigned char {
+	GlobalEvent, PlayerEvent, ProvinceEvent, HeroEvent,
+};
 
 bsreq ability_type[];
 bsreq action_type[];
@@ -442,9 +445,14 @@ struct menu_info {
 	static void					choose_block(const char* parent);
 	static void					select(answer_info& ai, const char* parent);
 };
+struct event_info : character_info {
+	event_type_s				type;
+	landscape_info*				landscape;
+};
 extern name_info				ability_data[];
 extern adat<action_info, 32>	action_data;
 extern adat<build_info, 256>	build_data;
+extern adat<event_info, 64>		event_data;
 extern game_info				game;
 extern gui_info					gui;
 extern adat<hero_info, hero_max> hero_data;

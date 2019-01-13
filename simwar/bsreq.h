@@ -54,7 +54,6 @@ struct bsreq {
 	bool				match(const void* p, const char* name) const;
 	inline const char*	ptr(const void* data) const { return (const char*)data + offset; }
 	inline const char*	ptr(const void* data, int index) const { return (const char*)data + offset + index * size; }
-	bool				readl(const char* url, void* object) const;
 	void				set(const void* p, int value) const;
 };
 extern bsreq			number_type[]; // standart integer value
