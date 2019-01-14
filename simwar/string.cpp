@@ -1,10 +1,14 @@
 #include "main.h"
 
-struct gender_change {
+struct string_id_gender {
 	const char*		she;
 	const char*		he;
 };
-static gender_change change_gender[] = {{"а", ""},
+struct string_id_proc {
+	const char*		id;
+	void			(string::*proc)();
+};
+static string_id_gender change_gender[] = {{"а", ""},
 {"ла", ""},
 {"ась", "ся"},
 {"ая", "ый"},
@@ -13,6 +17,18 @@ static gender_change change_gender[] = {{"а", ""},
 {"она", "он"},
 {"ее", "его"},
 };
+static string_id_proc change_proc[] = {{"cost", &string::addcost},
+{"strenght", &string::addstrenght},
+};
+
+void string::addcost() {
+	add(":gold:%1i", cost.gold);
+}
+
+void string::addstrenght() {
+	if(army)
+		army->getstrenght(this);
+}
 
 void string::addidentifier(const char* identifier) {
 	for(auto& e : change_gender) {
@@ -21,6 +37,12 @@ void string::addidentifier(const char* identifier) {
 				add(e.she);
 			else
 				add(e.he);
+			return;
+		}
+	}
+	for(auto& e : change_proc) {
+		if(strcmp(e.id, identifier) == 0) {
+			(this->*e.proc)();
 			return;
 		}
 	}

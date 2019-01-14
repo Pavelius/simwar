@@ -126,6 +126,7 @@ const char* stringcreator::readformat(const char* src, const char* vl) {
 				case '+': szupper(p, 1); break;
 				default: break;
 				}
+				p += count;
 			}
 		}
 	} else
@@ -164,8 +165,8 @@ void stringcreator::add(const char* src, ...) {
 
 void stringcreator::addx(const char* separator, const char* format, const char* format_param) {
 	if(p > pb)
-		add(separator, 0);
-	add(format, format_param);
+		addv(separator, 0);
+	addv(format, format_param);
 }
 
 void stringcreator::addn(const char* format, ...) {
@@ -173,14 +174,14 @@ void stringcreator::addn(const char* format, ...) {
 }
 
 void stringcreator::adds(const char* format, ...) {
-	if(p > pb && p[-1] != '\n' && p[-1] != '\t')
-		add(" ", 0);
-	add(format, xva_start(format));
+	if(p > pb)
+		addv(" ", 0);
+	addv(format, xva_start(format));
 }
 
 char* szprintvs(char* result, const char* result_maximum, const char* src, const char* vl) {
 	stringcreator e(result, result_maximum);
-	e.add(src, vl);
+	e.addv(src, vl);
 	return e;
 }
 

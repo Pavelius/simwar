@@ -73,8 +73,10 @@ struct string : stringcreator {
 	cost_info					cost;
 	const struct army*			army;
 	const player_info*			player;
-	string(gender_s gender = Male) : stringcreator(buffer, buffer + sizeof(buffer) / sizeof(buffer[0])), gender(gender), army(0) { buffer[0] = 0; }
+	string(gender_s gender = Male) : stringcreator(buffer, buffer + sizeof(buffer) / sizeof(buffer[0])), gender(gender), army(0) {}
 	void						addidentifier(const char* identifier) override;
+	void						addcost();
+	void						addstrenght();
 private:
 	char						buffer[8192];
 };
