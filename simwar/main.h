@@ -69,17 +69,20 @@ struct cost_info {
 	char*						get(char* result, const char* result_maximum) const;
 };
 struct string : stringcreator {
+	string();
+	void						addidentifier(const char* identifier) override;
+	void						addcost();
+	void						addplayer();
+	void						addplayerincome();
+	void						addstrenght();
+	void						set(const hero_info* value);
+	void						set(const player_info* value);
+	void						set(const cost_info& value);
+private:
 	cost_info					cost;
 	const struct army*			army;
 	const player_info*			player;
 	const hero_info*			hero;
-	string();
-	void						addidentifier(const char* identifier) override;
-	void						addcost();
-	void						addstrenght();
-	void						set(const hero_info* value);
-	void						set(const player_info* value);
-private:
 	char						buffer[8192];
 };
 struct name_info {

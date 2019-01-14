@@ -19,6 +19,7 @@ static string_id_gender change_gender[] = {{"à", ""},
 };
 static string_id_proc change_proc[] = {{"cost", &string::addcost},
 {"strenght", &string::addstrenght},
+{"player_income", &string::addplayerincome},
 };
 
 string::string() : stringcreator(buffer, buffer + sizeof(buffer) / sizeof(buffer[0])), army(0) {}
@@ -30,6 +31,16 @@ void string::addcost() {
 void string::addstrenght() {
 	if(army)
 		army->getstrenght(this);
+}
+
+void string::addplayer() {
+	if(player)
+		add("%+1", player->getname());
+}
+
+void string::addplayerincome() {
+	if(player)
+		player->getincome(this);
 }
 
 void string::addidentifier(const char* identifier) {
@@ -60,4 +71,8 @@ void string::set(const hero_info* value) {
 
 void string::set(const player_info* value) {
 	player = value;
+}
+
+void string::set(const cost_info& value) {
+	cost = value;
 }
