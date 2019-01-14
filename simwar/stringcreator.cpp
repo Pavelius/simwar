@@ -2,12 +2,9 @@
 #include "stringcreator.h"
 
 void stringcreator::addidentifier(const char* identifier) {
-	auto len = zlen(identifier) + 3;
-	if((pe - p) >= len) {
-		zcat(p, "[-");
-		zcat(p, identifier);
-		zcat(p, "]");
-	}
+	addv("[-", 0);
+	addv(identifier, 0);
+	addv("]", 0);
 }
 
 const char* stringcreator::readvariable(const char* p) {

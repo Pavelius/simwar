@@ -247,7 +247,8 @@ void player_info::hire_heroes() {
 	// Выполним действие
 	for(unsigned i = 0; i < source.count; i++) {
 		auto player = source.data[i];
-		string sb(hero->getgender());
+		string sb;
+		sb.set(hero);
 		if(i == 0) {
 			sb.add(msg.hero_hire_success, hero->getname(), player->getname(), player->hire_gold);
 			player->post(hero, 0, sb);

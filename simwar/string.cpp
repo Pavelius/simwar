@@ -21,6 +21,8 @@ static string_id_proc change_proc[] = {{"cost", &string::addcost},
 {"strenght", &string::addstrenght},
 };
 
+string::string() : stringcreator(buffer, buffer + sizeof(buffer) / sizeof(buffer[0])), army(0) {}
+
 void string::addcost() {
 	add(":gold:%1i", cost.gold);
 }
@@ -31,6 +33,9 @@ void string::addstrenght() {
 }
 
 void string::addidentifier(const char* identifier) {
+	auto gender = Male;
+	if(hero)
+		gender = hero->getgender();
 	for(auto& e : change_gender) {
 		if(strcmp(e.she, identifier) == 0) {
 			if(gender == Female)
@@ -46,13 +51,13 @@ void string::addidentifier(const char* identifier) {
 			return;
 		}
 	}
-	//if(strcmp(identifier, "cost") == 0)
-	//	print(result, result_max, ":gold:%1i", cost.gold);
-	//else if(strcmp(identifier, "strenght") == 0) {
-	//	if(army) {
-	//		stringcreator sb(*this, result, result_max);
-	//		army->getstrenght(&sb);
-	//	}
-	//} else
 	addidentifier(identifier);
+}
+
+void string::set(const hero_info* value) {
+	hero = value;
+}
+
+void string::set(const player_info* value) {
+	player = value;
 }

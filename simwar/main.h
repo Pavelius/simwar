@@ -69,14 +69,16 @@ struct cost_info {
 	char*						get(char* result, const char* result_maximum) const;
 };
 struct string : stringcreator {
-	gender_s					gender;
 	cost_info					cost;
 	const struct army*			army;
 	const player_info*			player;
-	string(gender_s gender = Male) : stringcreator(buffer, buffer + sizeof(buffer) / sizeof(buffer[0])), gender(gender), army(0) {}
+	const hero_info*			hero;
+	string();
 	void						addidentifier(const char* identifier) override;
 	void						addcost();
 	void						addstrenght();
+	void						set(const hero_info* value);
+	void						set(const player_info* value);
 private:
 	char						buffer[8192];
 };

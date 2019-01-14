@@ -167,7 +167,7 @@ void hero_info::check_leave() {
 		return;
 	if(loyalty <= 0) {
 		string sb;
-		sb.gender = getgender();
+		sb.set(this);
 		sb.add(msg.hero_desert, getname());
 		player->post(this, 0, sb);
 		player = 0;

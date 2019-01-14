@@ -421,7 +421,7 @@ static int windowh(const hero_info* hero, const char* format, const char* format
 		}
 		x += avatar_width;
 		sb.clear();
-		sb.gender = hero->getgender();
+		sb.set(hero);
 	}
 	sb.addv(format, format_param);
 	draw::link[0] = 0;

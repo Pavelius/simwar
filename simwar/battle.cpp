@@ -97,7 +97,7 @@ struct combatside : public army {
 		}
 		if(tactic) {
 			if(tactic_changed && general) {
-				sb.gender = general->getgender();
+				sb.set(general);
 				sb.adds(msg.tactic_changed, general->getname());
 			}
 			sb.adds(tactic->text, getside());
