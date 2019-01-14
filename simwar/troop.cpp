@@ -25,7 +25,7 @@ void troop_info::sort(troop_info** source, unsigned count) {
 	qsort(source, count, sizeof(source[0]), compare);
 }
 
-void troop_info::getpresent(stringbuilder& sb, troop_info** objects, unsigned count, const char* addition_text) {
+void troop_info::getpresent(stringcreator& sb, troop_info** objects, unsigned count, const char* addition_text) {
 	int count_in_row = 1;
 	for(unsigned i = 0; i < count; i++) {
 		if(i < count - 1 && compare(objects + i, objects + i + 1) == 0) {

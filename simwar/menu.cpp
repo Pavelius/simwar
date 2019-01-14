@@ -18,7 +18,6 @@ static void new_game(const menu_info* p) {
 
 static void map_editor(const menu_info* p) {
 	game.readmap("silentseas");
-	game.editor("editor.map");
 }
 
 bsreq menu_type[] = {

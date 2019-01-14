@@ -6,7 +6,7 @@ int name_info::compare(const void* p1, const void* p2) {
 	return strcmp(e1->name, e2->name);
 }
 
-int name_info::fix(stringbuilder* sb, const char* name, int value) {
+int name_info::fix(stringcreator* sb, const char* name, int value) {
 	if(sb && value) {
 		char temp[260]; temp[0] = 0;
 		if(name) {

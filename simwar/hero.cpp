@@ -197,7 +197,7 @@ void hero_info::initialize() {
 	}
 }
 
-void hero_info::getinfo(stringbuilder& sb) const {
+void hero_info::getinfo(stringcreator& sb) const {
 	auto ph = metadata;
 	for(auto i = Attack; i<=LastAbility; i = (ability_s)(i+1)) {
 		auto value = get(i);
@@ -212,7 +212,7 @@ void hero_info::getinfo(stringbuilder& sb) const {
 	}
 }
 
-void hero_info::getstate(stringbuilder& sb) const {
+void hero_info::getstate(stringcreator& sb) const {
 	if(action) {
 		sb.addn("[+");
 		sb.add("%+1", action->getnameof());
@@ -238,7 +238,7 @@ void hero_info::getstate(stringbuilder& sb) const {
 	}
 }
 
-void hero_info::getbrief(stringbuilder& sb) const {
+void hero_info::getbrief(stringcreator& sb) const {
 	sb.addn("###%1", getname());
 	for(auto p : traits) {
 		if(!p)

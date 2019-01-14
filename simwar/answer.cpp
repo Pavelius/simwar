@@ -12,7 +12,6 @@ void answer_info::sort() {
 
 
 void answer_info::addv(int param, const char* format, const char* format_param) {
-	stringcreator sc;
 	if(elements.getcount() >= elements.getmaximum())
 		return;
 	if(p >= zendof(buffer))
@@ -22,7 +21,9 @@ void answer_info::addv(int param, const char* format, const char* format_param) 
 	auto pe = elements.add();
 	pe->param = param;
 	pe->text = p;
-	p = sc.printv(p, zendof(buffer), format, format_param);
+	stringcreator sc(p, zendof(buffer));
+	sc.add(format, format_param);
+	p = sc.p;
 }
 
 void answer_info::add(int param, const char* format, ...) {

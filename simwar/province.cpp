@@ -35,7 +35,7 @@ int province_info::getdefend() const {
 	return landscape->get(Defend) + level;
 }
 
-int province_info::getincome(stringbuilder* ti) const {
+int province_info::getincome(stringcreator* ti) const {
 	auto result = 0;
 	if(landscape)
 		result += landscape->getincome(ti);
@@ -169,7 +169,7 @@ unsigned province_info::remove_hero_present(aref<province_info*> source, const p
 	return ps - source.data;
 }
 
-void province_info::getinfo(stringbuilder& sb, bool show_landscape, const army* defenders) const {
+void province_info::getinfo(stringcreator& sb, bool show_landscape, const army* defenders) const {
 	if(show_landscape)
 		sb.adds(landscape->name);
 	sb.adds(":gold:%1i", getincome());
@@ -180,7 +180,7 @@ void province_info::getinfo(stringbuilder& sb, bool show_landscape, const army* 
 	sb.adds(":shield_grey:%1i", value);
 }
 
-void province_info::getsupport(stringbuilder& sb) const {
+void province_info::getsupport(stringcreator& sb) const {
 	for(auto& e : player_data) {
 		if(!e)
 			continue;

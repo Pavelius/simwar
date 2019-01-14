@@ -36,7 +36,7 @@ unsigned player_info::remove_restricted(action_info** source, unsigned count) co
 	return ps - source;
 }
 
-void player_info::getcalendar(stringbuilder& sb) {
+void player_info::getcalendar(stringcreator& sb) {
 	auto count = calendar_manager.getcount();
 	if(!count)
 		return;
@@ -50,17 +50,16 @@ int	player_info::getindex() const {
 	return player_data.indexof(this);
 }
 
-void player_info::getinfo(stringbuilder& sb) const {
+void player_info::getinfo(stringcreator& sb) const {
 	char tips[512];
-	stringcreator sc;
-	stringbuilder ti(sc, tips, zendof(tips));
+	stringcreator ti(tips, zendof(tips));
 	getcalendar(sb);
 	auto income = getincome(&ti);
 	sb.adds(":gold:%1i[%4\"%3\"%+2i]", cost.gold, income, tips, (income >= 0) ? "+" : "-");
 	sb.adds(":flag_grey:%1i", cost.fame);
 }
 
-int player_info::getincome(stringbuilder* ti) const {
+int player_info::getincome(stringcreator* ti) const {
 	auto result = 0, r = 0;
 	for(auto& e : province_data) {
 		if(!e)
@@ -89,7 +88,7 @@ int player_info::getincome(stringbuilder* ti) const {
 	return result;
 }
 
-int	player_info::getsupport(stringbuilder* ti) const {
+int	player_info::getsupport(stringcreator* ti) const {
 	auto result = 0;
 	for(auto& e : hero_data) {
 		if(!e)

@@ -1,46 +1,48 @@
 #include "crt.h"
 #include "stringcreator.h"
 
-void stringcreator::parseidentifier(char* result, const char* result_max, const char* identifier) {
+void stringcreator::addidentifier(const char* identifier) {
 	auto len = zlen(identifier) + 3;
-	if((result_max - result) >= len) {
-		zcat(result, "[-");
-		zcat(result, identifier);
-		zcat(result, "]");
+	if((pe - p) >= len) {
+		zcat(p, "[-");
+		zcat(p, identifier);
+		zcat(p, "]");
 	}
 }
 
-void stringcreator::parsevariable(char* result, const char* result_max, const char** format) {
+const char* stringcreator::readvariable(const char* p) {
 	char temp[260];
-	auto src = *format;
-	int s = 0;
-	if(*src == '(') {
-		*format += 1;
-		while(*src && *src != ')')
-			src++;
-		s = src - *format;
-		src++;
+	auto s = 0;
+	auto p1 = p;
+	if(*p == '(') {
+		p++;
+		while(*p && *p != ')')
+			p++;
+		s = p - p1;
+		if(*p==')')
+			p++;
 	} else {
-		while(*src) {
-			const char* s1 = src;
-			unsigned ch = szget(&src);
+		while(*p) {
+			auto s1 = p;
+			unsigned ch = szget(&p);
 			if(!ischa(ch) && !isnum(ch) && ch != '_') {
-				src = s1;
+				p = s1;
 				break;
 			}
 		}
-		s = src - *format;
+		s = p - p1;
 	}
 	temp[0] = 0;
-	if(s != 0 && s<int(sizeof(temp) - 1)) {
-		memcpy(temp, *format, s);
-		temp[s] = 0;
-	}
-	*format = src;
-	parseidentifier(result, result_max, temp);
+	if(s >= (int)(sizeof(temp) - 1))
+		s = sizeof(temp) - 1;
+	if(s != 0)
+		memcpy(temp, p1, s);
+	temp[s] = 0;
+	addidentifier(temp);
+	return p;
 }
 
-char* stringcreator::parsenumber(char* dst, const char* result_max, unsigned value, int precision, const int radix) {
+char* stringcreator::adduint(char* dst, const char* result_max, unsigned value, int precision, const int radix) {
 	char temp[32]; int i = 0;
 	if(!value) {
 		zcpy(dst, "0");
@@ -69,24 +71,24 @@ char* stringcreator::parsenumber(char* dst, const char* result_max, unsigned val
 	return dst;
 }
 
-char* stringcreator::parseint(char* dst, const char* result_max, int value, int precision, const int radix) {
+char* stringcreator::addint(char* dst, const char* result_max, int value, int precision, const int radix) {
 	if(value < 0) {
 		if(dst < result_max)
 			*dst++ = '-';
 		value = -value;
 	}
-	return parsenumber(dst, result_max, value, precision, radix);
+	return adduint(dst, result_max, value, precision, radix);
 }
 
-const char* stringcreator::parseformat(char* dst, const char* result_max, const char* src, const char* vl) {
+const char* stringcreator::readformat(const char* src, const char* vl) {
 	if(*src == '%') {
 		auto sym = *src++;
-		if(dst < result_max)
-			*dst++ = sym;
-		*dst = 0;
+		if(p < pe)
+			*p++ = sym;
+		*p = 0;
 		return src;
 	}
-	*dst = 0;
+	*p = 0;
 	char prefix = 0;
 	if(*src == '+' || *src == '-')
 		prefix = *src++;
@@ -104,100 +106,86 @@ const char* stringcreator::parseformat(char* dst, const char* result_max, const 
 			src++;
 			auto value = ((int*)vl)[pn - 1];
 			if(prefix == '+' && value >= 0) {
-				if(dst < result_max)
-					*dst++ = '+';
+				if(p < pe)
+					*p++ = '+';
 			}
-			dst = parseint(dst, result_max, value, pnp, 10);
+			p = addint(p, pe, value, pnp, 10);
 		} else if(*src == 'h') {
 			src++;
-			dst = parsenumber(dst, result_max, (unsigned)(((int*)vl)[pn - 1]), pnp, 16);
+			p = adduint(p, pe, (unsigned)(((int*)vl)[pn - 1]), pnp, 16);
 		} else {
 			if(((char**)vl)[pn - 1]) {
-				auto count = result_max - dst;
+				auto count = pe - p;
 				auto count_str = zlen(((char**)vl)[pn - 1]);
 				if(count_str < count)
 					count = count_str;
-				memcpy(dst, ((char**)vl)[pn - 1], count);
-				dst[count] = 0;
+				memcpy(p, ((char**)vl)[pn - 1], count);
+				p[count] = 0;
 				switch(prefix) {
-				case '-': szlower(dst, 1); break;
-				case '+': szupper(dst, 1); break;
+				case '-': szlower(p, 1); break;
+				case '+': szupper(p, 1); break;
 				default: break;
 				}
 			}
 		}
 	} else
-		parsevariable(dst, result_max, &src);
+		src = readvariable(src);
 	return src;
 }
 
-char* stringcreator::printv(char* result, const char* result_maximum, const char* src, const char* vl) {
-	if(!result)
-		return 0;
+void stringcreator::addv(const char* src, const char* vl) {
+	if(!p)
+		return;
 	if(!src) {
 		// Error: No source string
-		result[0] = 0;
-		return result;
+		p[0] = 0;
+		return;
 	}
 	while(true) {
 		switch(*src) {
 		case 0:
-			*result = 0;
-			return result;
+			*p = 0;
+			return;
 		case '%':
-			src = parseformat(result, result_maximum, src + 1, vl);
-			result = zend(result);
-			if(result > result_maximum)
-				result = const_cast<char*>(result_maximum);
+			src = readformat(src + 1, vl);
 			break;
 		default:
-			if(result < result_maximum)
-				*result++ = *src;
+			if(p < pe)
+				*p++ = *src;
 			src++;
 			break;
 		}
 	}
 }
 
-void stringcreator::print(char* result, const char* result_maximum, const char* src, ...) {
-	printv(result, result_maximum, src, xva_start(src));
+void stringcreator::add(const char* src, ...) {
+	addv(src, xva_start(src));
 }
 
-void stringbuilder::add(const char* format, ...) {
-	p = driver.printv(p, result_maximum, format, xva_start(format));
+void stringcreator::addx(const char* separator, const char* format, const char* format_param) {
+	if(p > pb)
+		add(separator, 0);
+	add(format, format_param);
 }
 
-void stringbuilder::addv(const char* format, const char* format_param) {
-	p = driver.printv(p, result_maximum, format, format_param);
+void stringcreator::addn(const char* format, ...) {
+	addx("\n", format, xva_start(format));
 }
 
-void stringbuilder::addx(const char* separator, const char* format, const char* format_param) {
-	if(p != result)
-		p = driver.printv(p, result_maximum, separator, 0);
-	p = driver.printv(p, result_maximum, format, format_param);
-}
-
-void stringbuilder::adds(const char* format, ...) {
-	if(p > result && p[-1] != '\n' && p[-1] != '\t')
-		p = driver.printv(p, result_maximum, " ", 0);
-	p = driver.printv(p, result_maximum, format, xva_start(format));
-}
-
-void stringbuilder::addh(const char* format, ...) {
-	if(p != result)
-		p = driver.printv(p, result_maximum, "\n", 0);
-	p = driver.printv(p, result_maximum, "###", 0);
-	p = driver.printv(p, result_maximum, format, xva_start(format));
+void stringcreator::adds(const char* format, ...) {
+	if(p > pb && p[-1] != '\n' && p[-1] != '\t')
+		add(" ", 0);
+	add(format, xva_start(format));
 }
 
 char* szprintvs(char* result, const char* result_maximum, const char* src, const char* vl) {
-	stringcreator e;
-	e.printv(result, result_maximum, src, vl);
-	return result;
+	stringcreator e(result, result_maximum);
+	e.add(src, vl);
+	return e;
 }
 
 char* szprint(char* result, const char* result_maximum, const char* src, ...) {
-	stringcreator e;
-	e.printv(result, result_maximum, src, xva_start(src));
-	return result;
+	stringcreator e(result, result_maximum);
+	e.addv(src, xva_start(src));
+	return e;
 }

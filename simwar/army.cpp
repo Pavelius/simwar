@@ -40,11 +40,11 @@ int army::get(ability_s id) const {
 	return result;
 }
 
-int army::getstrenght(stringbuilder* sb) const {
+int army::getstrenght(stringcreator* sb) const {
 	return get(attack ? Attack : Defend, sb);
 }
 
-int army::get(ability_s id, stringbuilder* sb) const {
+int army::get(ability_s id, stringcreator* sb) const {
 	auto r = 0;
 	if(sb)
 		sb->adds("[\"");

@@ -45,8 +45,7 @@ struct combatside : public army {
 	void setstrenght(string& sb, const char* format, const char* province_name) {
 		char text_lead[260]; text_lead[0] = 0;
 		char text_tips[2048]; text_tips[0] = 0;
-		stringcreator sc;
-		stringbuilder ti(sc, text_tips, zendof(text_tips));
+		stringcreator ti(text_tips, zendof(text_tips));
 		if(general)
 			tactic = general->gettactic();
 		if(!tactic) {
@@ -105,14 +104,14 @@ struct combatside : public army {
 		}
 	}
 
-	void casualtyhead(stringbuilder& sb, const char* result) {
+	void casualtyhead(stringcreator& sb, const char* result) {
 		if(result[0])
 			sb.add(", ");
 		else
 			sb.addn("%1 %2: ", msg.casualties, getsideof());
 	}
 
-	void applycasualty(stringbuilder& sb) {
+	void applycasualty(stringcreator& sb) {
 		auto result = sb.get();
 		for(auto i = 0; i < casualties; i++) {
 			if(getcount() <= 0)
