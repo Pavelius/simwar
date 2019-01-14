@@ -3,7 +3,6 @@
 #define xva_start(v) ((const char*)&v + sizeof(v))
 
 struct stringcreator {
-	char*				p;
 	stringcreator(char* pb, const char* pe) : pb(pb), p(pb), pe(pe) { pb[0] = 0; }
 	template<unsigned N> stringcreator(char(&result)[N]) : stringcreator(result, result + N) {}
 	constexpr operator char*() const { return pb; }
@@ -19,11 +18,12 @@ struct stringcreator {
 	const char*			begin() const { return pb; }
 	void				clear() { pb[0] = 0; p = pb; }
 	const char*			end() const { return pe; }
-	const char*			get() const { return p; }
+	char*				get() const { return p; }
 	bool				ispos(const char* v) const { return p == v; }
 private:
-	const char*			readformat(const char* format, const char* format_param);
-	const char*			readvariable(const char* format);
+	char*				p;
 	char*				pb;
 	const char*			pe;
+	const char*			readformat(const char* format, const char* format_param);
+	const char*			readvariable(const char* format);
 };

@@ -10,7 +10,6 @@ void answer_info::sort() {
 	qsort(elements.data, elements.getcount(), sizeof(elements[0]), compare);
 }
 
-
 void answer_info::addv(int param, const char* format, const char* format_param) {
 	if(elements.getcount() >= elements.getmaximum())
 		return;
@@ -23,7 +22,7 @@ void answer_info::addv(int param, const char* format, const char* format_param) 
 	pe->text = p;
 	stringcreator sc(p, zendof(buffer));
 	sc.add(format, format_param);
-	p = sc.p;
+	p = sc.get();
 }
 
 void answer_info::add(int param, const char* format, ...) {
