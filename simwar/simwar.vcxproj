@@ -150,6 +150,7 @@
     <ClCompile Include="draw_scroll.cpp" />
     <ClCompile Include="draw_text.cpp" />
     <ClCompile Include="draw_textf.cpp" />
+    <ClCompile Include="effect.cpp" />
     <ClCompile Include="event.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="game_header.cpp" />

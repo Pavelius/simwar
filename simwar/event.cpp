@@ -1,10 +1,5 @@
 #include "main.h"
 
-bsreq effect_type[] = {
-	BSREQ(effect_info, type, ability_type),
-	BSREQ(effect_info, text, text_type),
-	BSREQ(effect_info, units, unit_type),
-{}};
 bsreq event_type[] = {
 	BSREQ(event_info, id, text_type),
 	BSREQ(event_info, name, text_type),

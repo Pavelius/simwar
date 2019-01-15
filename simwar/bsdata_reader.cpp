@@ -312,6 +312,7 @@ struct bsdata_serial : bsfile {
 				error(ErrorNotFoundMember1pInBase2p, buffer, getbasename(type));
 				return;
 			}
+			skipws();
 			readobject((void*)req->ptr(object, index), req->type, level+1);
 			index++;
 		}

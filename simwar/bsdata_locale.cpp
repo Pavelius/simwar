@@ -1,15 +1,18 @@
 #include "bsdata.h"
 #include "crt.h"
 
-static bool test_true(const char* id, const char** requisits, void* object, const bsreq* type) {
+static bool test_true(const char* id, const char** requisits, void* object, const bsreq* type, int index) {
+	if(index != -1)
+		return false;
 	return true;
 }
 
-static bool test_req(const char* id, const char** requisits, void* object, const bsreq* type) {
+static bool test_req(const char* id, const char** requisits, void* object, const bsreq* type, int index) {
+	if(index != -1)
+		return false;
 	if(!requisits[0] || !requisits[1])
 		return false;
 	char name[128];
-	auto index = 0;
 	for(unsigned i = 1; requisits[i]; i++) {
 		zprint(name, "%1%2", id, requisits[i]);
 		auto pf = type->find(name, text_type);
@@ -99,7 +102,7 @@ static bool read_localization(const char* url, const char** requisits, void* obj
 		auto count = 0;
 		auto pt = value;
 		strings[0] = pt;
-		if(multi_strings(name, requisits, object, type)) {
+		if(multi_strings(name, requisits, object, type, index)) {
 			while(pt[0]) {
 				if(pt[0] == '.' && requisits_count > 1) {
 					pt[0] = 0;

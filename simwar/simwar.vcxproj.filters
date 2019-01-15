@@ -187,6 +187,9 @@
     <ClCompile Include="computer.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
+    <ClCompile Include="effect.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="draw.h">

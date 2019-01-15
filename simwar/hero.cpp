@@ -5,6 +5,7 @@ bsreq hero_info::metadata[] = {
 	BSREQ(hero_info, name, text_type),
 	BSREQ(hero_info, nameof, text_type),
 	BSREQ(hero_info, text, text_type),
+	BSREQ(hero_info, ability, number_type),
 	BSREQ(hero_info, gender, gender_type),
 	BSREQ(hero_info, avatar, text_type),
 	BSREQ(hero_info, tactic, tactic_type),

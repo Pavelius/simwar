@@ -39,6 +39,7 @@ bsreq action_type[];
 bsreq calendar_type[];
 bsreq character_type[];
 bsreq cost_type[];
+bsreq effect_type[];
 bsreq game_type[];
 bsreq gender_type[];
 bsreq landscape_type[];
@@ -447,12 +448,13 @@ struct menu_info {
 	static void					select(answer_info& ai, const char* parent);
 };
 struct effect_info {
-	ability_s					type;
+	ability_s					test;
 	const char*					text;
-	cost_info					cost;
+	char						ability[LastAbility + 1];
 	unit_info*					units[4];
-	char						loyalty;
-	char						economy;
+	//
+	int							get(ability_s id) const { return ability[id]; }
+	void						set(ability_s id, char value) { ability[id] = value; }
 };
 struct event_info : name_info {
 	landscape_info*				landscape;

@@ -8,7 +8,7 @@
 bsdata c##_manager(#c, c##_data, c##_type);
 
 typedef void(*bslocal_proc)(const char* id, const char** requisits, const char** strings, void* object, const bsreq* type);
-typedef bool(*bslocal_test)(const char* id, const char** requisits, void* object, const bsreq* type);
+typedef bool(*bslocal_test)(const char* id, const char** requisits, void* object, const bsreq* type, int index);
 enum bsparse_error_s {
 	NoParserError,
 	ErrorExpectedIdentifier, ErrorExpectedArrayField, ErrorExpectedSymbol1p, ErrorExpected1p,
