@@ -66,7 +66,7 @@ struct cost_info {
 	void operator-=(const cost_info& e) { gold -= e.gold; fame -= e.fame; }
 	bool operator>(const cost_info& e) const { return gold > e.gold; }
 	void						clear();
-	char*						get(char* result, const char* result_maximum) const;
+	void						getinfo(stringcreator& sb) const;
 };
 struct string : stringcreator {
 	string();

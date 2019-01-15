@@ -7,6 +7,7 @@ struct stringcreator {
 	template<unsigned N> stringcreator(char(&result)[N]) : stringcreator(result, result + N) {}
 	constexpr operator char*() const { return pb; }
 	void				add(const char* format, ...);
+	void				addicon(const char* id, int value);
 	virtual void		addidentifier(const char* identifier);
 	static char*		addint(char* result, const char* result_maximum, int value, int precision, const int radix);
 	void				addn(const char* format, ...);

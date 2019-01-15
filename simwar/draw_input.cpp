@@ -885,7 +885,10 @@ struct unit_list : list {
 			szupper(result, 1);
 			break;
 		case 1:
-			source.data[line]->cost.get(result, result_maximum);
+			if(true) {
+				stringcreator sb(result, result_maximum);
+				source.data[line]->cost.getinfo(sb);
+			}
 			break;
 		default:
 			return "";
@@ -1086,7 +1089,8 @@ game_header* game_header::choose(game_header* source, unsigned count) {
 
 static void render_two_window(const player_info* player, const hero_info* hero, const action_info* action, list& u1, list& u2, const char* error_text, stringcreator& sb, const cost_info& cost) {
 	if(cost) {
-		char tem1[256]; cost.get(tem1, zendof(tem1));
+		char tem1[256]; stringcreator sc(tem1);
+		cost.getinfo(sc);
 		sb.adds("%1: %2", msg.total, tem1);
 	}
 	auto th = 0;

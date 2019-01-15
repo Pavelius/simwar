@@ -16,7 +16,7 @@ const char* stringcreator::readvariable(const char* p) {
 		while(*p && *p != ')')
 			p++;
 		s = p - p1;
-		if(*p==')')
+		if(*p == ')')
 			p++;
 	} else {
 		while(*p) {
@@ -174,6 +174,13 @@ void stringcreator::adds(const char* format, ...) {
 	if(p > pb)
 		addv(" ", 0);
 	addv(format, xva_start(format));
+}
+
+void stringcreator::addicon(const char* id, int value) {
+	if(value < 0)
+		adds(":%1:[-%2i]", id, -value);
+	else
+		adds(":%1:%2i", id, value);
 }
 
 char* szprintvs(char* result, const char* result_maximum, const char* src, const char* vl) {

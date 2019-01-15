@@ -5,12 +5,10 @@ bsreq cost_type[] = {
 	BSREQ(cost_info, fame, number_type),
 {}};
 
-char* cost_info::get(char* result, const char* result_maximum) const {
-	result[0] = 0;
-	szprint(result, result_maximum, ":gold:%1i", gold);
-	//if(income)
-	//	szprint(zend(result), result_maximum, "[%2%1i]", income, (income>=0) ? "+" : "-");
-	return result;
+void cost_info::getinfo(stringcreator& sb) const {
+	sb.addicon("gold", gold);
+	if(fame)
+		sb.addicon("flag_grey", fame);
 }
 
 void cost_info::clear() {
