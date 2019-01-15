@@ -170,7 +170,6 @@ const char* psstr(const char* p, char* r, char end_symbol) {
 }
 
 const char* psidn(const char* p, char* r, char* re) {
-	*r = 0;
 	while(*p) {
 		if((*p >= '0' && *p <= '9') || *p == '_' || ischa(*p)) {
 			if(r < re)

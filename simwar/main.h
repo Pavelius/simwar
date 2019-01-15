@@ -461,6 +461,7 @@ extern game_info				game;
 extern gui_info					gui;
 extern adat<hero_info, hero_max> hero_data;
 extern const char*				key_requisits[];
+extern const bsdata_strings		key_ranges[];
 extern adat<landscape_info, 32> landscape_data;
 extern msg_info					msg;
 extern adat<nation_info, 16>	nation_data;

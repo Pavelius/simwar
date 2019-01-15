@@ -1,13 +1,18 @@
 #include "bsdata.h"
 #include "crt.h"
 
-static bool test_true(const char* id, const char** requisits, void* object, const bsreq* type, int index) {
+typedef bool(*bslocal_test)(const char* id, const char** requisits, const bsdata_strings* tables, void* object, const bsreq* type, int index);
+typedef void(*bslocal_proc)(const char* id, const char** requisits, const bsdata_strings* tables, const char** strings, void* object, const bsreq* type, int index);
+
+const int maximum_strings = 32;
+
+static bool test_true(const char* id, const char** requisits, const bsdata_strings* tables, void* object, const bsreq* type, int index) {
 	if(index != -1)
 		return false;
 	return true;
 }
 
-static bool test_req(const char* id, const char** requisits, void* object, const bsreq* type, int index) {
+static bool test_req(const char* id, const char** requisits, const bsdata_strings* tables, void* object, const bsreq* type, int index) {
 	if(index != -1)
 		return false;
 	if(!requisits[0] || !requisits[1])
@@ -37,57 +42,94 @@ static const char* read_string(const char* p, char* ps, const char* pe) {
 	return p;
 }
 
-static void set_req_object(const char* id, const char** requisits, const char** strings, void* object, const bsreq* type) {
+static void set_req_object(const char* id, const char** requisits, const bsdata_strings* tables, const char** strings, void* object, const bsreq* type, int index) {
 	char name[128];
-	auto index = 0;
+	auto ni = 0;
 	for(unsigned i = 0; requisits[i]; i++) {
 		zprint(name, "%1%2", id, requisits[i]);
 		auto pf = type->find(name, text_type);
 		if(!pf)
 			continue;
-		if(!strings[index] || strings[index][0] == 0)
+		if(!strings[ni] || strings[ni][0] == 0)
 			break;
-		type->set(pf->ptr(object), (int)szdup(strings[index]));
-		index++;
+		type->set(pf->ptr(object), (int)szdup(strings[ni]));
+		ni++;
 	}
 }
 
-static void set_all_bsdata(const char* id, const char** requisits, const char** strings, void* object, const bsreq* type) {
+static void set_all_bsdata(const char* id, const char** requisits, const bsdata_strings* tables, const char** strings, void* object, const bsreq* type, int index) {
 	for(auto pb = bsdata::first; pb; pb = pb->next) {
 		auto pfid = pb->fields->find("id", text_type);
 		if(!pfid)
 			continue;
-		for(unsigned i = 0; requisits[i]; i++) {
-			auto pf = pb->fields->find(requisits[i], text_type);
-			if(!pf)
-				continue;
-			if(!strings[i])
-				continue;
-			auto string_value = szdup(strings[i]);
-			for(unsigned j = 0; j < pb->count; j++) {
-				auto pv = pb->get(j);
-				auto j_id = (const char*)pfid->get(pfid->ptr(pv));
-				if(!j_id)
+		if(index == -1) {
+			for(unsigned i = 0; requisits[i]; i++) {
+				if(!strings[i])
 					continue;
-				if(strcmp(j_id, id) != 0)
+				auto pf = pb->fields->find(requisits[i], text_type);
+				if(!pf)
 					continue;
-				pf->set(pf->ptr(pv), (int)string_value);
+				auto string_value = szdup(strings[i]);
+				for(unsigned j = 0; j < pb->count; j++) {
+					auto pv = pb->get(j);
+					auto j_id = (const char*)pfid->get(pfid->ptr(pv));
+					if(!j_id)
+						continue;
+					if(strcmp(j_id, id) != 0)
+						continue;
+					pf->set(pf->ptr(pv), (int)string_value);
+				}
+			}
+		} else {
+			if(!tables)
+				continue;
+			for(auto pr = tables; *pr; pr++) {
+				if(!pr->requisits)
+					continue;
+				if(pr->isrange() && (index<pr->range[0] || index > pr->range[1]))
+					continue;
+				auto pf = pb->fields->find(pr->id);
+				if(!pf)
+					continue;
+				if(pf->reference)
+					continue;
+				unsigned ib = index - pr->range[0];
+				if(ib >= pf->count)
+					continue;
+				auto pft = pf->type;
+				if(pft == number_type)
+					continue;
+				auto pid = pb->fields->getkey();
+				if(!pid)
+					continue;
+				auto pv = pb->find(pid, id);
+				if(!pv)
+					continue;
+				pv = (char*)pf->ptr(pv) + ib * pf->size;
+				for(unsigned i = 0; pr->requisits[i] && i<maximum_strings; i++) {
+					if(!strings[i])
+						continue;
+					auto pf = pft->find(pr->requisits[i], text_type);
+					if(!pf)
+						continue;
+					auto string_value = szdup(strings[i]);
+					pf->set(pf->ptr(pv), (int)string_value);
+				}
 			}
 		}
 	}
 }
 
-static bool read_localization(const char* url, const char** requisits, void* object, const bsreq* type, bslocal_proc proc, bslocal_test multi_strings) {
+static bool read_localization(const char* url, const char** requisits, const bsdata_strings* tables, void* object, const bsreq* type, bslocal_proc proc, bslocal_test multi_strings) {
 	if(!requisits || requisits[0] == 0)
 		return false;
 	auto pb = (const char*)loadt(url);
 	if(!pb)
 		return false;
 	auto requisits_count = zlen(requisits);
-	const int maximum_strings = 32;
 	auto p = pb;
+	char name[128];
 	while(*p) {
-		char name[128]; name[0] = 0;
 		auto index = -1;
 		if(isnum(p[0]))
 			p = psnum(p, index);
@@ -102,7 +144,7 @@ static bool read_localization(const char* url, const char** requisits, void* obj
 		auto count = 0;
 		auto pt = value;
 		strings[0] = pt;
-		if(multi_strings(name, requisits, object, type, index)) {
+		if(multi_strings(name, requisits, tables, object, type, index)) {
 			while(pt[0]) {
 				if(pt[0] == '.' && requisits_count > 1) {
 					pt[0] = 0;
@@ -120,18 +162,18 @@ static bool read_localization(const char* url, const char** requisits, void* obj
 				pt++;
 			}
 		}
-		proc(name, requisits, strings, object, type);
+		proc(name, requisits, tables, strings, object, type, index);
 	}
 	delete pb;
 	return true;
 }
 
-bool bsdata::readl(const char* url, const char** requisits) {
-	return read_localization(url, requisits, 0, 0, set_all_bsdata, test_true);
+bool bsdata::readl(const char* url, const char** requisits, const bsdata_strings* tables) {
+	return read_localization(url, requisits, tables, 0, 0, set_all_bsdata, test_true);
 }
 
 bool bsdata::readl(const char* url, const char** requisits, void* object, const bsreq* type) {
-	return read_localization(url, requisits, object, type, set_req_object, test_req);
+	return read_localization(url, requisits, 0, object, type, set_req_object, test_req);
 }
 
 static bool inlist(const char* id, const char** list) {
@@ -142,7 +184,7 @@ static bool inlist(const char* id, const char** list) {
 	return false;
 }
 
-bool bsdata::readl(const char* url, const char* locale_name, parser& errors, const char** prefix, const char** requisits_names, const char** skip_name) {
+bool bsdata::readl(const char* url, const char* locale_name, parser& errors, const char** prefix, const char** requisits_names, const bsdata_strings* tables, const char** skip_name) {
 	char file[260];
 	if(!locale_name || locale_name[0] == 0)
 		return false;
@@ -159,7 +201,7 @@ bool bsdata::readl(const char* url, const char* locale_name, parser& errors, con
 			else
 				errors.check(file, {pb->get(0), pb->fields});
 		} else {
-			if(!readl(file, requisits_names))
+			if(!readl(file, requisits_names, tables))
 				errors.add(ErrorFile1pNotFound, error_url, 0, 0, file);
 		}
 	}

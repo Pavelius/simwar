@@ -9,7 +9,7 @@ static bool initialize_messages(const char* locale_name) {
 	io::file::remove(url_errors);
 	if(true) {
 		bslog errors(url_errors);
-		bsdata::readl("text", locale_name, errors, prefixs, key_requisits, skip_name);
+		bsdata::readl("text", locale_name, errors, prefixs, key_requisits, key_ranges, skip_name);
 	}
 	return !io::file::exist(url_errors);
 }

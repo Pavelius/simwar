@@ -26,6 +26,9 @@ void game_info::clear() {
 }
 
 const char* key_requisits[] = {"name", "nameof", "nameact", "text", 0};
+const char* effect_requisits[] = {"text", 0};
+const bsdata_strings key_ranges[] = {{"effects", {0, 2}, effect_requisits},
+{}};
 static bsdata::requisit required_reqisits[] = {{"name", true},
 {"nameact", true},
 {"order", false, {1, 5}},
@@ -72,7 +75,7 @@ bool game_info::readmap(const char* name) {
 	if(true) {
 		game_log errors(url_errors);
 		bsdata::read(zprint(temp, "maps/%1.map", name), errors);
-		bsdata::readl(zprint(temp, "maps/%1_%2.txt", name, "ru"), key_requisits);
+		bsdata::readl(zprint(temp, "maps/%1_%2.txt", name, "ru"), key_requisits, key_ranges);
 		errors.check(required_reqisits, lenghtof(required_reqisits));
 		if(result) {
 			if(!initializemap())

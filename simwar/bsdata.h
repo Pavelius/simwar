@@ -7,8 +7,13 @@
 #define BSMETA(c) \
 bsdata c##_manager(#c, c##_data, c##_type);
 
-typedef void(*bslocal_proc)(const char* id, const char** requisits, const char** strings, void* object, const bsreq* type);
-typedef bool(*bslocal_test)(const char* id, const char** requisits, void* object, const bsreq* type, int index);
+struct bsdata_strings {
+	const char*		id;
+	int				range[2];
+	const char**	requisits;
+	constexpr explicit operator bool() const { return id != 0; }
+	constexpr bool	isrange() const { return range[0] || range[1]; }
+};
 enum bsparse_error_s {
 	NoParserError,
 	ErrorExpectedIdentifier, ErrorExpectedArrayField, ErrorExpectedSymbol1p, ErrorExpected1p,
@@ -57,9 +62,9 @@ struct bsdata : array {
 	static bsval		findbyid(const char* value);
 	static void			read(const char* url);
 	static void			read(const char* url, parser& errors);
-	static bool			readl(const char* url, const char** requisits);
+	static bool			readl(const char* url, const char** requisits, const bsdata_strings* tables);
 	static bool			readl(const char* url, const char** requisits, void* object, const bsreq* type);
-	static bool			readl(const char* url, const char* locale_name, parser& log, const char** prefixs, const char** requisits, const char** skip_name);
+	static bool			readl(const char* url, const char* locale_name, parser& log, const char** prefixs, const char** requisits, const bsdata_strings* tables, const char** skip_name);
 	static void			write(const char* url, const char** baseids, bool(*comparer)(void* object, const bsreq* type) = 0);
 	static void			write(const char* url, const char* baseid);
 	static void			write(const char* url, const array& source, const bsreq* fields);
