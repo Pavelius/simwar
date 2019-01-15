@@ -8,12 +8,10 @@ int name_info::compare(const void* p1, const void* p2) {
 
 int name_info::fix(stringcreator* sb, const char* name, int value) {
 	if(sb && value) {
-		char temp[260]; temp[0] = 0;
-		if(name) {
-			zcpy(temp, name);
-			szupper(temp, 1);
-		}
-		sb->add("[%3%+1i]\t%2\n", value, temp, (value>=0) ? "+" : "-");
+		auto p = sb->get();
+		if(p > sb->begin() && p[-1] != '\"')
+			sb->add("\n");
+		sb->add("[%3%+1i]\t%+2", value, name, (value >= 0) ? "+" : "-");
 	}
 	return value;
 }

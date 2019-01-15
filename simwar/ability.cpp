@@ -12,6 +12,9 @@ name_info ability_data[] = {{"good"},
 {"support"},
 {"level"},
 //
+{"recruit"},
+{"movement"},
+//
 {"attack"},
 {"defend"},
 {"raid"},

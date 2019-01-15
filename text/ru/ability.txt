@@ -7,6 +7,7 @@ good: доброта|злость
 magic: магия
 nobility: власть|жадность
 loyalty: лояльность
+movement: движение
 level: уровень
 gold: золото
 fame: слава

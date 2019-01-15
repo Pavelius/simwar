@@ -255,7 +255,7 @@ void hero_info::getbrief(stringcreator& sb) const {
 }
 
 void hero_info::neutral_hero_actions() {
-	auto default_patrol = action_info::getaction(0, 1, 0);
+	auto default_patrol = action_info::getaction(Defend);
 	if(!default_patrol)
 		return;
 	province_info* source[province_max];
@@ -325,7 +325,7 @@ void hero_info::make_move() {
 		if(!choose_troops(action, province, a1, troops_move, a3, 0, cost))
 			return;
 	}
-	if(action->movement) {
+	if(action->get(Movement)) {
 		army a1(const_cast<player_info*>(player), province, this, false, false);
 		army a3;
 		a1.fill(player, 0);
@@ -340,7 +340,7 @@ void hero_info::make_move() {
 		if(!tactic)
 			return;
 	}
-	if(action->recruit) {
+	if(action->get(Recruit)) {
 		unit_set a1; a1.fill(player, province, this, action);
 		if(!choose_units(action, province, a1, units_product, cost))
 			return;

@@ -27,6 +27,7 @@ enum ability_s : unsigned char {
 	Good, Nobility,
 	Loyalty, Wounds, Gold, Fame,
 	Economy, Support, Level,
+	Recruit, Movement,
 	Attack, Defend, Raid, Magic, Sword, Shield,
 	LastAbility = Shield
 };
@@ -113,7 +114,6 @@ struct object_info : name_info {
 };
 struct nation_info : name_info {};
 struct action_info : object_info {
-	char						recruit, movement;
 	cost_info					cost;
 	char						cost_per_unit;
 	char						order;
@@ -121,12 +121,12 @@ struct action_info : object_info {
 	//
 	static int					compare(const void* p1, const void* p2);
 	bool						isplaceable() const;
-	static const action_info*	getaction(char attack, char defend, char raid);
+	static const action_info*	getaction(ability_s id);
 	int							getattack() const { return get(Attack); }
 	int							getdefend() const { return get(Defend); }
 	int							getraid() const { return get(Raid); }
 	province_flag_s				getprovince() const;
-	static unsigned				select(action_info** source, unsigned count, char attack = 0, char defend = 0, char raid = 0);
+	static unsigned				select(action_info** source, unsigned count, ability_s id);
 	static void					sort(action_info** source, unsigned count);
 };
 struct season_info : name_info {};
@@ -447,14 +447,9 @@ struct menu_info {
 	static void					choose_block(const char* parent);
 	static void					select(answer_info& ai, const char* parent);
 };
-struct effect_info {
+struct effect_info : object_info {
 	ability_s					test;
-	const char*					text;
-	char						ability[LastAbility + 1];
 	unit_info*					units[4];
-	//
-	int							get(ability_s id) const { return ability[id]; }
-	void						set(ability_s id, char value) { ability[id] = value; }
 };
 struct event_info : name_info {
 	landscape_info*				landscape;
