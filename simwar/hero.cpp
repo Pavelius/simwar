@@ -24,8 +24,8 @@ void hero_info::refresh_heroes() {
 			continue;
 		if(e.wait > 0)
 			e.wait--;
-		if(e.wound > 0)
-			e.wound--;
+		if(e.get(Wounds) > 0)
+			e.set(Wounds, e.get(Wounds) - 1);
 		if(e.wait == 0) {
 			e.tactic = 0;
 			e.province = 0;
@@ -78,10 +78,15 @@ void hero_info::resolve() {
 			player->post(this, province, sb);
 			enemy->post(province->gethero(enemy), province, sb);
 		}
+	} else {
+		if(player) {
+			player->cost.gold += action->get(Gold);
+			player->cost.gold += action->get(Fame);
+		}
 	}
-	province->addsupport(player, action->support);
+	province->addsupport(player, action->get(Support));
 	province->addsupport(player, get(Good));
-	province->addeconomy(action->economy);
+	province->addeconomy(action->get(Economy));
 	setloyalty(getloyalty() + action->get(Good)*get(Good));
 }
 
@@ -165,7 +170,7 @@ const action_info* hero_info::choose_action() const {
 void hero_info::check_leave() {
 	if(!player)
 		return;
-	if(loyalty <= 0) {
+	if(get(Loyalty) <= 0) {
 		string sb;
 		sb.set(this);
 		sb.add(msg.hero_desert, getname());
@@ -177,10 +182,10 @@ void hero_info::check_leave() {
 void hero_info::setplayer(player_info* player) {
 	this->player = player;
 	if(player) {
-		loyalty = game.loyalty_base;
-		loyalty += game.loyalty_noble_modifier*get(Good);
+		setloyalty(game.loyalty_base);
+		ability[Loyalty] += game.loyalty_noble_modifier*get(Good);
 	} else
-		loyalty = 0;
+		ability[Loyalty] = 0;
 }
 
 void hero_info::initialize() {
@@ -245,7 +250,7 @@ void hero_info::getbrief(stringcreator& sb) const {
 			continue;
 		sb.addn(p->getname());
 	}
-	sb.addn("%1: %2i", msg.loyalty, getloyalty());
+	sb.addn("%1: %2i", getname(Loyalty), getloyalty());
 }
 
 void hero_info::neutral_hero_actions() {
@@ -278,9 +283,9 @@ void hero_info::neutral_hero_actions() {
 
 void hero_info::setloyalty(int value) {
 	if(!player)
-		loyalty = 0;
+		ability[Loyalty] = 0;
 	else
-		loyalty = value;
+		ability[Loyalty] = value;
 }
 
 void hero_info::make_move() {

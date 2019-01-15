@@ -123,7 +123,7 @@ struct combatside : public army {
 		}
 		if(general && wounds) {
 			casualtyhead(sb, result);
-			sb.add("%1 (%2i %3)", general->getname(), wounds, numeric(wounds, msg.wound, msg.wounds, msg.wounds_of));
+			sb.add("%1 (%2i %3)", general->getname(), wounds, name_info::getnameint(Wounds, wounds));
 			general->setwound(general->getwound() + wounds * 2);
 		}
 		if(result[0])
@@ -164,17 +164,18 @@ bool province_info::battle(string& sb, player_info* attacker_player, player_info
 			if(attackers.general)
 				attacker_player->cost.fame += imax(0, attackers.general->get(Nobility));
 		}
-		auto trophies = action->trophies;
+		auto trophies = action->get(Gold);
 		if(raid)
-			trophies.gold += getincome(0);
-		trophies.gold += defenders.casualties;
-		if(trophies.gold) {
+			trophies += getincome(0);
+		trophies += defenders.casualties;
+		if(trophies) {
 			if(attacker_player)
 				attacker_player->cost += trophies;
 			if(defender_player)
-				defender_player->cost -= trophies;
-			sb.addn(msg.raid_spoils, trophies.gold);
+				defender_player->cost += -trophies;
+			sb.addn(msg.raid_spoils, trophies);
 		}
+		attacker_player->cost.fame += action->get(Fame);
 		defenders.addloyalty(-1);
 	} else {
 		retreat(attacker_player);

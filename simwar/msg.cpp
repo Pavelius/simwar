@@ -14,9 +14,6 @@ bsreq msg_type[] = {
 	BSREQ(msg_info, moved, text_type),
 	BSREQ(msg_info, raid_spoils, text_type),
 	//
-	BSREQ(msg_info, loyalty, text_type),
-	BSREQ(msg_info, support, text_type),
-	//
 	BSREQ(msg_info, income, text_type),
 	BSREQ(msg_info, income_province, text_type),
 	BSREQ(msg_info, income_units, text_type),
@@ -52,10 +49,6 @@ bsreq msg_type[] = {
 	BSREQ(msg_info, cancel, text_type),
 	BSREQ(msg_info, yes, text_type),
 	BSREQ(msg_info, no, text_type),
-	//
-	BSREQ(msg_info, wound, text_type),
-	BSREQ(msg_info, wounds, text_type),
-	BSREQ(msg_info, wounds_of, text_type),
 	//
 	BSREQ(msg_info, word_in, text_type),
 	BSREQ(msg_info, troops_desert, text_type),	

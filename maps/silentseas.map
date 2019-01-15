@@ -5,8 +5,8 @@ nation orcs
 nation northerners
 nation southerners
 
-action raiding order(2) raid(1) support(-3) trophies(2) cost_per_unit(1)
-action attacking order(4) attack(1) support(-6) cost(5) cost_per_unit(1)
+action raiding order(2) raid(1) support(-3) gold(2) cost_per_unit(1)
+action attacking order(4) attack(1) support(-6) cost(5) fame(1) cost_per_unit(1)
 action defending order(5) defend(1) cost(1)
 action recruit order(3) recruit(1)
 action support order(3) support(5) cost(6)

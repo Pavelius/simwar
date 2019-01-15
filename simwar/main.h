@@ -25,6 +25,8 @@ enum gender_s : unsigned char {
 };
 enum ability_s : unsigned char {
 	Good, Nobility,
+	Loyalty, Wounds, Gold, Fame,
+	Economy, Support, Level,
 	Attack, Defend, Raid, Magic, Sword, Shield,
 	LastAbility = Shield
 };
@@ -96,19 +98,22 @@ struct name_info {
 	int							compare(const void* p1, const void* p2);
 	const char*					getid() const { return id; }
 	const char*					getname() const { return name; }
+	static const char*			getname(ability_s id, int value = 0);
+	static const char*			getnameint(ability_s id, int value);
 	const char*					getnameof() const { return nameof; }
 	static int					getnum(const void* object, const bsreq* type, const char* id);
 	static int					fix(stringcreator* ti, const char* name, int value);
 	int							fix(stringcreator* ti, int value) const { return fix(ti, name, value); }
 };
-struct character_info : name_info {
+struct object_info : name_info {
 	char						ability[LastAbility + 1];
 	int							get(ability_s id) const { return ability[id]; }
+	void						set(ability_s id, char value) { ability[id] = value; }
 };
 struct nation_info : name_info {};
-struct action_info : character_info {
-	char						recruit, support, economy, movement;
-	cost_info					cost, trophies;
+struct action_info : object_info {
+	char						recruit, movement;
+	cost_info					cost;
 	char						cost_per_unit;
 	char						order;
 	char						wait;
@@ -127,11 +132,11 @@ struct season_info : name_info {};
 struct calendar_info : name_info {
 	const season_info*			season;
 };
-struct landscape_info : character_info {
+struct landscape_info : object_info {
 	char						income;
 	int							getincome(stringcreator* ti) const;
 };
-struct province_info : name_info {
+struct province_info : object_info {
 	void						add(const unit_info* unit);
 	void						addeconomy(int value) { seteconomy(geteconomy() + value); }
 	void						addsupport(const player_info* player, int value) { setsupport(player, getsupport(player) + value); }
@@ -142,7 +147,7 @@ struct province_info : name_info {
 	static void					change_support();
 	void						createwave();
 	int							getdefend() const;
-	int							geteconomy() const { return economy; }
+	int							geteconomy() const { return get(Economy); }
 	hero_info*					gethero(const player_info* player) const;
 	player_info*				getplayer() const { return player; }
 	point						getposition() const { return position; }
@@ -150,7 +155,7 @@ struct province_info : name_info {
 	int							getindex() const;
 	void						getinfo(stringcreator& sb, bool show_landscape, const army* support_units = 0) const;
 	landscape_info*				getlandscape() const { return landscape; }
-	int							getlevel() const { return level; }
+	int							getlevel() const { return get(Level); }
 	nation_info*				getnation() const { return nation; }
 	province_info*				getneighbors(const player_info* player) const;
 	int							getmovecost() const;
@@ -171,13 +176,11 @@ struct province_info : name_info {
 	void						setplayer(player_info* value) { player = value; }
 	void						setsupport(const player_info* player, int value);
 private:
-	char						level;
 	player_info*				player;
 	landscape_info*				landscape;
 	nation_info*				nation;
 	point						position;
 	int							support[player_max];
-	int							economy;
 	province_info*				neighbors[8];
 };
 struct report_info {
@@ -197,8 +200,8 @@ private:
 	const player_info*			player;
 	const province_info*		province;
 };
-struct trait_info : character_info {};
-struct tactic_info : character_info {};
+struct trait_info : object_info {};
+struct tactic_info : object_info {};
 struct army : adat<troop_info*, 32> {
 	hero_info*					general;
 	player_info*				player;
@@ -218,7 +221,7 @@ private:
 	int							get(ability_s id) const;
 	int							getcasualty(ability_s id) const;
 };
-struct answer_info {
+struct answer_info : string {
 	struct element {
 		int						param;
 		const char*				text;
@@ -226,18 +229,14 @@ struct answer_info {
 	};
 	typedef void(*tips_type)(stringcreator& sb, const element& e);
 	adat<element, 8>			elements;
-	answer_info() { p = buffer; buffer[0] = 0; }
 	constexpr explicit operator bool() const { return elements.count != 0; }
 	void						add(int param, const char* format, ...);
 	void						addv(int param, const char* format, const char* format_param);
 	int							choose(bool cancel_button = false) const;
 	int							choose(const hero_info* hero, bool cancel_button = true, answer_info::tips_type getinfo = 0) const;
 	void						sort();
-private:
-	char*						p;
-	char						buffer[8196];
 };
-struct hero_info : character_info {
+struct hero_info : object_info {
 	cost_info					pay;
 	//
 	void						cancelaction();
@@ -256,7 +255,7 @@ struct hero_info : character_info {
 	gender_s					getgender() const { return gender; }
 	int							getdefend() const { return get(Defend); }
 	int							getincome() const;
-	int							getloyalty() const { return loyalty; }
+	int							getloyalty() const { return get(Loyalty); }
 	const landscape_info*		getorigin() const { return origin; }
 	player_info*				getplayer() const { return player; }
 	province_info*				getprovince() const { return province; }
@@ -266,10 +265,10 @@ struct hero_info : character_info {
 	int							getsword() const { return get(Sword); }
 	const tactic_info*			gettactic() const { return tactic; }
 	int							getwait() const { return wait; }
-	int							getwound() const { return wound; }
+	int							getwound() const { return get(Wounds); }
 	static void					initialize();
 	bool						isallow(const action_info* action) const;
-	bool						isready() const { return (wait == 0) && (wound == 0); }
+	bool						isready() const { return (wait == 0) && (get(Wounds) == 0); }
 	void						make_move();
 	static bsreq				metadata[];
 	static void					neutral_hero_actions();
@@ -285,10 +284,10 @@ struct hero_info : character_info {
 	void						setprovince(province_info* value) { province = value; }
 	void						settactic(const tactic_info* value) { tactic = value; }
 	void						setwait(int v) { wait = v; }
-	void						setwound(int v) { wound = v; }
+	void						setwound(int v) { set(Wounds, v); }
 private:
-	char						wait, wound, loyalty;
-	char						level, experience;
+	char						wait;
+	char						experience;
 	gender_s					gender;
 	const action_info*			action;
 	const char*					avatar;
@@ -299,11 +298,10 @@ private:
 	const landscape_info*		origin;
 	trait_info*					traits[2];
 };
-struct unit_info : character_info {
+struct unit_info : object_info {
 	cost_info					cost;
 	nation_info*				nation;
 	char						recruit_count, recruit_time;
-	char						level;
 	char						income;
 	char						mourning;
 	landscape_info*				landscape[4];

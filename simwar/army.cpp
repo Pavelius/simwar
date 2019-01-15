@@ -73,13 +73,13 @@ int army::get(ability_s id, stringcreator* sb) const {
 			r += province->fix(sb, province->getdefend());
 			if(game.support_defend) {
 				auto value = province->getsupport(player) / game.support_defend;
-				char temp[256]; zprint(temp, "%1 %2", msg.support, province->getname());
+				char temp[256]; zprint(temp, "%1 %2", name_info::getname(Support), province->getname());
 				r += name_info::fix(sb, temp, value);
 			}
 		} else {
 			if(game.support_attack) {
 				auto value = province->getsupport(player) / game.support_attack;
-				char temp[256]; zprint(temp, "%1 %2", msg.support, province->getname());
+				char temp[256]; zprint(temp, "%1 %2", name_info::getname(Support), province->getname());
 				r += name_info::fix(sb, temp, value);
 			}
 		}

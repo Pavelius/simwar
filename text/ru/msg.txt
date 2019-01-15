@@ -10,18 +10,6 @@ tactic_changed: В последний момент %1 решил%а поменя
 raid_spoils: Добыча составила [%1i] золотых.
 battle_magic: Боевая магия.
 
-attack: Атака
-defend: Защита
-raid: Рейд
-sword: Меч
-shield: Щит
-diplomacy: Дипломатия
-loyalty: Лояльность
-good: Доброта|Злость
-nobility: Власть|Жадность
-will: Воля
-support: Поддержка
-
 income: Доход
 income_heroes: Расходы на героев
 income_province: Доход от провинций
@@ -62,7 +50,5 @@ yes: Да
 no: Нет
 
 word_in: в
-
-wound: рана|раны|ран
 
 troops_desert: Учитывая ваше плачевное финансовое положение ваши войска потихоньку дезертируют от вас. [Дезертиры]

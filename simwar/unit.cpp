@@ -8,7 +8,7 @@ bsreq unit_type[] = {
 	BSREQ(unit_info, ability, number_type),
 	BSREQ(unit_info, cost, cost_type),
 	BSREQ(unit_info, income, number_type),
-	BSREQ(unit_info, level, number_type),
+	BSREQ(unit_info, ability, number_type),
 	BSREQ(unit_info, nation, nation_type),
 	BSREQ(unit_info, mourning, number_type),
 	BSREQ(unit_info, recruit_count, number_type),
@@ -33,7 +33,7 @@ void unit_set::fill(const player_info* player, const province_info* province, co
 			continue;
 		if(e.cost > player_cost)
 			continue;
-		if(e.level > level)
+		if(e.get(Level) > level)
 			continue;
 		if(e.nation && e.nation != nation)
 			continue;
@@ -61,7 +61,7 @@ const unit_info* unit_info::getfirst(const nation_info* nation, const landscape_
 	for(auto& e : unit_data) {
 		if(!e)
 			continue;
-		if(e.level != level)
+		if(e.get(Level) != level)
 			continue;
 		if(e.nation != nation)
 			continue;

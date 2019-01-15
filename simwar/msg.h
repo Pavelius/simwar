@@ -11,9 +11,6 @@ struct msg_info {
 	const char* lead;
 	const char* moved;
 	const char* raid_spoils;
-	const char* diplomacy;
-	const char* loyalty;
-	const char* support;
 	const char* total_strenght, *total;
 	const char* predict_fail, *predict_partial, *predict_success;
 	const char*	hero_wait;
@@ -43,8 +40,5 @@ struct msg_info {
 	const char* cancel;
 	const char* yes;
 	const char* no;
-	const char* wound;
-	const char* wounds;
-	const char* wounds_of;
 	const char* word_in;
 };

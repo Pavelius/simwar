@@ -13,16 +13,14 @@ void answer_info::sort() {
 void answer_info::addv(int param, const char* format, const char* format_param) {
 	if(elements.getcount() >= elements.getmaximum())
 		return;
-	if(p >= zendof(buffer))
+	if(get() >= end())
 		return;
-	if(p > buffer)
-		*p++ = 0;
+	if(get() > begin())
+		addsz();
 	auto pe = elements.add();
 	pe->param = param;
-	pe->text = p;
-	stringcreator sc(p, zendof(buffer));
-	sc.add(format, format_param);
-	p = sc.get();
+	pe->text = get();
+	string::addv(format, format_param);
 }
 
 void answer_info::add(int param, const char* format, ...) {

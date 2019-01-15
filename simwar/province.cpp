@@ -10,7 +10,7 @@ bsreq province_info::metadata[] = {
 	BSREQ(province_info, text, text_type),
 	BSREQ(province_info, player, player_info::metadata),
 	BSREQ(province_info, landscape, landscape_type),
-	BSREQ(province_info, level, number_type),
+	BSREQ(province_info, ability, number_type),
 	BSREQ(province_info, position, point_type),
 	BSREQ(province_info, neighbors, metadata),
 	BSREQ(province_info, nation, nation_type),
@@ -32,14 +32,14 @@ province_flag_s province_info::getstatus(const player_info* player) const {
 }
 
 int province_info::getdefend() const {
-	return landscape->get(Defend) + level;
+	return landscape->get(Defend) + get(Level);
 }
 
 int province_info::getincome(stringcreator* ti) const {
 	auto result = 0;
 	if(landscape)
 		result += landscape->getincome(ti);
-	result += level * game.income_per_level;
+	result += get(Level) * game.income_per_level;
 	result += geteconomy();
 	return result;
 }
@@ -264,11 +264,11 @@ void province_info::addsupportex(const player_info* player, int value, int minim
 }
 
 void province_info::seteconomy(int value) {
-	economy += value;
-	if(economy > game.economy_maximum)
-		economy = game.economy_maximum;
-	if(economy < game.economy_minimum)
-		economy = game.economy_minimum;
+	ability[Economy] += value;
+	if(ability[Economy] > game.economy_maximum)
+		ability[Economy] = game.economy_maximum;
+	if(ability[Economy] < game.economy_minimum)
+		ability[Economy] = game.economy_minimum;
 }
 
 province_info* province_info::getneighbors(const player_info* player) const {
@@ -329,7 +329,7 @@ void province_info::initialize() {
 			army a1; a1.fill(0, &e);
 			if(a1.getcount())
 				continue;
-			for(auto i = 0; i <= e.level; i++) {
+			for(auto i = 0; i <= e.getlevel(); i++) {
 				auto pu = unit_info::getfirst(e.nation, e.landscape, 0);
 				if(!pu)
 					continue;

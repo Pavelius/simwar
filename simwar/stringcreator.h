@@ -12,6 +12,7 @@ struct stringcreator {
 	static char*		addint(char* result, const char* result_maximum, int value, int precision, const int radix);
 	void				addn(const char* format, ...);
 	void				adds(const char* format, ...);
+	void				addsz() { if(p < pe) *p++ = 0; }
 	void				addv(const char* format, const char* format_param);
 	void				addx(const char* separator, const char* format, const char* format_param);
 	static char*		adduint(char* result, const char* result_maximum, unsigned value, int precision, const int radix);
