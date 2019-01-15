@@ -9,7 +9,6 @@ bsreq action_type[] = {
 	BSREQ(action_info, order, number_type),
 	BSREQ(action_info, cost, cost_type),
 	BSREQ(action_info, cost_per_unit, number_type),
-	BSREQ(action_info, wait, number_type),
 {}};
 adat<action_info, 32> action_data; BSMETA(action);
 

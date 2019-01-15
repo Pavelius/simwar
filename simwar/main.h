@@ -25,7 +25,8 @@ enum gender_s : unsigned char {
 };
 enum ability_s : unsigned char {
 	Good, Nobility,
-	Loyalty, Wounds, Gold, Fame,
+	Loyalty, Wounds, Wait,
+	Gold, Fame,
 	Economy, Support, Level,
 	Recruit, Movement,
 	Attack, Defend, Raid, Magic, Sword, Shield,
@@ -117,7 +118,6 @@ struct action_info : object_info {
 	cost_info					cost;
 	char						cost_per_unit;
 	char						order;
-	char						wait;
 	//
 	static int					compare(const void* p1, const void* p2);
 	bool						isplaceable() const;
@@ -265,11 +265,11 @@ struct hero_info : object_info {
 	void						getstate(stringcreator& sb) const;
 	int							getsword() const { return get(Sword); }
 	const tactic_info*			gettactic() const { return tactic; }
-	int							getwait() const { return wait; }
+	int							getwait() const { return get(Wait); }
 	int							getwound() const { return get(Wounds); }
 	static void					initialize();
 	bool						isallow(const action_info* action) const;
-	bool						isready() const { return (wait == 0) && (get(Wounds) == 0); }
+	bool						isready() const { return (get(Wait) == 0) && (get(Wounds) == 0); }
 	void						make_move();
 	static bsreq				metadata[];
 	static void					neutral_hero_actions();
@@ -284,10 +284,9 @@ struct hero_info : object_info {
 	void						setplayer(player_info* player);
 	void						setprovince(province_info* value) { province = value; }
 	void						settactic(const tactic_info* value) { tactic = value; }
-	void						setwait(int v) { wait = v; }
+	void						setwait(int v) { set(Wait, v); }
 	void						setwound(int v) { set(Wounds, v); }
 private:
-	char						wait;
 	char						experience;
 	gender_s					gender;
 	const action_info*			action;

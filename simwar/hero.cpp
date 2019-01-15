@@ -14,7 +14,6 @@ bsreq hero_info::metadata[] = {
 	BSREQ(hero_info, traits, trait_type),
 	BSREQ(hero_info, player, player_info::metadata),
 	BSREQ(hero_info, province, province_info::metadata),
-	BSREQ(hero_info, wait, number_type),
 {}};
 adat<hero_info, hero_max> hero_data;
 bsdata hero_manager("hero", hero_data, hero_info::metadata);
@@ -23,11 +22,11 @@ void hero_info::refresh_heroes() {
 	for(auto& e : hero_data) {
 		if(!e)
 			continue;
-		if(e.wait > 0)
-			e.wait--;
+		if(e.get(Wait) > 0)
+			e.set(Wait, e.get(Wait) - 1);
 		if(e.get(Wounds) > 0)
 			e.set(Wounds, e.get(Wounds) - 1);
-		if(e.wait == 0) {
+		if(e.get(Wait) == 0) {
 			e.tactic = 0;
 			e.province = 0;
 			e.action = game.default_action;

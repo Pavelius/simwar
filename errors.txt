@@ -1,0 +1,2 @@
+﻿In file localization you need add next lines
+wait:

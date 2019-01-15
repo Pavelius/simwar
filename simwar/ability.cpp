@@ -5,6 +5,8 @@ name_info ability_data[] = {{"good"},
 //
 {"loyalty"},
 {"wounds"},
+{"wait"},
+//
 {"gold"},
 {"fame"},
 //
