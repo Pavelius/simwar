@@ -90,6 +90,22 @@ void hero_info::resolve() {
 	setloyalty(getloyalty() + action->get(Good)*get(Good));
 }
 
+unsigned hero_info::select(hero_info** source, unsigned maximum_count) {
+	auto ps = source;
+	auto pe = ps + maximum_count;
+	for(auto& e : hero_data) {
+		if(!e)
+			continue;
+		if(!e.isready())
+			continue;
+		if(!e.getplayer())
+			continue;
+		if(ps < pe)
+			*ps++ = &e;
+	}
+	return ps - source;
+}
+
 unsigned hero_info::select(hero_info** source, unsigned maximum_count, const player_info* player) {
 	auto ps = source;
 	auto pe = ps + maximum_count;

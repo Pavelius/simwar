@@ -163,6 +163,7 @@
     <ClCompile Include="menu.cpp" />
     <ClCompile Include="msg.cpp" />
     <ClCompile Include="nation.cpp" />
+    <ClCompile Include="object.cpp" />
     <ClCompile Include="player.cpp" />
     <ClCompile Include="player_ai.cpp" />
     <ClCompile Include="png.cpp" />

@@ -111,6 +111,10 @@ struct name_info {
 struct object_info : name_info {
 	char						ability[LastAbility + 1];
 	int							get(ability_s id) const { return ability[id]; }
+	static bool					ismatch(int v1, int v2);
+	bool						isvalid(const hero_info& e) const;
+	bool						isvalid(const player_info& e) const;
+	bool						isvalid(const province_info& e) const;
 	void						set(ability_s id, char value) { ability[id] = value; }
 };
 struct nation_info : name_info {};
@@ -169,6 +173,7 @@ struct province_info : object_info {
 	static unsigned				remove_mode(aref<province_info*> source, const player_info* player, province_flag_s state);
 	void						render_neighbors(const rect& rc) const;
 	void						retreat(const player_info* player);
+	static unsigned				select(province_info** source, unsigned maximum);
 	static unsigned				select(province_info** source, unsigned maximum, const player_info* player);
 	static unsigned				select_friendly(province_info** source, unsigned maximum, const player_info* player);
 	void						seteconomy(int value);
@@ -277,6 +282,7 @@ struct hero_info : object_info {
 	unsigned					remove_this(hero_info** source, unsigned count) const;
 	static unsigned				remove_hired(hero_info** source, unsigned count);
 	void						resolve();
+	static unsigned				select(hero_info** source, unsigned maximum_count);
 	static unsigned				select(hero_info** source, unsigned maximum_count, const player_info* player);
 	void						setaction(const action_info* value) { action = value; }
 	void						setaction(const action_info* action, province_info* province, const tactic_info* tactic, const cost_info& cost, const army& logistic, const unit_set& production);
@@ -378,6 +384,7 @@ struct player_info : name_info {
 	static bsreq				metadata[];
 	static void					playgame();
 	void						post(const hero_info* hero, const province_info* province, const char* text) const;
+	static void					random_events();
 	unsigned					remove_restricted(action_info** source, unsigned maximum) const;
 	static void					resolve_actions();
 	void						show_reports() const;
@@ -449,9 +456,17 @@ struct effect_info : object_info {
 	ability_s					test;
 	unit_info*					units[4];
 };
-struct event_info : name_info {
+struct event_info : object_info {
 	landscape_info*				landscape;
 	effect_info					effects[3]; // 0 - Провал, 1 и 2 - выигрыш
+	char						count;
+	static const event_info*	getnext();
+	static void					initialize();
+	bool						isvalid(const province_info& e) const;
+	bool						isvalid(const hero_info& e) const;
+	void						play(province_info* province, hero_info* hero) const;
+	static void					random(province_info* province, hero_info* hero);
+	unsigned					select(province_info** source, unsigned maximum) const;
 };
 extern name_info				ability_data[];
 extern adat<action_info, 32>	action_data;

@@ -81,6 +81,18 @@ unsigned province_info::select_friendly(province_info** source, unsigned maximum
 	return ps - source;
 }
 
+unsigned province_info::select(province_info** source, unsigned maximum) {
+	auto ps = source;
+	auto pe = ps + maximum;
+	for(auto& e : province_data) {
+		if(!e)
+			continue;
+		if(ps < pe)
+			*ps++ = &e;
+	}
+	return ps - source;
+}
+
 unsigned province_info::select(province_info** source, unsigned maximum, const player_info* player) {
 	auto count = select_friendly(source, maximum, player);
 	if(!count)

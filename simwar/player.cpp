@@ -325,6 +325,36 @@ void player_info::create_order() {
 	qsort(players.data, players.count, sizeof(players[0]), compare_fame);
 }
 
+static hero_info* getmatched(aref<hero_info*> source, const player_info* player) {
+	for(auto p : source) {
+		if(p->getplayer() == player)
+			return p;
+	}
+	return 0;
+}
+
+void player_info::random_events() {
+	adat<province_info*> provinces;
+	adat<hero_info*, hero_max> heroes;
+	provinces.count = province_info::select(provinces.data, provinces.getmaximum());
+	zshuffle(provinces.data, provinces.count);
+	heroes.count = hero_info::select(heroes.data, heroes.getmaximum());
+	zshuffle(heroes.data, heroes.count);
+	unsigned province_index = 0;
+	for(int i = 0; i < 4; i++) {
+		if(province_index >= provinces.count)
+			province_index = 0;
+		auto province = provinces.data[province_index++];
+		auto player = province->getplayer();
+		if(!player)
+			continue;
+		auto hero = getmatched(heroes, player);
+		event_info::random(province, hero);
+		if(hero)
+			heroes.remove(heroes.indexof(hero));
+	}
+}
+
 void player_info::desert_units() {
 	if(!game.desert_base)
 		return;
@@ -375,6 +405,7 @@ void player_info::playgame() {
 		neutrals_move();
 		create_order();
 		resolve_actions();
+		random_events();
 		desert_units();
 		gain_profit();
 		check_heroes();
