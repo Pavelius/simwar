@@ -42,7 +42,10 @@ const char* stringcreator::readvariable(const char* p) {
 char* stringcreator::adduint(char* dst, const char* result_max, unsigned value, int precision, const int radix) {
 	char temp[32]; int i = 0;
 	if(!value) {
-		zcpy(dst, "0");
+		if(dst<result_max)
+			*dst++ = '0';
+		if(dst<result_max)
+			*dst = 0;
 		return dst;
 	}
 	if(!result_max)
@@ -112,18 +115,17 @@ const char* stringcreator::readformat(const char* src, const char* vl) {
 			p = adduint(p, pe, (unsigned)(((int*)vl)[pn - 1]), pnp, 16);
 		} else {
 			if(((char**)vl)[pn - 1]) {
-				auto count = pe - p;
-				auto count_str = zlen(((char**)vl)[pn - 1]);
-				if(count_str < count)
-					count = count_str;
-				memcpy(p, ((char**)vl)[pn - 1], count);
-				p[count] = 0;
+				auto p0 = p;
+				auto p1 = ((char**)vl)[pn - 1];
+				while(*p1 && p < pe)
+					*p++ = *p1++;
+				if(p < pe)
+					*p = 0;
 				switch(prefix) {
-				case '-': szlower(p, 1); break;
-				case '+': szupper(p, 1); break;
+				case '-': szlower(p0, 1); break;
+				case '+': szupper(p0, 1); break;
 				default: break;
 				}
-				p += count;
 			}
 		}
 	} else

@@ -11,4 +11,5 @@ movement: движение
 level: уровень
 gold: золото
 fame: слава
+wait: ожидание
 wounds: рана|раны|ран.

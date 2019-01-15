@@ -61,7 +61,7 @@ void hero_info::setaction(const action_info* action, province_info* province, co
 	for(auto p : logistic)
 		p->setmove(province);
 	for(auto p : production)
-		province->build(p, p->recruit_time);
+		province->build(p, p->get(Wait));
 }
 
 void hero_info::resolve() {

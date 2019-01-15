@@ -11,8 +11,6 @@ bsreq unit_type[] = {
 	BSREQ(unit_info, ability, number_type),
 	BSREQ(unit_info, nation, nation_type),
 	BSREQ(unit_info, mourning, number_type),
-	BSREQ(unit_info, recruit_count, number_type),
-	BSREQ(unit_info, recruit_time, number_type),
 	BSREQ(unit_info, landscape, landscape_type),
 {}};
 adat<unit_info, 64> unit_data;
@@ -39,7 +37,7 @@ void unit_set::fill(const player_info* player, const province_info* province, co
 			continue;
 		if(!e.is(landscape))
 			continue;
-		auto count = e.recruit_count;
+		auto count = e.get(Recruit);
 		if(!count)
 			count = 1;
 		for(int i=0; i<count; i++)

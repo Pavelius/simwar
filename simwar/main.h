@@ -301,7 +301,6 @@ private:
 struct unit_info : object_info {
 	cost_info					cost;
 	nation_info*				nation;
-	char						recruit_count, recruit_time;
 	char						income;
 	char						mourning;
 	landscape_info*				landscape[4];
