@@ -1067,9 +1067,9 @@ game_header* game_header::choose(game_header* source, unsigned count) {
 		rectf({0, 0, mx, my}, colors::gray);
 		auto x1 = (getwidth() - width) / 2;
 		auto y1 = (getheight() - height) / 2;
-		auto w1 = 200;
+		auto w1 = 250;
 		window({x1, y1, x1 + width, y1 + height}, false, false);
-		u1.view({x1 + w1 + gui.padding, y1, x1 + width, y1 + height});
+		u1.view({x1 + w1 + gui.border, y1, x1 + width, y1 + height});
 		y = y1;
 		x = x1;
 		auto current = u1.getcurrent();
