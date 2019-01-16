@@ -80,6 +80,7 @@ struct string : stringcreator {
 	void						addplayer();
 	void						addplayerincome();
 	void						addstrenght();
+	static bsreq				metadata[];
 	void						set(const hero_info* value);
 	void						set(const player_info* value);
 	void						set(const cost_info& value);
@@ -88,6 +89,7 @@ private:
 	const struct army*			army;
 	const player_info*			player;
 	const hero_info*			hero;
+	const province_info*		province;
 	char						buffer[8192];
 };
 struct name_info {

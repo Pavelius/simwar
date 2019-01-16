@@ -1,14 +1,14 @@
 #include "main.h"
 
-struct string_id_gender {
-	const char*		she;
-	const char*		he;
+struct string_id {
+	const char*		id;
+	const char*		url;
 };
 struct string_id_proc {
 	const char*		id;
 	void			(string::*proc)();
 };
-static string_id_gender change_gender[] = {{"а", ""},
+static string_id change_gender[] = {{"а", ""},
 {"ла", ""},
 {"ась", "ся"},
 {"ая", "ый"},
@@ -16,13 +16,25 @@ static string_id_gender change_gender[] = {{"а", ""},
 {"нее", "него"},
 {"она", "он"},
 {"ее", "его"},
+{}};
+static string_id change_properties[] ={{"герой", "hero.name"},
+{"героя", "hero.nameof"},
+{"hero", "hero.name"},
+{"province", "province.name"},
+{"player", "player.name"},
 };
 static string_id_proc change_proc[] = {{"cost", &string::addcost},
 {"strenght", &string::addstrenght},
 {"player_income", &string::addplayerincome},
 };
+bsreq string::metadata[] = {
+	BSREQ(string, hero, hero_info::metadata),
+	BSREQ(string, player, player_info::metadata),
+	BSREQ(string, province, province_info::metadata),
+{}};
 
-string::string() : stringcreator(buffer, buffer + sizeof(buffer) / sizeof(buffer[0])), army(0) {}
+string::string() : stringcreator(buffer, buffer + sizeof(buffer) / sizeof(buffer[0])),
+army(0), hero(0), player(0), province(0) {}
 
 void string::addcost() {
 	add(":gold:%1i", cost.gold);
@@ -31,11 +43,6 @@ void string::addcost() {
 void string::addstrenght() {
 	if(army)
 		army->getstrenght(this);
-}
-
-void string::addplayer() {
-	if(player)
-		add("%+1", player->getname());
 }
 
 void string::addplayerincome() {
@@ -48,11 +55,25 @@ void string::addidentifier(const char* identifier) {
 	if(hero)
 		gender = hero->getgender();
 	for(auto& e : change_gender) {
-		if(strcmp(e.she, identifier) == 0) {
+		if(strcmp(e.id, identifier) == 0) {
 			if(gender == Female)
-				add(e.she);
+				add(e.id);
 			else
-				add(e.he);
+				add(e.url);
+			return;
+		}
+	}
+	for(auto& e : change_properties) {
+		if(strcmp(e.id, identifier) == 0) {
+			bsval bv = {this, string::metadata};
+			bv.get(e.url);
+			if(!bv)
+				stringcreator::addidentifier(e.url);
+			if(bv.type->type == text_type) {
+				auto p = (const char*)bv.get();
+				if(p)
+					add(p);
+			}
 			return;
 		}
 	}
@@ -62,7 +83,7 @@ void string::addidentifier(const char* identifier) {
 			return;
 		}
 	}
-	addidentifier(identifier);
+	stringcreator::addidentifier(identifier);
 }
 
 void string::set(const hero_info* value) {
