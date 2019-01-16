@@ -97,6 +97,6 @@ event capture_incasator
  effects test(sword) gold(10)
 
 event barbarian_invasion
- effects attack(1) units(barbarians, barbarians, barbarians)
+ effects attack(1) units(berserks, barbarians, barbarians)
  effects test(raid) wounds(1)
  effects test(nobility) recruit(1) units(barbarians)

@@ -216,6 +216,20 @@ void province_info::add(const unit_info* unit) {
 	troop_info::add(this, unit);
 }
 
+troop_info* province_info::addinvader(unit_info* type, player_info* player) {
+	auto p = troop_info::add(this, type);
+	p->setmove(this);
+	return p;
+}
+
+void province_info::addinvader(unit_info** units, unsigned count, player_info* player) {
+	for(unsigned i = 0; i < count; i++) {
+		if(!units[i])
+			continue;
+		addinvader(units[i], player);
+	}
+}
+
 void province_info::change_support() {
 	auto support_maximum = game.support_maximum;
 	auto support_minimum = game.support_minimum;

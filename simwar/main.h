@@ -147,6 +147,8 @@ struct landscape_info : object_info {
 struct province_info : object_info {
 	void						add(const unit_info* unit);
 	void						addeconomy(int value) { seteconomy(geteconomy() + value); }
+	troop_info*					addinvader(unit_info* type, player_info* player);
+	void						addinvader(unit_info** units, unsigned count, player_info* player);
 	void						addsupport(const player_info* player, int value) { setsupport(player, getsupport(player) + value); }
 	void						addsupportex(const player_info* player, int value, int minimal_value, int maximal_value);
 	void						arrival(const player_info* player);
@@ -334,7 +336,7 @@ struct troop_info {
 	province_info*				getmove() const { return move; }
 	const char*					getname() const { return type->name; }
 	const char*					getnameof() const { return type->nameof; }
-	player_info*				getplayer() const { return province->getplayer(); }
+	player_info*				getplayer() const;
 	static void					getpresent(stringcreator& sb, troop_info** source, unsigned count, const char* addition_text);
 	province_info*				getprovince() const { return province; }
 	province_info*				getprovince(const player_info* player) const;
@@ -462,9 +464,7 @@ struct effect_info : object_info {
 	void operator+=(const effect_info& e);
 	ability_s					test;
 	unit_info*					units[4];
-	void						apply(hero_info* hero) const;
-	void						apply(player_info* player) const;
-	void						apply(province_info* province) const;
+	void						apply(string& sb, player_info* player, province_info* province, hero_info* hero) const;
 	bool						isvalid(const hero_info& e) const;
 };
 struct event_info : object_info {

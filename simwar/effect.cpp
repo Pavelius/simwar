@@ -26,31 +26,29 @@ void effect_info::operator+=(const effect_info& e) {
 	}
 }
 
-void effect_info::apply(player_info* player) const {
-	if(!player)
-		return;
-	player->cost.gold += get(Gold);
-	player->cost.fame += get(Fame);
-}
-
-void effect_info::apply(province_info* province) const {
-	if(!province)
-		return;
-	province->addeconomy(get(Gold));
-	province->addsupport(province->getplayer(), get(Gold));
-	if(get(Recruit)) {
-		for(auto u : units) {
-			if(!u)
-				break;
-			province->add(u);
+void effect_info::apply(string& sb, player_info* player, province_info* province, hero_info* hero) const {
+	if(player) {
+		player->cost.gold += get(Gold);
+		player->cost.fame += get(Fame);
+	}
+	if(province) {
+		province->addeconomy(get(Gold));
+		province->addsupport(province->getplayer(), get(Gold));
+		if(get(Attack)) {
+			province->addinvader((unit_info**)units, sizeof(units) / sizeof(units[0]), 0);
+			province->battle(sb, 0, player, 0, false);
+		}
+		if(get(Recruit)) {
+			for(auto u : units) {
+				if(!u)
+					break;
+				province->add(u);
+			}
 		}
 	}
-}
-
-void effect_info::apply(hero_info* hero) const {
-	if(!hero)
-		return;
-	hero->setwound(hero->get(Wounds) + get(Wounds));
-	hero->setwait(hero->get(Wait) + get(Wait));
-	hero->setloyalty(hero->get(Loyalty) + get(Loyalty));
+	if(hero) {
+		hero->setwound(hero->get(Wounds) + get(Wounds));
+		hero->setwait(hero->get(Wait) + get(Wait));
+		hero->setloyalty(hero->get(Loyalty) + get(Loyalty));
+	}
 }

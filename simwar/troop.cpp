@@ -9,6 +9,12 @@ bsreq troop_info::metadata[] = {
 adat<troop_info, 256> troop_data;
 bsdata troop_manager("troop", troop_data, troop_info::metadata);
 
+player_info* troop_info::getplayer() const {
+	if(!province)
+		return 0;
+	return province->getplayer();
+}
+
 int troop_info::compare(const void* p1, const void* p2) {
 	auto e1 = *((troop_info**)p1);
 	auto e2 = *((troop_info**)p2);
