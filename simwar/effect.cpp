@@ -26,11 +26,18 @@ void effect_info::operator+=(const effect_info& e) {
 	}
 }
 
-void effect_info::apply(player_info* player) {
+void effect_info::apply(player_info* player) const {
 	player->cost.gold += get(Gold);
+	player->cost.fame += get(Fame);
 }
 
-void effect_info::apply(hero_info* hero) {
+void effect_info::apply(province_info* province) const {
+	province->addeconomy(get(Gold));
+	province->addsupport(province->getplayer(), get(Gold));
+}
+
+void effect_info::apply(hero_info* hero) const {
 	hero->setwound(hero->get(Wounds) + get(Wounds));
-	hero->setwound(hero->get(Wait) + get(Wait));
+	hero->setwait(hero->get(Wait) + get(Wait));
+	hero->setloyalty(hero->get(Loyalty) + get(Loyalty));
 }

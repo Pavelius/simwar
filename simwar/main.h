@@ -459,8 +459,9 @@ struct effect_info : object_info {
 	void operator+=(const effect_info& e);
 	ability_s					test;
 	unit_info*					units[4];
-	void						apply(hero_info* hero);
-	void						apply(player_info* player);
+	void						apply(hero_info* hero) const;
+	void						apply(player_info* player) const;
+	void						apply(province_info* province) const;
 	bool						isvalid(const hero_info& e) const;
 };
 struct event_info : object_info {

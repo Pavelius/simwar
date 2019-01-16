@@ -78,7 +78,7 @@ void event_info::play(province_info* province, hero_info* hero) const {
 		total = effects[0];
 		sb.adds(effects[0].text);
 	}
-	//total.apply(province);
+	total.apply(province);
 	total.apply(player);
 	total.apply(hero);
 	player->post(hero, province, sb);
