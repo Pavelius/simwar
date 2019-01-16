@@ -81,9 +81,10 @@ struct string : stringcreator {
 	void						addplayerincome();
 	void						addstrenght();
 	static bsreq				metadata[];
-	void						set(const hero_info* value);
-	void						set(const player_info* value);
-	void						set(const cost_info& value);
+	void						set(const hero_info* value) { hero = value; }
+	void						set(const player_info* value) { player = value; }
+	void						set(const province_info* value) { province = value; }
+	void						set(const cost_info& value) { cost = value; }
 private:
 	cost_info					cost;
 	const struct army*			army;
@@ -457,6 +458,7 @@ struct menu_info {
 struct effect_info : object_info {
 	ability_s					test;
 	unit_info*					units[4];
+	bool						isvalid(const hero_info& e) const;
 };
 struct event_info : object_info {
 	landscape_info*				landscape;
@@ -465,7 +467,6 @@ struct event_info : object_info {
 	static const event_info*	getnext();
 	static void					initialize();
 	bool						isvalid(const province_info& e) const;
-	bool						isvalid(const hero_info& e) const;
 	void						play(province_info* province, hero_info* hero) const;
 	static void					random(province_info* province, hero_info* hero);
 	unsigned					select(province_info** source, unsigned maximum) const;

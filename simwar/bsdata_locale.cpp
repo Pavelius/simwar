@@ -143,8 +143,14 @@ static bool read_localization(const char* url, const char** requisits, const bsd
 		const char* strings[maximum_strings] = {};
 		auto count = 0;
 		auto pt = value;
+		auto ms = false;
+		if(pt[0] == ':') {
+			ms = false;
+			pt = zskipsp(pt + 1);
+		} else
+			ms = multi_strings(name, requisits, tables, object, type, index);
 		strings[0] = pt;
-		if(multi_strings(name, requisits, tables, object, type, index)) {
+		if(ms) {
 			while(pt[0]) {
 				if(pt[0] == '.' && requisits_count > 1) {
 					pt[0] = 0;

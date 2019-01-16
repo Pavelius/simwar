@@ -34,11 +34,3 @@ bool object_info::isvalid(const province_info& e) const {
 	}
 	return true;
 }
-
-bool object_info::isvalid(const hero_info& e) const {
-	for(auto i : hero_conditions) {
-		if(!ismatch(get(i), e.get(i)))
-			return false;
-	}
-	return true;
-}

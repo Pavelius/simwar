@@ -126,6 +126,9 @@ bsval& bsval::dereference() {
 				data = b->get(get());
 				type = b->fields;
 			}
+		} else if(type->reference) {
+			data = *((void**)type->ptr(data));
+			type = type->type;
 		}
 	}
 	return *this;

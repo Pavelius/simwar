@@ -63,12 +63,17 @@ void event_info::play(province_info* province, hero_info* hero) const {
 	string sb;
 	sb.set(hero);
 	sb.set(player);
+	sb.set(province);
 	sb.add(name);
+	auto result = 0;
 	for(int i = 1; i < sizeof(effects) / sizeof(effects[0]); i++) {
-		if(effects[i].isvalid(*hero)) {
-			sb.adds(effects[i].text);
-		}
+		if(!effects[i].isvalid(*hero))
+			break;
+		sb.adds(effects[i].text);
+		result++;
 	}
+	if(result==0)
+		sb.adds(effects[0].text);
 	player->post(hero, province, sb);
 }
 

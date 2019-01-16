@@ -1,7 +1,7 @@
 event capture_incasator
  effects gold(-10)
- effects gold(0)
- effects gold(10)
+ effects test(attack) gold(0)
+ effects test(sword) gold(10)
 
 include "scripts/tactics.txt"
 include "scripts/earth_calendar.txt"

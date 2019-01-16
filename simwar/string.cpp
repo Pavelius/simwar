@@ -16,7 +16,7 @@ static string_id change_gender[] = {{"а", ""},
 {"нее", "него"},
 {"она", "он"},
 {"ее", "его"},
-{}};
+};
 static string_id change_properties[] ={{"герой", "hero.name"},
 {"героя", "hero.nameof"},
 {"hero", "hero.name"},
@@ -67,13 +67,16 @@ void string::addidentifier(const char* identifier) {
 		if(strcmp(e.id, identifier) == 0) {
 			bsval bv = {this, string::metadata};
 			bv.get(e.url);
-			if(!bv)
+			if(!bv) {
 				stringcreator::addidentifier(e.url);
+				return;
+			}
 			if(bv.type->type == text_type) {
 				auto p = (const char*)bv.get();
 				if(p)
 					add(p);
-			}
+			} else if(bv.type->type == number_type)
+				add("%1i", bv.get());
 			return;
 		}
 	}
@@ -84,16 +87,4 @@ void string::addidentifier(const char* identifier) {
 		}
 	}
 	stringcreator::addidentifier(identifier);
-}
-
-void string::set(const hero_info* value) {
-	hero = value;
-}
-
-void string::set(const player_info* value) {
-	player = value;
-}
-
-void string::set(const cost_info& value) {
-	cost = value;
 }
