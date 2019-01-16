@@ -217,7 +217,7 @@ void province_info::add(const unit_info* unit) {
 }
 
 troop_info* province_info::addinvader(unit_info* type, player_info* player) {
-	auto p = troop_info::add(this, type);
+	auto p = troop_info::add(0, type);
 	p->setmove(this);
 	return p;
 }

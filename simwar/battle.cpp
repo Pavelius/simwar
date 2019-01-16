@@ -45,7 +45,7 @@ struct combatside : public army {
 	void setstrenght(string& sb, const char* format, const char* province_name) {
 		char text_lead[260]; text_lead[0] = 0;
 		char text_tips[2048]; text_tips[0] = 0;
-		stringcreator ti(text_tips, zendof(text_tips));
+		stringcreator ti(text_tips);
 		if(general)
 			tactic = general->gettactic();
 		if(!tactic) {
@@ -64,7 +64,7 @@ struct combatside : public army {
 			}
 		}
 		strenght = army::getstrenght(&ti);
-		sb.add(format, getlead(text_lead, zendof(text_lead)), text_tips, province_name);
+		sb.adds(format, getlead(text_lead, zendof(text_lead)), text_tips, province_name);
 	}
 
 	int getstrenght() const {

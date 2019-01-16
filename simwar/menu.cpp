@@ -4,9 +4,18 @@ static void exit_game(const menu_info* p) {
 	exit(0);
 }
 
+static void test_event() {
+	auto p = (event_info*)bsdata::findbyid("barbarian_invasion").data;
+	if(!p)
+		return;
+	auto province = (province_info*)bsdata::findbyid("lone_mountain").data;
+	p->play(province, 0);
+}
+
 static void load_game(const menu_info* p) {
 	if(!game.readmap("silentseas"))
 		return;
+	//test_event();
 	player_info::playgame();
 }
 
