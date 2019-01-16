@@ -456,8 +456,11 @@ struct menu_info {
 	static void					select(answer_info& ai, const char* parent);
 };
 struct effect_info : object_info {
+	void operator+=(const effect_info& e);
 	ability_s					test;
 	unit_info*					units[4];
+	void						apply(hero_info* hero);
+	void						apply(player_info* player);
 	bool						isvalid(const hero_info& e) const;
 };
 struct event_info : object_info {
