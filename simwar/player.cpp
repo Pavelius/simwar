@@ -390,7 +390,7 @@ void player_info::desert_units() {
 void player_info::playgame() {
 	create_province_order();
 	while(isallowgame()) {
-		hero_info::refresh_heroes();
+		hero_info::clear_actions();
 		for(auto& e : player_data) {
 			if(!e)
 				continue;
@@ -403,6 +403,7 @@ void player_info::playgame() {
 		}
 		game.turn++;
 		neutrals_move();
+		hero_info::refresh_heroes();
 		create_order();
 		resolve_actions();
 		random_events();

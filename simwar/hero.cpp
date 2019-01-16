@@ -18,6 +18,18 @@ bsreq hero_info::metadata[] = {
 adat<hero_info, hero_max> hero_data;
 bsdata hero_manager("hero", hero_data, hero_info::metadata);
 
+void hero_info::clear_actions() {
+	for(auto& e : hero_data) {
+		if(!e)
+			continue;
+		if(e.get(Wait) == 0) {
+			e.tactic = 0;
+			e.province = 0;
+			e.action = game.default_action;
+		}
+	}
+}
+
 void hero_info::refresh_heroes() {
 	for(auto& e : hero_data) {
 		if(!e)
@@ -26,11 +38,6 @@ void hero_info::refresh_heroes() {
 			e.set(Wait, e.get(Wait) - 1);
 		if(e.get(Wounds) > 0)
 			e.set(Wounds, e.get(Wounds) - 1);
-		if(e.get(Wait) == 0) {
-			e.tactic = 0;
-			e.province = 0;
-			e.action = game.default_action;
-		}
 	}
 }
 

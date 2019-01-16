@@ -113,9 +113,9 @@ struct name_info {
 };
 struct object_info : name_info {
 	char						ability[LastAbility + 1];
+	void						add(ability_s id, char value) { ability[id] += value; }
 	int							get(ability_s id) const { return ability[id]; }
 	static bool					ismatch(int v1, int v2);
-	bool						isvalid(const hero_info& e) const;
 	bool						isvalid(const player_info& e) const;
 	bool						isvalid(const province_info& e) const;
 	void						set(ability_s id, char value) { ability[id] = value; }
@@ -171,6 +171,7 @@ struct province_info : object_info {
 	int							getsupport(const player_info* player) const;
 	void						getsupport(stringcreator& sb) const;
 	static void					initialize();
+	void						loose(string& sb, player_info* attacker_player, player_info* defender_player, const action_info* action, bool raid, hero_info* attacker_general, hero_info* defender_general, int trophies);
 	static bsreq				metadata[];
 	static unsigned				remove_hero_present(aref<province_info*> source, const player_info* player);
 	static unsigned				remove_mode(aref<province_info*> source, const player_info* player, province_flag_s state);
@@ -184,6 +185,7 @@ struct province_info : object_info {
 	void						setnation(nation_info* value) { nation = value; }
 	void						setplayer(player_info* value) { player = value; }
 	void						setsupport(const player_info* player, int value);
+	void						win(string& sb, player_info* attacker_player, player_info* defender_player, const action_info* action, bool raid, hero_info* attacker_general, hero_info* defender_general, int trophies);
 private:
 	player_info*				player;
 	landscape_info*				landscape;
@@ -255,6 +257,7 @@ struct hero_info : object_info {
 	const tactic_info*			choose_tactic() const;
 	bool						choose_troops(const action_info* action, const province_info* province, army& a1, army& a2, army& a3, int minimal_count, cost_info& cost) const;
 	bool						choose_units(const action_info* action, const province_info* province, unit_set& a1, unit_set& a2, cost_info& cost) const;
+	static void					clear_actions();
 	int							getattack() const { return get(Attack); }
 	const action_info*			getaction() const { return action; }
 	const char*					getavatar() const { return avatar; }

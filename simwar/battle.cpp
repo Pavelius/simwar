@@ -137,51 +137,67 @@ struct combatside : public army {
 
 };
 
-bool province_info::battle(string& sb, player_info* attacker_player, player_info* defender_player, const action_info* action, bool raid) {
-	combatside attackers(this, attacker_player, true, raid);
-	combatside defenders(this, defender_player, false, raid);
-	attackers.setstrenght(sb, msg.attacking_force, getname()); sb.add(" ");
-	defenders.setstrenght(sb, msg.defending_force, getname());
+void province_info::win(string& sb, player_info* attacker_player, player_info* defender_player, const action_info* action, bool raid, hero_info* attacker_general, hero_info* defender_general, int trophies) {
+	if(!raid) {
+		retreat(defender_player);
+		arrival(attacker_player);
+	} else
+		retreat(attacker_player);
+	if(!raid) {
+		player = attacker_player;
+		if(attacker_general)
+			attacker_player->cost.fame += imax(0, attacker_general->get(Nobility));
+	}
+	trophies += action->get(Gold);
+	if(raid)
+		trophies += getincome(0);
+	if(trophies) {
+		if(attacker_player)
+			attacker_player->cost += trophies;
+		if(defender_player)
+			defender_player->cost += -trophies;
+		sb.addn(msg.raid_spoils, trophies);
+	}
+	attacker_player->cost.fame += action->get(Fame);
+	if(defender_general)
+		defender_general->add(Loyalty, -1);
+}
+
+void province_info::loose(string& sb, player_info* attacker_player, player_info* defender_player, const action_info* action, bool raid, hero_info* attacker_general, hero_info* defender_general, int trophies) {
+	retreat(attacker_player);
+	if(defender_player && defender_general)
+		defender_player->cost.fame += imax(0, defender_general->get(Nobility));
+	if(attacker_general)
+		attacker_general->add(Loyalty, -1);
+}
+
+static bool play_battle(string& sb, province_info* province, combatside& attackers, combatside& defenders) {
+	attackers.setstrenght(sb, msg.attacking_force, province->getname()); sb.add(" ");
+	defenders.setstrenght(sb, msg.defending_force, province->getname());
 	attackers.setcasualty(sb, defenders);
 	defenders.setcasualty(sb, attackers);
 	auto& winner = (attackers.getstrenght() > defenders.getstrenght()) ? attackers : defenders;
 	sb.add(" "); sb.add(msg.winner, winner.getside());
 	attackers.applycasualty(sb);
 	defenders.applycasualty(sb);
-	auto iswin = (&winner == &attackers);
-	if(attacker_player)
-		attacker_player->cost.fame += defenders.casualties - attackers.casualties;
-	if(defender_player)
-		defender_player->cost.fame += attackers.casualties - defenders.casualties;
-	if(iswin) {
-		if(!raid) {
-			retreat(defender_player);
-			arrival(attacker_player);
-		} else
-			retreat(attacker_player);
-		if(!raid) {
-			player = attacker_player;
-			if(attackers.general)
-				attacker_player->cost.fame += imax(0, attackers.general->get(Nobility));
-		}
-		auto trophies = action->get(Gold);
-		if(raid)
-			trophies += getincome(0);
-		trophies += defenders.casualties;
-		if(trophies) {
-			if(attacker_player)
-				attacker_player->cost += trophies;
-			if(defender_player)
-				defender_player->cost += -trophies;
-			sb.addn(msg.raid_spoils, trophies);
-		}
-		attacker_player->cost.fame += action->get(Fame);
-		defenders.addloyalty(-1);
-	} else {
-		retreat(attacker_player);
-		if(defender_player && defenders.general)
-			defender_player->cost.fame += imax(0, defenders.general->get(Nobility));
-		attackers.addloyalty(-1);
-	}
+	if(attackers.player)
+		attackers.player->cost.fame += defenders.casualties - attackers.casualties;
+	if(defenders.player)
+		defenders.player->cost.fame += attackers.casualties - defenders.casualties;
+	return (&winner == &attackers);
+}
+
+bool province_info::battle(string& sb, player_info* attacker_player, player_info* defender_player, const action_info* action, bool raid) {
+	combatside attackers(this, attacker_player, true, raid);
+	combatside defenders(this, defender_player, false, raid);
+	auto iswin = play_battle(sb, this, attackers, defenders);
+	if(iswin)
+		win(sb, attacker_player, defender_player, action, raid,
+			attackers.general, defenders.general,
+			defenders.casualties);
+	else
+		loose(sb, attacker_player, defender_player, action, raid,
+			attackers.general, defenders.general,
+			defenders.casualties);
 	return iswin;
 }

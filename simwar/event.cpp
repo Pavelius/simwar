@@ -55,9 +55,9 @@ const event_info* event_info::getnext() {
 }
 
 void event_info::play(province_info* province, hero_info* hero) const {
-	if(!province || !hero)
+	if(!province)
 		return;
-	auto player = hero->getplayer();
+	auto player = province->getplayer();
 	if(!player)
 		return;
 	string sb;
@@ -67,12 +67,14 @@ void event_info::play(province_info* province, hero_info* hero) const {
 	sb.add(name);
 	auto result = 0;
 	effect_info total;
-	for(int i = 1; i < sizeof(effects) / sizeof(effects[0]); i++) {
-		if(!effects[i].isvalid(*hero))
-			break;
-		total += effects[i];
-		sb.adds(effects[i].text);
-		result++;
+	if(hero) {
+		for(int i = 1; i < sizeof(effects) / sizeof(effects[0]); i++) {
+			if(!effects[i].isvalid(*hero))
+				break;
+			total += effects[i];
+			sb.adds(effects[i].text);
+			result++;
+		}
 	}
 	if(result == 0) {
 		total = effects[0];
@@ -90,5 +92,6 @@ void event_info::random(province_info* province, hero_info* hero) {
 		if(!p->isvalid(*province))
 			continue;
 		p->play(province, hero);
+		break;
 	}
 }

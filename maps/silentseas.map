@@ -1,8 +1,3 @@
-event capture_incasator
- effects gold(-10)
- effects test(attack) gold(0)
- effects test(sword) gold(10)
-
 include "scripts/tactics.txt"
 include "scripts/earth_calendar.txt"
 
@@ -95,3 +90,13 @@ player green cost(50) type(human)
 province lone_mountain player(green)
 troop type(orcs) province(lone_mountain) home(lone_mountain)
 troop type(orcs) province(lone_mountain) home(lone_mountain)
+
+event capture_incasator
+ effects gold(-10)
+ effects test(attack) gold(0)
+ effects test(sword) gold(10)
+
+event barbarian_invasion
+ effects attack(1) units(barbarians, barbarians, barbarians)
+ effects test(raid) wounds(1)
+ effects test(nobility) recruit(1) units(barbarians)
