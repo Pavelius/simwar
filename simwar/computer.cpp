@@ -138,3 +138,35 @@ void player_info::computer_move() {
 	for(unsigned i = 0; i < hero_count; i++)
 		source[i]->make_move();
 }
+
+bool hero_info::choose_units_computer(const action_info* action, const province_info* province, unit_set& s1, unit_set& s2, cost_info& cost) const {
+	cost_info total = cost;
+	zshuffle(s1.data, s1.getcount());
+	for(unsigned i = 0; i < s1.count; i++) {
+		total += s1.data[i]->cost;
+		if(total > player->cost)
+			break;
+		cost = total;
+		s2.add(s1.data[i]);
+	}
+	return s2.getcount() > 0;
+}
+
+bool hero_info::choose_troops_computer(const action_info* action, const province_info* province, army& s1, army& s2, army& a3, int minimal_count, cost_info& cost) const {
+	const int safety = 2;
+	auto defend = a3.getstrenght(0);
+	cost_info total = cost;
+	zshuffle(s1.data, s1.getcount());
+	for(unsigned i = 0; i < s1.count; i++) {
+		auto attack = s2.get(Attack, 0);
+		if(attack >= defend + safety)
+			break;
+		total.gold += action->cost_per_unit;
+		if(total > player->cost)
+			return false;
+		cost = total;
+		s2.add(s1.data[i]);
+	}
+	auto attack = s2.get(Attack, 0);
+	return attack + safety >= defend;
+}

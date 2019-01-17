@@ -1122,18 +1122,7 @@ static void render_two_window(const player_info* player, const hero_info* hero, 
 	control_standart();
 }
 
-bool hero_info::choose_units(const action_info* action, const province_info* province, unit_set& s1, unit_set& s2, cost_info& cost) const {
-	if(player->iscomputer()) {
-		zshuffle(s1.data, s1.getcount());
-		cost_info total;
-		for(unsigned i = 0; i < s1.count; i++) {
-			total += s1.data[i]->cost;
-			if(total > player->cost)
-				break;
-			s2.add(s1.data[i]);
-		}
-		return true;
-	}
+bool hero_info::choose_units_human(const action_info* action, const province_info* province, unit_set& s1, unit_set& s2, cost_info& cost) const {
 	unit_list u1(s1); u1.id = 10;
 	unit_list u2(s2); u2.id = 11;
 	auto player_cost = player->cost;
@@ -1165,20 +1154,9 @@ bool hero_info::choose_units(const action_info* action, const province_info* pro
 	return getresult() != 0;
 }
 
-bool hero_info::choose_troops(const action_info* action, const province_info* province, army& s1, army& s2, army& a3, int minimal_count, cost_info& cost) const {
+bool hero_info::choose_troops_human(const action_info* action, const province_info* province, army& s1, army& s2, army& a3, int minimal_count, cost_info& cost) const {
 	if(!s1.getcount() && minimal_count == 0)
 		return true;
-	if(player->iscomputer()) {
-		zshuffle(s1.data, s1.getcount());
-		cost_info total;
-		for(unsigned i = 0; i < s1.count; i++) {
-			total.gold += action->cost_per_unit;
-			if(total.gold > player->cost.gold)
-				break;
-			a3.add(s1.data[i]);
-		}
-		return true;
-	}
 	army_list u1(s1); u1.id = 10;
 	army_list u2(s2); u2.id = 11;
 	string tid;

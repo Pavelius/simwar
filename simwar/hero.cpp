@@ -34,6 +34,7 @@ void hero_info::refresh_heroes() {
 	for(auto& e : hero_data) {
 		if(!e)
 			continue;
+		e.pay.clear();
 		if(e.get(Wait) > 0)
 			e.set(Wait, e.get(Wait) - 1);
 		if(e.get(Wounds) > 0)
@@ -368,4 +369,16 @@ void hero_info::make_move() {
 			return;
 	}
 	setaction(action, province, tactic, cost, troops_move, units_product);
+}
+
+bool hero_info::choose_units(const action_info* action, const province_info* province, unit_set& a1, unit_set& a2, cost_info& cost) const {
+	if(player->iscomputer())
+		return choose_units_computer(action, province, a1, a2, cost);
+	return choose_units_human(action, province, a1, a2, cost);
+}
+
+bool hero_info::choose_troops(const action_info* action, const province_info* province, army& a1, army& a2, army& a3, int minimal_count, cost_info& cost) const {
+	if(player->iscomputer())
+		return choose_troops_computer(action, province, a1, a2, a3, minimal_count, cost);
+	return choose_troops_human(action, province, a1, a2, a3, minimal_count, cost);
 }
