@@ -1087,11 +1087,10 @@ game_header* game_header::choose(game_header* source, unsigned count) {
 	return (game_header*)getresult();
 }
 
-static void render_two_window(const player_info* player, const hero_info* hero, const action_info* action, list& u1, list& u2, const char* error_text, stringcreator& sb, const cost_info& cost) {
+static void render_two_window(const player_info* player, const hero_info* hero, const action_info* action, list& u1, list& u2, const char* error_text, string& sb, const cost_info& cost) {
 	if(cost) {
-		char tem1[256]; stringcreator sc(tem1);
-		cost.getinfo(sc);
-		sb.adds("%1: %2", msg.total, tem1);
+		sb.set(cost);
+		sb.adds("%1: %cost", msg.total);
 	}
 	auto th = 0;
 	if(sb) {
