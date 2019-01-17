@@ -22,12 +22,15 @@ static string_id change_properties[] ={{"герой", "hero.name"},
 {"hero", "hero.name"},
 {"province", "province.name"},
 {"player", "player.name"},
+{"игрок", "player.name"},
+{"игрока", "player.nameof"},
 };
 static string_id_proc change_proc[] = {{"cost", &string::addcost},
 {"strenght", &string::addstrenght},
 {"player_income", &string::addplayerincome},
 };
 bsreq string::metadata[] = {
+	BSREQ(string, cost, cost_type),
 	BSREQ(string, hero, hero_info::metadata),
 	BSREQ(string, player, player_info::metadata),
 	BSREQ(string, province, province_info::metadata),
@@ -37,7 +40,7 @@ string::string() : stringcreator(buffer, buffer + sizeof(buffer) / sizeof(buffer
 army(0), hero(0), player(0), province(0) {}
 
 void string::addcost() {
-	add(":gold:%1i", cost.gold);
+	cost.getinfo(*this);
 }
 
 void string::addstrenght() {

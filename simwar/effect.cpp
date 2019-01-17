@@ -33,7 +33,7 @@ void effect_info::apply(string& sb, player_info* player, province_info* province
 	}
 	if(province) {
 		province->addeconomy(get(Gold));
-		province->addsupport(province->getplayer(), get(Gold));
+		province->addsupport(province->getplayer(), get(Support));
 		if(get(Attack)) {
 			province->addinvader((unit_info**)units, sizeof(units) / sizeof(units[0]), 0);
 			province->battle(sb, 0, player, 0, false);

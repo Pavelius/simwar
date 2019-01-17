@@ -1087,11 +1087,10 @@ game_header* game_header::choose(game_header* source, unsigned count) {
 	return (game_header*)getresult();
 }
 
-static void render_two_window(const player_info* player, const hero_info* hero, const action_info* action, list& u1, list& u2, const char* error_text, stringcreator& sb, const cost_info& cost) {
+static void render_two_window(const player_info* player, const hero_info* hero, const action_info* action, list& u1, list& u2, const char* error_text, string& sb, const cost_info& cost) {
 	if(cost) {
-		char tem1[256]; stringcreator sc(tem1);
-		cost.getinfo(sc);
-		sb.adds("%1: %2", msg.total, tem1);
+		sb.set(cost);
+		sb.adds("%1: %cost", msg.total);
 	}
 	auto th = 0;
 	if(sb) {
@@ -1168,6 +1167,8 @@ bool hero_info::choose_units(const action_info* action, const province_info* pro
 bool hero_info::choose_troops(const action_info* action, const province_info* province, army& s1, army& s2, army& a3, int minimal_count, cost_info& cost) const {
 	if(!s1.getcount() && minimal_count == 0)
 		return true;
+	string tid;
+	auto defender_strenght = a3.getstrenght(&tid);
 	if(player->iscomputer()) {
 		zshuffle(s1.data, s1.getcount());
 		cost_info total;
@@ -1181,9 +1182,7 @@ bool hero_info::choose_troops(const action_info* action, const province_info* pr
 	}
 	army_list u1(s1); u1.id = 10;
 	army_list u2(s2); u2.id = 11;
-	string tid;
 	auto th = texth() * 3 + 2;
-	auto defender_strenght = a3.getstrenght(&tid);
 	auto player_cost = player->cost;
 	auto start_cost = cost;
 	while(ismodal()) {
@@ -1195,7 +1194,7 @@ bool hero_info::choose_troops(const action_info* action, const province_info* pr
 			sb.adds(msg.total_strenght, (const char*)tia, (const char*)tid);
 			if(attacker_strenght <= defender_strenght)
 				sb.adds(msg.predict_fail);
-			else if(attacker_strenght <= defender_strenght + 2)
+			else if(attacker_strenght <= defender_strenght + 3)
 				sb.adds(msg.predict_partial);
 			else
 				sb.adds(msg.predict_success);

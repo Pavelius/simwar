@@ -165,10 +165,10 @@ void province_info::win(string& sb, player_info* attacker_player, player_info* d
 
 void province_info::loose(string& sb, player_info* attacker_player, player_info* defender_player, const action_info* action, bool raid, hero_info* attacker_general, hero_info* defender_general, int trophies) {
 	retreat(attacker_player);
-	if(defender_player && defender_general)
-		defender_player->cost.fame += imax(0, defender_general->get(Nobility));
 	if(attacker_general)
 		attacker_general->add(Loyalty, -1);
+	if(defender_player && defender_general)
+		defender_player->cost.fame += imax(0, defender_general->get(Nobility));
 }
 
 static bool play_battle(string& sb, province_info* province, combatside& attackers, combatside& defenders) {
