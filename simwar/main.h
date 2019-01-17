@@ -77,7 +77,6 @@ struct string : stringcreator {
 	string();
 	void						addidentifier(const char* identifier) override;
 	void						addcost();
-	void						addplayer();
 	void						addplayerincome();
 	void						addstrenght();
 	static bsreq				metadata[];

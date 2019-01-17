@@ -43,8 +43,10 @@ unsigned action_info::select(action_info** source, unsigned count, ability_s id)
 			continue;
 		if(e.get(id)==0)
 			continue;
-		if(ps<pe)
+		if(ps < pe)
 			*ps++ = &e;
+		else
+			break;
 	}
 	return ps - source;
 }
