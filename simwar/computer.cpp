@@ -113,6 +113,13 @@ class move_info {
 		add_need(action_defend, 1);
 	}
 
+	void move_priority() {
+		static ability_s priority[] = {Attack, Raid, Recruit, Economy, Support};
+		for(auto a : priority) {
+			auto action = action_info::getaction(a);
+		}
+	}
+
 public:
 
 	move_info(player_info* player) {
