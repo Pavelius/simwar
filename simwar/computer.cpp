@@ -36,7 +36,7 @@ bool hero_info::choose_troops_computer(const action_info* action, const province
 		s2.add(s1.data[i]);
 	}
 	auto attack = s2.get(Attack, 0);
-	return attack + safety >= defend;
+	return attack >= defend;
 }
 
 static const action_info* get_action(adat<action_info*> actions, ability_s id) {
@@ -51,28 +51,41 @@ static bool most_needed(const player_info* player, const hero_info* hero, const 
 	const int ideal_provincies = 10;
 	const int ideal_gold = 30;
 	const int ideal_income = 5;
+	const int ideal_income_maximum = 15;
+	const int ideal_troops = 10;
 	if(action->get(Attack) > 0) {
 		auto provincies = player->getfriendlyprovinces();
 		if(provincies < ideal_provincies)
 			return true;
-	} else if(action->get(Raid) > 0) {
+	}
+	if(action->get(Raid) > 0) {
 		auto gold = player->cost.gold;
 		auto income = player->getincome(0);
 		if(income < ideal_income && gold < ideal_gold)
 			return true;
-	} else if(action->get(Recruit) > 0) {
-
+	}
+	if(action->get(Recruit) > 0) {
+		auto troops = player->gettroopscount();
+		if(troops < ideal_troops)
+			return true;
+	}
+	if(action->get(Economy) > 0) {
+		auto income = player->getincome();
+		if(income < ideal_income_maximum)
+			return true;
+	}
+	if(action->get(Support) > 0) {
+		auto support = player->getsupport();
+		if(support < -1 * player->getfriendlyprovinces())
+			return true;
 	}
 	return false;
 }
 
-const action_info* hero_info::choose_action_computer(const adat<action_info*>& actions) const {
+const action_info* hero_info::choose_action_computer(adat<action_info*>& actions) const {
 	auto player = getplayer();
-	static ability_s abilities[] = {Attack, Raid, Recruit};
-	for(auto id : abilities) {
-		auto a = get_action(actions, id);
-		if(!a)
-			continue;
+	zshuffle(actions.data, actions.count);
+	for(auto a : actions) {
 		if(most_needed(player, this, a))
 			return a;
 	}

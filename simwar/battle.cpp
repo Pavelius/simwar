@@ -148,7 +148,8 @@ void province_info::win(string& sb, player_info* attacker_player, player_info* d
 		if(attacker_general)
 			attacker_player->cost.fame += imax(0, attacker_general->get(Nobility));
 	}
-	trophies += action->get(Gold);
+	if(action)
+		trophies += action->get(Gold);
 	if(raid)
 		trophies += getincome(0);
 	if(trophies) {

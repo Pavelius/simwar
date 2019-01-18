@@ -254,7 +254,7 @@ struct hero_info : object_info {
 	void						cancelaction();
 	void						check_leave();
 	const action_info*			choose_action() const;
-	const action_info*			choose_action_computer(const adat<action_info*>& ai) const;
+	const action_info*			choose_action_computer(adat<action_info*>& ai) const;
 	bool						choose_attack(const action_info* action, const province_info* province, army& troops, cost_info& cost, bool raid) const;
 	province_info*				choose_province(const action_info* action) const;
 	const province_info*		choose_province(const action_info* action, aref<province_info*> source, province_flag_s mode) const;
