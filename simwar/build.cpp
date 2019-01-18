@@ -5,7 +5,7 @@ bsreq build_type[] = {
 	BSREQ(build_info, province, province_info::metadata),
 	BSREQ(build_info, wait, number_type),
 {}};
-adat<build_info, 256> build_data;
+adat<build_info> build_data;
 BSMETA(build);
 
 int build_info::compare(const void* p1, const void* p2) {

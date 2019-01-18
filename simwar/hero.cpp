@@ -171,7 +171,7 @@ unsigned hero_info::remove_this(hero_info** source, unsigned count) const {
 }
 
 const action_info* hero_info::choose_action() const {
-	answer_info ai;
+	adat<action_info*> source;
 	for(auto& e : action_data) {
 		if(!e)
 			continue;
@@ -181,12 +181,15 @@ const action_info* hero_info::choose_action() const {
 			if(!player->isallow(&e))
 				continue;
 		}
-		ai.add((int)&e, e.getname());
+		source.add(&e);
 	}
-	if(!ai)
+	if(!source)
 		return 0;
 	if(player->iscomputer())
-		return (action_info*)ai.elements.data[rand()%ai.elements.count].param;
+		return choose_action_computer(source);
+	answer_info ai;
+	for(auto p : source)
+		ai.add((int)p, p->getname());
 	ai.sort();
 	return (action_info*)ai.choose(this);
 }
@@ -312,6 +315,20 @@ void hero_info::setloyalty(int value) {
 		ability[Loyalty] = value;
 }
 
+province_info* hero_info::choose_province(const action_info* action) const {
+	auto choose_mode = action->getprovince();
+	adat<province_info*> provinces;
+	provinces.count = province_info::select(provinces.data, provinces.getmaximum(), getplayer());
+	provinces.count = province_info::remove_mode(provinces, player, choose_mode);
+	provinces.count = province_info::remove_hero_present(provinces, player);
+	if(!provinces.count)
+		return 0;
+	if(player->iscomputer())
+		return provinces[rand() % provinces.count];
+	else
+		return const_cast<province_info*>(choose_province(action, provinces, choose_mode));
+}
+
 void hero_info::make_move() {
 	auto player = getplayer();
 	auto action = choose_action();
@@ -321,17 +338,7 @@ void hero_info::make_move() {
 	const tactic_info* tactic = 0;
 	province_info* province = 0;
 	if(action->isplaceable()) {
-		auto choose_mode = action->getprovince();
-		province_info* provinces[128];
-		auto count = province_info::select(provinces, lenghtof(provinces), player);
-		count = province_info::remove_mode({provinces, count}, player, choose_mode);
-		count = province_info::remove_hero_present({provinces, count}, player);
-		if(!count)
-			return;
-		if(player->iscomputer())
-			province = provinces[rand() % count];
-		else
-			province = const_cast<province_info*>(choose_province(action, {provinces, count}, choose_mode));
+		province = choose_province(action);
 		if(!province)
 			return;
 	}
@@ -339,13 +346,7 @@ void hero_info::make_move() {
 	army troops_move(const_cast<player_info*>(player), const_cast<province_info*>(province), this, true, raid);
 	unit_set units_product;
 	if(action->get(Raid) || action->get(Attack)) {
-		army a1(const_cast<player_info*>(player), const_cast<province_info*>(province), this, true, raid);
-		army a3(0, const_cast<province_info*>(province), 0, false, raid);
-		a1.fill(player, 0);
-		a1.count = troop_info::remove_moved(a1.data, a1.count);
-		a1.count = troop_info::remove_restricted(a1.data, a1.count, province);
-		a3.fill(province->getplayer(), province);
-		if(!choose_troops(action, province, a1, troops_move, a3, 0, cost))
+		if(!choose_attack(action, province, troops_move, cost, raid))
 			return;
 	}
 	if(action->get(Movement)) {
@@ -369,6 +370,16 @@ void hero_info::make_move() {
 			return;
 	}
 	setaction(action, province, tactic, cost, troops_move, units_product);
+}
+
+bool hero_info::choose_attack(const action_info* action, const province_info* province, army& troops, cost_info& cost, bool raid) const {
+	army a1(getplayer(), const_cast<province_info*>(province), const_cast<hero_info*>(this), true, raid);
+	army a3(0, const_cast<province_info*>(province), 0, false, raid);
+	a1.fill(getplayer(), 0);
+	a1.count = troop_info::remove_moved(a1.data, a1.count);
+	a1.count = troop_info::remove_restricted(a1.data, a1.count, province);
+	a3.fill(province->getplayer(), province);
+	return choose_troops(action, province, a1, troops, a3, 0, cost);
 }
 
 bool hero_info::choose_units(const action_info* action, const province_info* province, unit_set& a1, unit_set& a2, cost_info& cost) const {

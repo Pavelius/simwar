@@ -1,144 +1,5 @@
 #include "main.h"
 
-class move_info {
-	enum priority_s : unsigned char {
-		EnemyPlayer,
-		LastPriority = EnemyPlayer,
-	};
-	struct statistic {
-		int					provinces;
-		int					gold;
-		int					income;
-		int					support;
-		int					troops;
-		statistic() { clear(); }
-		void clear() { memset(this, 0, sizeof(*this)); }
-	};
-	struct need {
-		province_info*		province;
-		const action_info*	action;
-		int					cost;
-	};
-	char					priority[LastPriority + 1];
-	player_info*			player;
-	const action_info*		action_attack;
-	const action_info*		action_raid;
-	const action_info*		action_defend;
-	adat<province_info*>	provincies;
-	statistic				current, ideal;
-	adat<troop_info*>		troops;
-	adat<need, 1024>		needs;
-
-	void set(const action_info** result, const action_info* action, ability_s id) {
-		if(*result)
-			return;
-		if(action->get(id) > 0)
-			*result = action;
-	}
-
-	void fill_actions() {
-		action_attack = 0;
-		action_raid = 0;
-		action_defend = 0;
-		for(auto& e : action_data) {
-			if(!e)
-				continue;
-			set(&action_attack, &e, Attack);
-			set(&action_raid, &e, Raid);
-			set(&action_defend, &e, Defend);
-		}
-	}
-
-	int get(priority_s id) const {
-		return priority[id];
-	}
-
-	void add_need(const action_info* action, int cost) {
-		auto state = action->getprovince();
-		for(auto p : provincies) {
-			if(p->getstatus(player) != state)
-				continue;
-			auto pn = needs.add();
-			pn->province = p;
-			pn->action = action;
-			pn->cost = cost;
-			if(p->getplayer() && p->getplayer() != player)
-				pn->cost += get(EnemyPlayer);
-		}
-	}
-
-	int getfriendlyprovinces() const {
-		auto result = 0;
-		for(auto p : provincies) {
-			if(p->getstatus(player) == FriendlyProvince)
-				result++;
-		}
-		return result;
-	}
-
-	int gettroopscount() const {
-		return troops.getcount();
-	}
-
-	int getsupport() const {
-		auto result = 0;
-		for(auto p : provincies)
-			result += p->getsupport(player);
-		return result;
-	}
-
-	void update_current(statistic& e) {
-		e.clear();
-		e.gold = player->cost.gold;
-		e.income = player->getincome(0);
-		e.provinces = getfriendlyprovinces();
-		e.troops = gettroopscount();
-		e.support = getsupport();
-	}
-
-	void update_provincies() {
-		provincies.count = province_info::select(provincies.data, provincies.getmaximum(), player);
-	}
-
-	void update_troops() {
-		troops.count = troop_info::select(troops.data, troops.getmaximum(), player);
-	}
-
-	void move() {
-		update_provincies();
-		update_troops();
-		update_current(current);
-		add_need(action_attack, 1);
-		add_need(action_raid, 1);
-		add_need(action_defend, 1);
-	}
-
-	void move_priority() {
-		static ability_s priority[] = {Attack, Raid, Recruit, Economy, Support};
-		for(auto a : priority) {
-			auto action = action_info::getaction(a);
-		}
-	}
-
-public:
-
-	move_info(player_info* player) {
-		memset(this, 0, sizeof(*this));
-		this->player = player;
-	}
-
-	void execute() {
-		fill_actions();
-		move();
-	}
-
-};
-
-//void player_info::computer_move() {
-//	move_info e(this);
-//	e.execute();
-//}
-
 void player_info::computer_move() {
 	hero_info* source[hero_max];
 	auto hero_count = hero_info::select(source, lenghtof(source), this);
@@ -175,5 +36,58 @@ bool hero_info::choose_troops_computer(const action_info* action, const province
 		s2.add(s1.data[i]);
 	}
 	auto attack = s2.get(Attack, 0);
-	return attack + safety >= defend;
+	return attack >= defend;
+}
+
+static const action_info* get_action(adat<action_info*> actions, ability_s id) {
+	for(auto p : actions) {
+		if(p->get(id) > 0)
+			return p;
+	}
+	return 0;
+}
+
+static bool most_needed(const player_info* player, const hero_info* hero, const action_info* action) {
+	const int ideal_provincies = 10;
+	const int ideal_gold = 30;
+	const int ideal_income = 5;
+	const int ideal_income_maximum = 15;
+	const int ideal_troops = 10;
+	if(action->get(Attack) > 0) {
+		auto provincies = player->getfriendlyprovinces();
+		if(provincies < ideal_provincies)
+			return true;
+	}
+	if(action->get(Raid) > 0) {
+		auto gold = player->cost.gold;
+		auto income = player->getincome(0);
+		if(income < ideal_income && gold < ideal_gold)
+			return true;
+	}
+	if(action->get(Recruit) > 0) {
+		auto troops = player->gettroopscount();
+		if(troops < ideal_troops)
+			return true;
+	}
+	if(action->get(Economy) > 0) {
+		auto income = player->getincome();
+		if(income < ideal_income_maximum)
+			return true;
+	}
+	if(action->get(Support) > 0) {
+		auto support = player->getsupport();
+		if(support < -1 * player->getfriendlyprovinces())
+			return true;
+	}
+	return false;
+}
+
+const action_info* hero_info::choose_action_computer(adat<action_info*>& actions) const {
+	auto player = getplayer();
+	zshuffle(actions.data, actions.count);
+	for(auto a : actions) {
+		if(most_needed(player, this, a))
+			return a;
+	}
+	return (action_info*)actions.data[rand() % actions.count];
 }

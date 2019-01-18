@@ -254,6 +254,9 @@ struct hero_info : object_info {
 	void						cancelaction();
 	void						check_leave();
 	const action_info*			choose_action() const;
+	const action_info*			choose_action_computer(adat<action_info*>& ai) const;
+	bool						choose_attack(const action_info* action, const province_info* province, army& troops, cost_info& cost, bool raid) const;
+	province_info*				choose_province(const action_info* action) const;
 	const province_info*		choose_province(const action_info* action, aref<province_info*> source, province_flag_s mode) const;
 	const tactic_info*			choose_tactic() const;
 	bool						choose_troops(const action_info* action, const province_info* province, army& a1, army& a2, army& a3, int minimal_count, cost_info& cost) const;
@@ -385,8 +388,10 @@ struct player_info : name_info {
 	int							getindex() const;
 	void						getinfo(stringcreator& sb) const;
 	const char*					getnameof() const { return nameof; }
-	int							getsupport(stringcreator* ti = 0) const;
+	int							getfriendlyprovinces() const;
+	int							getsupport() const;
 	static unsigned				gettroops(troop_info** source, unsigned maximum_count, const province_info* province = 0, const player_info* player = 0, const player_info* player_move = 0);
+	int							gettroopscount() const;
 	static void					hire_heroes();
 	bool						iscomputer() const { return !this || type == PlayerComputer; }
 	bool						isallow(const action_info* action) const;
@@ -481,9 +486,19 @@ struct event_info : object_info {
 	static void					random(province_info* province, hero_info* hero);
 	unsigned					select(province_info** source, unsigned maximum) const;
 };
+struct statistic_info {
+	int							provinces;
+	int							gold;
+	int							income;
+	int							support;
+	int							troops;
+	statistic_info() { clear(); }
+	void						clear();
+	void						fill(const player_info* player);
+};
 extern name_info				ability_data[];
 extern adat<action_info, 32>	action_data;
-extern adat<build_info, 256>	build_data;
+extern adat<build_info>			build_data;
 extern adat<event_info, 64>		event_data;
 extern game_info				game;
 extern gui_info					gui;

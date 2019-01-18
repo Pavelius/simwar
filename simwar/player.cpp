@@ -88,13 +88,12 @@ int player_info::getincome(stringcreator* ti) const {
 	return result;
 }
 
-int	player_info::getsupport(stringcreator* ti) const {
+int	player_info::getsupport() const {
 	auto result = 0;
-	for(auto& e : hero_data) {
+	for(auto& e : province_data) {
 		if(!e)
 			continue;
-		if(e.getplayer() != this)
-			continue;
+		result += e.getsupport(this);
 	}
 	return result;
 }
@@ -185,6 +184,28 @@ int player_info::getherocount() const {
 		if(!e || e.getplayer() != this)
 			continue;
 		result++;
+	}
+	return result;
+}
+
+int player_info::gettroopscount() const {
+	auto result = 0;
+	for(auto& e : troop_data) {
+		if(!e)
+			continue;
+		if(e.getplayer() == this)
+			result++;
+	}
+	return result;
+}
+
+int player_info::getfriendlyprovinces() const {
+	auto result = 0;
+	for(auto& e : province_data) {
+		if(!e)
+			continue;
+		if(e.getstatus(this) == FriendlyProvince)
+			result++;
 	}
 	return result;
 }
