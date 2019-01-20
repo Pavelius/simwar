@@ -8,8 +8,10 @@ static int compare(const void* p1, const void* p2) {
 
 int	answer_info::getweight() const {
 	auto result = 0;
-	for(auto& e : elements)
-		result += e.weight;
+	for(auto& e : elements) {
+		if(e.weight>0)
+			result += e.weight;
+	}
 	return result;
 }
 
@@ -26,7 +28,7 @@ const answer_info::element* answer_info::getrandom() const {
 	auto roll = rand() % weight;
 	auto total = 0;
 	for(auto& e : elements) {
-		if(!e.weight)
+		if(e.weight<=0)
 			continue;
 		total += e.weight;
 		if(roll < total)

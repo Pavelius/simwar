@@ -39,55 +39,52 @@ bool hero_info::choose_troops_computer(const action_info* action, const province
 	return attack >= defend;
 }
 
-static const action_info* get_action(adat<action_info*> actions, ability_s id) {
-	for(auto p : actions) {
-		if(p->get(id) > 0)
-			return p;
-	}
-	return 0;
-}
-
-static bool most_needed(const player_info* player, const hero_info* hero, const action_info* action) {
+static int getweight(const hero_info* hero, const action_info* action) {
 	const int ideal_provincies = 10;
 	const int ideal_gold = 30;
 	const int ideal_income = 5;
 	const int ideal_income_maximum = 15;
-	const int ideal_troops = 10;
-	if(action->get(Attack) > 0) {
-		auto provincies = player->getfriendlyprovinces();
-		if(provincies < ideal_provincies)
-			return true;
-	}
-	if(action->get(Raid) > 0) {
+	auto result = 10;
+	auto player = hero->getplayer();
+	auto good_mode = (action->getprovince() == NoFriendlyProvince) ? -1 : 1;
+	if(player) {
 		auto gold = player->cost.gold;
 		auto income = player->getincome(0);
-		if(income < ideal_income && gold < ideal_gold)
-			return true;
-	}
-	if(action->get(Recruit) > 0) {
+		auto provincies = player->getfriendlyprovinces();
 		auto troops = player->gettroopscount();
-		if(troops < ideal_troops)
-			return true;
+		auto ideal_troops = provincies;
+		if(action->get(Attack) > 0)
+			result += (ideal_provincies - player->getfriendlyprovinces());
+		if(action->get(Raid) > 0)
+			result += (ideal_gold - gold) * 2 + (ideal_income - income);
+		if(action->get(Economy) > 0)
+			result += (ideal_income - income) * 2;
+		if(action->get(Support) > 0)
+			result -= player->getsupport() / 4;
+		if(action->get(Recruit) > 0)
+			result += (ideal_troops - troops) * 3;
 	}
-	if(action->get(Economy) > 0) {
-		auto income = player->getincome();
-		if(income < ideal_income_maximum)
-			return true;
-	}
-	if(action->get(Support) > 0) {
-		auto support = player->getsupport();
-		if(support < -1 * player->getfriendlyprovinces())
-			return true;
-	}
-	return false;
+	result += action->cost.gold / 2;
+	result += action->get(Support)*good_mode;
+	result += action->get(Economy)*2*good_mode;
+	return result;
 }
 
-const action_info* hero_info::choose_action_computer(adat<action_info*>& actions) const {
-	auto player = getplayer();
-	zshuffle(actions.data, actions.count);
-	for(auto a : actions) {
-		if(most_needed(player, this, a))
-			return a;
+const action_info* hero_info::choose_action() const {
+	answer_info ai;
+	for(auto& e : action_data) {
+		if(!e)
+			continue;
+		if(!isallow(&e))
+			continue;
+		if(player) {
+			if(!player->isallow(&e))
+				continue;
+		}
+		auto p = ai.add((int)&e, e.getname());
+		p->weight = getweight(this, &e);
 	}
-	return (action_info*)actions.data[rand() % actions.count];
+	ai.sort();
+	auto interactive = player && !player->iscomputer();
+	return (action_info*)ai.choose(interactive, this, true, 0);
 }
