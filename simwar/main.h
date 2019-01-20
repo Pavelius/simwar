@@ -264,7 +264,7 @@ struct hero_info : object_info {
 	const tactic_info*			choose_tactic() const;
 	bool						choose_troops(const action_info* action, const province_info* province, army& a1, army& a2, army& a3, int minimal_count, cost_info& cost) const;
 	bool						choose_troops_human(const action_info* action, const province_info* province, army& a1, army& a2, army& a3, int minimal_count, cost_info& cost) const;
-	bool						choose_troops_computer(const action_info* action, const province_info* province, army& a1, army& a2, army& a3, int minimal_count, cost_info& cost) const;
+	bool						choose_troops_computer(const action_info* action, const province_info* province, army& a1, army& a2, army& a3, int minimal_count, cost_info& cost, int test_safety) const;
 	bool						choose_units(const action_info* action, const province_info* province, unit_set& a1, unit_set& a2, cost_info& cost) const;
 	bool						choose_units_human(const action_info* action, const province_info* province, unit_set& a1, unit_set& a2, cost_info& cost) const;
 	bool						choose_units_computer(const action_info* action, const province_info* province, unit_set& s1, unit_set& s2, cost_info& cost) const;

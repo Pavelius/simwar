@@ -299,12 +299,30 @@ province_info* hero_info::choose_province(const action_info* action, bool run) c
 	provinces.count = province_info::remove_hero_present(provinces, player);
 	if(!provinces.count)
 		return 0;
+	if(player->iscomputer()) {
+		if(action->getprovince() == NoFriendlyProvince) {
+			auto ps = provinces.data;
+			for(auto p : provinces) {
+				auto raid = action->get(Raid) > 0;
+				army troops_move(
+					const_cast<player_info*>(player),
+					const_cast<province_info*>(p),
+					const_cast<hero_info*>(this),
+					true, raid);
+				auto cost = player->cost;
+				if(!choose_attack(action, p, troops_move, cost, raid))
+					continue;
+				*ps++ = p;
+			}
+			provinces.count = ps - provinces.data;
+		}
+		if(!provinces.count)
+			return 0;
+		return provinces[rand() % provinces.count];
+	}
 	if(!run)
 		return provinces[rand() % provinces.count];
-	if(player->iscomputer())
-		return provinces[rand() % provinces.count];
-	else
-		return const_cast<province_info*>(choose_province(action, provinces, choose_mode));
+	return const_cast<province_info*>(choose_province(action, provinces, choose_mode));
 }
 
 void hero_info::make_move() {
@@ -364,10 +382,4 @@ bool hero_info::choose_units(const action_info* action, const province_info* pro
 	if(player->iscomputer())
 		return choose_units_computer(action, province, a1, a2, cost);
 	return choose_units_human(action, province, a1, a2, cost);
-}
-
-bool hero_info::choose_troops(const action_info* action, const province_info* province, army& a1, army& a2, army& a3, int minimal_count, cost_info& cost) const {
-	if(player->iscomputer())
-		return choose_troops_computer(action, province, a1, a2, a3, minimal_count, cost);
-	return choose_troops_human(action, province, a1, a2, a3, minimal_count, cost);
 }

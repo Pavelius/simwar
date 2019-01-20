@@ -1,5 +1,7 @@
 #include "main.h"
 
+const int ideal_safety = 2;
+
 void player_info::computer_move() {
 	hero_info* source[hero_max];
 	auto hero_count = hero_info::select(source, lenghtof(source), this);
@@ -20,8 +22,7 @@ bool hero_info::choose_units_computer(const action_info* action, const province_
 	return s2.getcount() > 0;
 }
 
-bool hero_info::choose_troops_computer(const action_info* action, const province_info* province, army& s1, army& s2, army& a3, int minimal_count, cost_info& cost) const {
-	const int safety = 2;
+bool hero_info::choose_troops_computer(const action_info* action, const province_info* province, army& s1, army& s2, army& a3, int minimal_count, cost_info& cost, int safety) const {
 	auto defend = a3.getstrenght(0);
 	cost_info total = cost;
 	zshuffle(s1.data, s1.getcount());
@@ -65,9 +66,15 @@ static int getweight(const hero_info* hero, const action_info* action) {
 			result += (ideal_troops - troops) * 3;
 	}
 	result += action->cost.gold / 2;
-	result += action->get(Support)*good_mode;
-	result += action->get(Economy)*2*good_mode;
+	result += action->get(Support);
+	result += action->get(Economy) * 2 * good_mode;
 	return result;
+}
+
+bool hero_info::choose_troops(const action_info* action, const province_info* province, army& a1, army& a2, army& a3, int minimal_count, cost_info& cost) const {
+	if(player->iscomputer())
+		return choose_troops_computer(action, province, a1, a2, a3, minimal_count, cost, ideal_safety);
+	return choose_troops_human(action, province, a1, a2, a3, minimal_count, cost);
 }
 
 const action_info* hero_info::choose_action() const {
@@ -81,7 +88,7 @@ const action_info* hero_info::choose_action() const {
 			if(!player->isallow(&e))
 				continue;
 		}
-		if(action->isplaceable()) {
+		if(e.isplaceable()) {
 			if(!choose_province(&e, false))
 				continue;
 		}
