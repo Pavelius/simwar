@@ -40,6 +40,20 @@ bool hero_info::choose_troops_computer(const action_info* action, const province
 	return attack >= defend;
 }
 
+static int getminimaldefence(const player_info* player) {
+	adat<province_info*> provincies;
+	provincies.count = province_info::select(provincies.data, provincies.getmaximum());
+	auto minimal_defence = -1;
+	for(auto p : provincies) {
+		if(p->getstatus(player) == NoFriendlyProvince)
+			continue;
+		auto d = p->getstrenght();
+		if(minimal_defence ==-1 || minimal_defence > d)
+			minimal_defence = d;
+	}
+	return minimal_defence;
+}
+
 static int getweight(const hero_info* hero, const action_info* action) {
 	const int ideal_provincies = 10;
 	const int ideal_gold = 30;
@@ -49,11 +63,14 @@ static int getweight(const hero_info* hero, const action_info* action) {
 	auto player = hero->getplayer();
 	auto good_mode = (action->getprovince() == NoFriendlyProvince) ? -1 : 1;
 	if(player) {
+		auto attack_strenght = player->getstrenght();
 		auto gold = player->cost.gold;
 		auto income = player->getincome(0);
 		auto provincies = player->getfriendlyprovinces();
 		auto troops = player->gettroopscount();
 		auto ideal_troops = provincies;
+		if(ideal_troops < 10)
+			ideal_troops = 10;
 		if(action->get(Attack) > 0)
 			result += (ideal_provincies - player->getfriendlyprovinces());
 		if(action->get(Raid) > 0)
@@ -62,8 +79,11 @@ static int getweight(const hero_info* hero, const action_info* action) {
 			result += (ideal_income - income) * 2;
 		if(action->get(Support) > 0)
 			result -= player->getsupport() / 4;
-		if(action->get(Recruit) > 0)
+		if(action->get(Recruit) > 0) {
+			auto minimal_strenght = getminimaldefence(player) + ideal_safety;
 			result += (ideal_troops - troops) * 3;
+			result += (minimal_strenght - attack_strenght) * 3;
+		}
 	}
 	result += action->cost.gold / 2;
 	result += action->get(Support);

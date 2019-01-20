@@ -35,6 +35,12 @@ int province_info::getdefend() const {
 	return landscape->get(Defend) + get(Level);
 }
 
+int province_info::getstrenght() const {
+	army defenders(0, const_cast<province_info*>(this), 0, false, false);
+	defenders.count = troop_info::select(defenders.data, defenders.getmaximum(), this);
+	return defenders.get(Defend, 0);
+}
+
 int province_info::getincome(stringcreator* ti) const {
 	auto result = 0;
 	if(landscape)

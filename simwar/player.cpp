@@ -88,6 +88,18 @@ int player_info::getincome(stringcreator* ti) const {
 	return result;
 }
 
+int	player_info::getstrenght() const {
+	auto result = 0;
+	for(auto& e : troop_data) {
+		if(!e)
+			continue;
+		if(e.getplayer()!=this)
+			continue;
+		result += e.get(Attack);
+	}
+	return result;
+}
+
 int	player_info::getsupport() const {
 	auto result = 0;
 	for(auto& e : province_data) {

@@ -160,6 +160,7 @@ struct province_info : object_info {
 	hero_info*					gethero(const player_info* player) const;
 	player_info*				getplayer() const { return player; }
 	point						getposition() const { return position; }
+	int							getstrenght() const;
 	int							getincome(stringcreator* ti = 0) const;
 	int							getindex() const;
 	void						getinfo(stringcreator& sb, bool show_landscape, const army* support_units = 0) const;
@@ -393,6 +394,7 @@ struct player_info : name_info {
 	const char*					getnameof() const { return nameof; }
 	int							getfriendlyprovinces() const;
 	int							getsupport() const;
+	int							getstrenght() const;
 	static unsigned				gettroops(troop_info** source, unsigned maximum_count, const province_info* province = 0, const player_info* player = 0, const player_info* player_move = 0);
 	int							gettroopscount() const;
 	static void					hire_heroes();
