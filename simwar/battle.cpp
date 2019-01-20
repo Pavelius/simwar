@@ -159,7 +159,8 @@ void province_info::win(string& sb, player_info* attacker_player, player_info* d
 			defender_player->cost += -trophies;
 		sb.addn(msg.raid_spoils, trophies);
 	}
-	attacker_player->cost.fame += action->get(Fame);
+	if(attacker_player)
+		attacker_player->cost.fame += action->get(Fame);
 	if(defender_general)
 		defender_general->add(Loyalty, -1);
 }

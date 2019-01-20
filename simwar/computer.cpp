@@ -81,6 +81,10 @@ const action_info* hero_info::choose_action() const {
 			if(!player->isallow(&e))
 				continue;
 		}
+		if(action->isplaceable()) {
+			if(!choose_province(&e, false))
+				continue;
+		}
 		auto p = ai.add((int)&e, e.getname());
 		p->weight = getweight(this, &e);
 	}

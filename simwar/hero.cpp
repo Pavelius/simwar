@@ -291,7 +291,7 @@ void hero_info::setloyalty(int value) {
 		ability[Loyalty] = value;
 }
 
-province_info* hero_info::choose_province(const action_info* action) const {
+province_info* hero_info::choose_province(const action_info* action, bool run) const {
 	auto choose_mode = action->getprovince();
 	adat<province_info*> provinces;
 	provinces.count = province_info::select(provinces.data, provinces.getmaximum(), getplayer());
@@ -299,6 +299,8 @@ province_info* hero_info::choose_province(const action_info* action) const {
 	provinces.count = province_info::remove_hero_present(provinces, player);
 	if(!provinces.count)
 		return 0;
+	if(!run)
+		return provinces[rand() % provinces.count];
 	if(player->iscomputer())
 		return provinces[rand() % provinces.count];
 	else
@@ -314,7 +316,7 @@ void hero_info::make_move() {
 	const tactic_info* tactic = 0;
 	province_info* province = 0;
 	if(action->isplaceable()) {
-		province = choose_province(action);
+		province = choose_province(action, true);
 		if(!province)
 			return;
 	}

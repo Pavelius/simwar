@@ -259,7 +259,7 @@ struct hero_info : object_info {
 	void						check_leave();
 	const action_info*			choose_action() const;
 	bool						choose_attack(const action_info* action, const province_info* province, army& troops, cost_info& cost, bool raid) const;
-	province_info*				choose_province(const action_info* action) const;
+	province_info*				choose_province(const action_info* action, bool run) const;
 	const province_info*		choose_province(const action_info* action, aref<province_info*> source, province_flag_s mode) const;
 	const tactic_info*			choose_tactic() const;
 	bool						choose_troops(const action_info* action, const province_info* province, army& a1, army& a2, army& a3, int minimal_count, cost_info& cost) const;
