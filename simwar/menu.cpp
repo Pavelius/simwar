@@ -47,7 +47,7 @@ const menu_info* menu_info::choose(const char* parent, bool cancel_button) {
 	answer_info ai;
 	select(ai, parent);
 	//ai.sort();
-	return (menu_info*)ai.choose(cancel_button);
+	return (menu_info*)ai.choose(true, cancel_button);
 }
 
 void menu_info::choose_block(const char* parent) {

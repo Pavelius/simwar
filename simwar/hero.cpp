@@ -171,7 +171,7 @@ unsigned hero_info::remove_this(hero_info** source, unsigned count) const {
 }
 
 const action_info* hero_info::choose_action() const {
-	adat<action_info*> source;
+	answer_info ai;
 	for(auto& e : action_data) {
 		if(!e)
 			continue;
@@ -181,17 +181,12 @@ const action_info* hero_info::choose_action() const {
 			if(!player->isallow(&e))
 				continue;
 		}
-		source.add(&e);
+		auto p = ai.add((int)&e, e.getname());
+		p->weight = 10;
 	}
-	if(!source)
-		return 0;
-	if(player->iscomputer())
-		return choose_action_computer(source);
-	answer_info ai;
-	for(auto p : source)
-		ai.add((int)p, p->getname());
 	ai.sort();
-	return (action_info*)ai.choose(this);
+	auto interactive = player && !player->iscomputer();
+	return (action_info*)ai.choose(interactive, this, true, 0);
 }
 
 void hero_info::check_leave() {

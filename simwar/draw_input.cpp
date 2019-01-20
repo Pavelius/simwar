@@ -1225,7 +1225,9 @@ static void end_turn() {
 //	}
 //}
 
-int answer_info::choose(const hero_info* hero, bool cancel_button, answer_info::tips_type getinfo) const {
+int answer_info::choose(bool interactive, const hero_info* hero, bool cancel_button, answer_info::tips_type getinfo) const {
+	if(!interactive)
+		return getrandomparam();
 	while(ismodal()) {
 		if(hero)
 			render_left_side(hero->getplayer(), 0, false);
@@ -1242,7 +1244,9 @@ int answer_info::choose(const hero_info* hero, bool cancel_button, answer_info::
 	return getresult();
 }
 
-int answer_info::choose(bool cancel_button) const {
+int answer_info::choose(bool interactive, bool cancel_button) const {
+	if(!interactive)
+		return getrandomparam();
 	auto button_height = texth() + gui.button_border * 2 + gui.padding;
 	if(!elements.getcount())
 		return 0;
@@ -1270,12 +1274,8 @@ const tactic_info* hero_info::choose_tactic() const {
 			continue;
 		ai.add((int)&e, e.getname());
 	}
-	if(!ai)
-		return 0;
-	if(player->iscomputer())
-		return (tactic_info*)ai.elements.data[rand() % ai.elements.count].param;
 	ai.sort();
-	return (tactic_info*)ai.choose(this);
+	return (tactic_info*)ai.choose(!player->iscomputer(), this, true, 0);
 }
 
 int	player_info::choose(const hero_info* hero, answer_info& source, const char* format, ...) const {

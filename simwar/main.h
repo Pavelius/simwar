@@ -236,16 +236,20 @@ private:
 struct answer_info : string {
 	struct element {
 		int						param;
+		int						weight;
 		const char*				text;
 		const char*				getname() const { return text; }
 	};
 	typedef void(*tips_type)(stringcreator& sb, const element& e);
 	adat<element, 8>			elements;
 	constexpr explicit operator bool() const { return elements.count != 0; }
-	void						add(int param, const char* format, ...);
-	void						addv(int param, const char* format, const char* format_param);
-	int							choose(bool cancel_button = false) const;
-	int							choose(const hero_info* hero, bool cancel_button = true, answer_info::tips_type getinfo = 0) const;
+	element*					add(int param, const char* format, ...);
+	element*					addv(int param, const char* format, const char* format_param);
+	int							choose(bool interactive, bool cancel_button) const;
+	int							choose(bool interactive, const hero_info* hero, bool cancel_button, answer_info::tips_type getinfo) const;
+	const element*				getrandom() const;
+	int							getrandomparam() const;
+	int							getweight() const;
 	void						sort();
 };
 struct hero_info : object_info {
