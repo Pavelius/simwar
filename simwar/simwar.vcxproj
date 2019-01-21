@@ -154,7 +154,6 @@
     <ClCompile Include="event.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="game_header.cpp" />
-    <ClCompile Include="game_log.cpp" />
     <ClCompile Include="gender.cpp" />
     <ClCompile Include="grammar.cpp" />
     <ClCompile Include="hero.cpp" />
@@ -215,10 +214,12 @@
     <Text Include="..\scripts\earth_calendar.txt" />
     <Text Include="..\scripts\tactics.txt" />
     <Text Include="..\text\ru\ability.txt" />
+    <Text Include="..\text\ru\earth_calendar.txt" />
     <Text Include="..\text\ru\gender.txt" />
     <Text Include="..\text\ru\menu.txt" />
     <Text Include="..\text\ru\msg.txt" />
     <Text Include="..\text\ru\player_ai.txt" />
+    <Text Include="..\text\ru\tactics.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\maps\silentseas.map" />

@@ -34,11 +34,11 @@ struct bsdata : array {
 		void			add(bsparse_error_s id, const char* url, int line, int column, ...);
 		bool			check(const requisit* requisits, unsigned requisits_count);
 		bool			check(const char* url, bsval source);
-		virtual const char* getinclude(char* result, const char* result_end, const char* id) { return id; }
 		virtual void	error(bsparse_error_s id, const char* url, int line, int column, const char* format_param) {}
 		virtual bsdata*	findbase(const bsreq* type) const;
 		virtual bsdata*	findbase(const char* id) const;
 		int				getcount() const { return count; }
+		virtual const char* getinclude(char* result, const char* result_end, const char* id) const { return id; }
 		virtual const bsreq* getrequisit(const bsreq* fields, const char* buffer) const;
 	private:
 		int				count;
@@ -63,6 +63,7 @@ struct bsdata : array {
 	static bsval		findbyid(const char* value);
 	static void			read(const char* url);
 	static void			read(const char* url, parser& errors);
+	static void			read(const char* url, parser& errors, const char* loc, const char** requisits, const bsdata_strings* ranges);
 	static bool			readl(const char* url, const char** requisits, const bsdata_strings* tables);
 	static bool			readl(const char* url, const char** requisits, void* object, const bsreq* type);
 	static bool			readl(const char* url, const char* locale_name, parser& log, const char** prefixs, const char** requisits, const bsdata_strings* tables, const char** skip_name);

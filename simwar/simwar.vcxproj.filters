@@ -193,9 +193,6 @@
     <ClCompile Include="object.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
-    <ClCompile Include="game_log.cpp">
-      <Filter>Логика</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="draw.h">
@@ -312,6 +309,12 @@
     </Text>
     <Text Include="..\scripts\earth_calendar.txt">
       <Filter>Скрипты</Filter>
+    </Text>
+    <Text Include="..\text\ru\earth_calendar.txt">
+      <Filter>Ядро</Filter>
+    </Text>
+    <Text Include="..\text\ru\tactics.txt">
+      <Filter>Ядро</Filter>
     </Text>
   </ItemGroup>
   <ItemGroup>

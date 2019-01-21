@@ -53,3 +53,8 @@ void bslog::error(bsparse_error_s id, const char* url, int line, int column, con
 	linefeed();
 	last_error = id;
 }
+
+const char* bslog::getinclude(char* result, const char* result_end, const char* id) const {
+	szprint(result, result_end, "scripts/%1.txt", id);
+	return result;
+}

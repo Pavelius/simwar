@@ -393,6 +393,19 @@ void bsdata::read(const char* url, bsdata::parser& parser) {
 	e.parse();
 }
 
+void bsdata::read(const char* url, parser& errors, const char* loc, const char** requisits, const bsdata_strings* ranges) {
+	textfile file(url);
+	if(!file)
+		return;
+	bsdata_serial e(errors);
+	e.setup(file);
+	e.parse();
+	for(auto p : e.names) {
+		zprint(e.buffer, "text/%1/%2.txt", loc, p);
+		readl(e.buffer, requisits, ranges);
+	}
+}
+
 void bsdata::read(const char* url) {
 	parser errors;
 	read(url, errors);

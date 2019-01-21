@@ -1,4 +1,3 @@
-#include "bslog.h"
 #include "main.h"
 
 bsreq game_type[] = {
@@ -45,7 +44,7 @@ struct game_log : bslog {
 
 	game_log(const char* name) : bslog(name) {}
 
-	virtual const bsreq* getrequisit(const bsreq* fields, const char* buffer) const override {
+	const bsreq* getrequisit(const bsreq* fields, const char* buffer) const {
 		auto result = parser::getrequisit(fields, buffer);
 		if(result)
 			return result;
@@ -73,9 +72,10 @@ bool game_info::readmap(const char* name) {
 	game.clear();
 	io::file::remove(url_errors);
 	if(true) {
+		auto loc = "ru";
 		game_log errors(url_errors);
-		bsdata::read(zprint(temp, "maps/%1.map", name), errors);
-		bsdata::readl(zprint(temp, "maps/%1_%2.txt", name, "ru"), key_requisits, key_ranges);
+		bsdata::read(zprint(temp, "maps/%1.map", name), errors, loc, key_requisits, key_ranges);
+		bsdata::readl(zprint(temp, "maps/%1_%2.txt", name, loc), key_requisits, key_ranges);
 		errors.check(required_reqisits, lenghtof(required_reqisits));
 		if(result) {
 			if(!initializemap())

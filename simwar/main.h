@@ -1,4 +1,5 @@
 #include "bsdata.h"
+#include "bslog.h"
 #include "collection.h"
 #include "crt.h"
 #include "msg.h"
