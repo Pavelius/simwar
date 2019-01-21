@@ -1,5 +1,5 @@
-include "scripts/tactics.txt"
-include "scripts/earth_calendar.txt"
+include "tactics"
+include "earth_calendar"
 
 nation orcs
 nation northerners

@@ -2,29 +2,34 @@
 #include "crt.h"
 #include "io.h"
 
-class bsfile {
-	const bsfile*	parent;
-	const char*		url;
-	const char*		start;
+class textfile {
+	const char*			url;
+	const char*			content;
 public:
-	bsfile(const char* url, const bsfile* parent = 0) : parent(0), url(url), start(loadt(url)) {}
-	~bsfile() { delete start; }
-	operator bool() const { return start != 0; }
-	const bsfile*	getparent() const { return parent; }
-	const char*		getstart() const { return start; }
-	const char*		geturl() const { return url; }
+	textfile(const char* url) : content(loadt(url)), url(url) {}
+	~textfile() { delete content; }
+	operator bool() const { return begin() != 0; }
+	const char*			begin() const { return content; }
+	const char*			geturl() const { return url; }
 };
 
-struct bsdata_serial : bsfile {
+struct bsdata_serial {
 	
-	char			buffer[1024];
-	int				value;
-	const bsreq*	value_type;
-	void*			value_object;
-	const char*		p;
-	bsdata::parser&	parser;
+	const textfile*		file;
+	arem<const char*>	names;
+	char				buffer[1024];
+	int					value;
+	const bsreq*		value_type;
+	void*				value_object;
+	const char*			p;
+	bsdata::parser&		parser;
 
-	bsdata_serial(const char* url, bsdata::parser& parser, bsdata_serial* parent) : bsfile(url, parent), parser(parser), p(getstart()) {
+	bsdata_serial(bsdata::parser& parser) : parser(parser), p(0) {
+	}
+
+	void setup(const textfile& e) {
+		file = &e;
+		p = e.begin();
 		clearvalue();
 		buffer[0] = 0;
 	}
@@ -72,7 +77,9 @@ struct bsdata_serial : bsfile {
 	void getpos(const char* p, int& line, int& column) {
 		line = 0;
 		column = 0;
-		auto ps = getstart();
+		if(!file)
+			return;
+		auto ps = file->begin();
 		while(*ps) {
 			line++;
 			auto pe = skipcr(skipline(ps));
@@ -87,7 +94,9 @@ struct bsdata_serial : bsfile {
 	void error(bsparse_error_s id, ...) {
 		int line, column;
 		getpos(p, line, column);
-		parser.error(id, geturl(), line, column, xva_start(id));
+		if(!file)
+			return;
+		parser.error(id, file->geturl(), line, column, xva_start(id));
 		parser.add();
 		p = skipline(p);
 	}
@@ -95,7 +104,9 @@ struct bsdata_serial : bsfile {
 	void warning(bsparse_error_s id, ...) {
 		int line, column;
 		getpos(p, line, column);
-		parser.error(id, geturl(), line, column, xva_start(id));
+		if(!file)
+			return;
+		parser.error(id, file->geturl(), line, column, xva_start(id));
 		parser.add();
 	}
 
@@ -257,25 +268,38 @@ struct bsdata_serial : bsfile {
 		return true;
 	}
 
+	void directive_include() {
+		if(p[0] != '\"') {
+			error(ErrorExpected1p, "\"");
+			return;
+		}
+		p++;
+		readstring('\"');
+		auto ps = szdup(buffer);
+		if(names.indexof(ps) != -1)
+			return; // Файл уже загружался
+		names.add(ps);
+		ps = parser.getinclude(zend(buffer), zendof(buffer), ps);
+		if(!ps)
+			return;
+		textfile new_file(ps);
+		if(!new_file) {
+			error(ErrorFile1pNotFound, buffer);
+			return;
+		}
+		auto old_file = file;
+		auto old_p = p;
+		setup(new_file);
+		parse();
+		p = old_p;
+		file = old_file;
+		clearvalue();
+	}
+
 	bool directive() {
-		if(strcmp(buffer, "include") == 0) {
-			if(p[0] != '\"') {
-				error(ErrorExpected1p, "\"");
-				return true;
-			}
-			p++;
-			readstring('\"');
-			for(auto p = getparent(); p; p = p->getparent()) {
-				if(strcmp(p->geturl(), buffer) == 0)
-					return true;
-			}
-			bsdata_serial e(buffer, parser, this);
-			if(!e) {
-				error(ErrorFile1pNotFound, buffer);
-				return true;
-			}
-			e.parse();
-		} else
+		if(strcmp(buffer, "include") == 0)
+			directive_include();
+		else
 			return false;
 		return true;
 	}
@@ -361,9 +385,12 @@ struct bsdata_serial : bsfile {
 };
 
 void bsdata::read(const char* url, bsdata::parser& parser) {
-	bsdata_serial e(url, parser, 0);
-	if(e)
-		e.parse();
+	textfile file(url);
+	if(!file)
+		return;
+	bsdata_serial e(parser);
+	e.setup(file);
+	e.parse();
 }
 
 void bsdata::read(const char* url) {

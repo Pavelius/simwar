@@ -193,6 +193,9 @@
     <ClCompile Include="object.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
+    <ClCompile Include="game_log.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="draw.h">

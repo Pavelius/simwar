@@ -154,6 +154,7 @@
     <ClCompile Include="event.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="game_header.cpp" />
+    <ClCompile Include="game_log.cpp" />
     <ClCompile Include="gender.cpp" />
     <ClCompile Include="grammar.cpp" />
     <ClCompile Include="hero.cpp" />

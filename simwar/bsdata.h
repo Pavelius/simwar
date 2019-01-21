@@ -34,6 +34,7 @@ struct bsdata : array {
 		void			add(bsparse_error_s id, const char* url, int line, int column, ...);
 		bool			check(const requisit* requisits, unsigned requisits_count);
 		bool			check(const char* url, bsval source);
+		virtual const char* getinclude(char* result, const char* result_end, const char* id) { return id; }
 		virtual void	error(bsparse_error_s id, const char* url, int line, int column, const char* format_param) {}
 		virtual bsdata*	findbase(const bsreq* type) const;
 		virtual bsdata*	findbase(const char* id) const;
