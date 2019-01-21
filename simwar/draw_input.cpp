@@ -740,7 +740,7 @@ static void setcamera(const province_info* province) {
 	camera = province->getposition();
 }
 
-static int choose_answer(const player_info* player, const province_info* province, const hero_info* hero, answer_info& source, const char* format, const char* format_param) {
+static int choose_answer(const player_info* player, const province_info* province, const hero_info* hero, choiseset& source, const char* format, const char* format_param) {
 	if(province)
 		setcamera(province);
 	while(ismodal()) {
@@ -758,7 +758,7 @@ static int choose_answer(const player_info* player, const province_info* provinc
 }
 
 static void show_report(const player_info* player, const province_info* province, const hero_info* hero, const char* format, ...) {
-	answer_info source; source.add(0, msg.accept);
+	choiseset source; source.add(0, msg.accept);
 	choose_answer(player, province, hero, source, format, xva_start(format));
 }
 
@@ -1207,25 +1207,7 @@ static void end_turn() {
 	breakmodal(0);
 }
 
-//void game_info::editor(const char* map_name) {
-//	while(ismodal()) {
-//		render_board(0, 0, {}, colors::gray, false, false);
-//		auto x = getwidth() - gui.hero_window_width - gui.border - gui.padding;
-//		auto y = gui.padding + gui.border;
-//		y += windowb(x, y, gui.hero_window_width, msg.accept, cmd(buttonok));
-//		domodal();
-//		control_standart();
-//		if(hot.key == MouseLeft && hot.pressed && last_board == hot.hilite) {
-//			auto pt = getmappos(last_board, hot.mouse);
-//			auto province = province_data.add();
-//			char temp[260]; zprint(temp, "province%1i", province->getindex());
-//			province->setnation(&nation_data[0]);
-//			province->setlandscape(&landscape_data[0]);
-//		}
-//	}
-//}
-
-int answer_info::choose(bool interactive, const hero_info* hero, bool cancel_button, answer_info::tips_type getinfo) const {
+int choiseset::choose(bool interactive, const hero_info* hero, bool cancel_button, choiseset::tips_type getinfo) const {
 	if(!interactive)
 		return getrandomparam();
 	while(ismodal()) {
@@ -1244,7 +1226,7 @@ int answer_info::choose(bool interactive, const hero_info* hero, bool cancel_but
 	return getresult();
 }
 
-int answer_info::choose(bool interactive, bool cancel_button) const {
+int choiseset::choose(bool interactive, bool cancel_button) const {
 	if(!interactive)
 		return getrandomparam();
 	auto button_height = texth() + gui.button_border * 2 + gui.padding;
@@ -1268,7 +1250,7 @@ int answer_info::choose(bool interactive, bool cancel_button) const {
 }
 
 const tactic_info* hero_info::choose_tactic() const {
-	answer_info ai;
+	choiseset ai;
 	for(auto& e : tactic_data) {
 		if(!e)
 			continue;
@@ -1278,7 +1260,7 @@ const tactic_info* hero_info::choose_tactic() const {
 	return (tactic_info*)ai.choose(!player->iscomputer(), this, true, 0);
 }
 
-int	player_info::choose(const hero_info* hero, answer_info& source, const char* format, ...) const {
+int	player_info::choose(const hero_info* hero, choiseset& source, const char* format, ...) const {
 	if(type == PlayerComputer)
 		return source.elements.data[rand() % source.elements.count].param;
 	return choose_answer(this, 0, hero, source, format, xva_start(format));

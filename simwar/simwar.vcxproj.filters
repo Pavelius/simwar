@@ -160,9 +160,6 @@
     <ClCompile Include="gender.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
-    <ClCompile Include="answer.cpp">
-      <Filter>Логика</Filter>
-    </ClCompile>
     <ClCompile Include="calendar.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
@@ -191,6 +188,9 @@
       <Filter>Логика</Filter>
     </ClCompile>
     <ClCompile Include="object.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
+    <ClCompile Include="choiseset.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
   </ItemGroup>

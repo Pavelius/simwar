@@ -59,6 +59,7 @@ static int getweight(const hero_info* hero, const action_info* action) {
 	const int ideal_gold = 30;
 	const int ideal_income = 5;
 	const int ideal_income_maximum = 15;
+	const int higly_likely = 20;
 	auto result = 10;
 	auto player = hero->getplayer();
 	auto good_mode = (action->getprovince() == NoFriendlyProvince) ? -1 : 1;
@@ -82,7 +83,8 @@ static int getweight(const hero_info* hero, const action_info* action) {
 		if(action->get(Recruit) > 0) {
 			auto minimal_strenght = getminimaldefence(player) + ideal_safety;
 			result += (ideal_troops - troops) * 3;
-			result += (minimal_strenght - attack_strenght) * 3;
+			if(minimal_strenght > attack_strenght)
+				result += higly_likely;
 		}
 	}
 	result += action->cost.gold / 2;
@@ -98,7 +100,7 @@ bool hero_info::choose_troops(const action_info* action, const province_info* pr
 }
 
 const action_info* hero_info::choose_action() const {
-	answer_info ai;
+	choiseset ai;
 	for(auto& e : action_data) {
 		if(!e)
 			continue;

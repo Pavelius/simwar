@@ -299,7 +299,7 @@ void player_info::check_hire() {
 	if(!game.hire_hero)
 		return;
 	auto base_multiplier = 10;
-	answer_info ai;
+	choiseset ai;
 	for(auto i = 0; i < 7; i++) {
 		auto value = (i + 1)*base_multiplier;
 		if(cost.gold>=value)

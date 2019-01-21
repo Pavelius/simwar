@@ -1,12 +1,12 @@
 #include "main.h"
 
 static int compare(const void* p1, const void* p2) {
-	auto e1 = (answer_info::element*)p1;
-	auto e2 = (answer_info::element*)p2;
+	auto e1 = (choiseset::element*)p1;
+	auto e2 = (choiseset::element*)p2;
 	return strcmp(e1->text, e2->text);
 }
 
-int	answer_info::getweight() const {
+int	choiseset::getweight() const {
 	auto result = 0;
 	for(auto& e : elements) {
 		if(e.weight>0)
@@ -15,11 +15,11 @@ int	answer_info::getweight() const {
 	return result;
 }
 
-void answer_info::sort() {
+void choiseset::sort() {
 	qsort(elements.data, elements.getcount(), sizeof(elements[0]), compare);
 }
 
-const answer_info::element* answer_info::getrandom() const {
+const choiseset::element* choiseset::getrandom() const {
 	if(!elements.getcount())
 		return 0;
 	auto weight = getweight();
@@ -37,14 +37,14 @@ const answer_info::element* answer_info::getrandom() const {
 	return 0;
 }
 
-int answer_info::getrandomparam() const {
+int choiseset::getrandomparam() const {
 	auto p = getrandom();
 	if(!p)
 		return 0;
 	return p->param;
 }
 
-answer_info::element* answer_info::addv(int param, const char* format, const char* format_param) {
+choiseset::element* choiseset::addv(int param, const char* format, const char* format_param) {
 	if(elements.getcount() >= elements.getmaximum())
 		return 0;
 	if(get() >= end())
@@ -59,6 +59,6 @@ answer_info::element* answer_info::addv(int param, const char* format, const cha
 	return pe;
 }
 
-answer_info::element* answer_info::add(int param, const char* format, ...) {
+choiseset::element* choiseset::add(int param, const char* format, ...) {
 	return addv(param, format, xva_start(format));
 }

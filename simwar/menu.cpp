@@ -36,7 +36,7 @@ static menu_info menu_data[] = {
 };
 BSMETA(menu);
 
-void menu_info::select(answer_info& ai, const char* parent) {
+void menu_info::select(choiseset& ai, const char* parent) {
 	for(auto& e : menu_data) {
 		if(strcmp(e.parent, parent)==0)
 			ai.add((int)&e, e.name);
@@ -44,7 +44,7 @@ void menu_info::select(answer_info& ai, const char* parent) {
 }
 
 const menu_info* menu_info::choose(const char* parent, bool cancel_button) {
-	answer_info ai;
+	choiseset ai;
 	select(ai, parent);
 	//ai.sort();
 	return (menu_info*)ai.choose(true, cancel_button);

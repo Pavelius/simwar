@@ -235,7 +235,7 @@ private:
 	int							get(ability_s id) const;
 	int							getcasualty(ability_s id) const;
 };
-struct answer_info : string {
+struct choiseset : string {
 	struct element {
 		int						param;
 		int						weight;
@@ -248,7 +248,7 @@ struct answer_info : string {
 	element*					add(int param, const char* format, ...);
 	element*					addv(int param, const char* format, const char* format_param);
 	int							choose(bool interactive, bool cancel_button) const;
-	int							choose(bool interactive, const hero_info* hero, bool cancel_button, answer_info::tips_type getinfo) const;
+	int							choose(bool interactive, const hero_info* hero, bool cancel_button, choiseset::tips_type getinfo) const;
 	const element*				getrandom() const;
 	int							getrandomparam() const;
 	int							getweight() const;
@@ -377,7 +377,7 @@ struct player_info : name_info {
 	explicit operator bool() const { return type != NoPlayer; }
 	static void					check_heroes();
 	void						check_hire();
-	int							choose(const hero_info* hero, answer_info& source, const char* format, ...) const;
+	int							choose(const hero_info* hero, choiseset& source, const char* format, ...) const;
 	cost_info					cost;
 	static int					compare_fame(const void* p1, const void* p2);
 	static int					compare_hire_bet(const void* p1, const void* p2);
@@ -472,7 +472,7 @@ struct menu_info {
 	const char*					name;
 	static const menu_info*		choose(const char* parent, bool cancel_button);
 	static void					choose_block(const char* parent);
-	static void					select(answer_info& ai, const char* parent);
+	static void					select(choiseset& ai, const char* parent);
 };
 struct effect_info : object_info {
 	void operator+=(const effect_info& e);

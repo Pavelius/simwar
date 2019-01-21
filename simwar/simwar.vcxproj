@@ -120,7 +120,7 @@
   <ItemGroup>
     <ClCompile Include="ability.cpp" />
     <ClCompile Include="action.cpp" />
-    <ClCompile Include="answer.cpp" />
+    <ClCompile Include="choiseset.cpp" />
     <ClCompile Include="archive.cpp" />
     <ClCompile Include="army.cpp" />
     <ClCompile Include="bsdata.cpp" />
