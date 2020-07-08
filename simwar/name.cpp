@@ -1,12 +1,12 @@
 #include "main.h"
 
-int name_info::compare(const void* p1, const void* p2) {
-	auto e1 = *((name_info**)p1);
-	auto e2 = *((name_info**)p2);
+int namei::compare(const void* p1, const void* p2) {
+	auto e1 = *((namei**)p1);
+	auto e2 = *((namei**)p2);
 	return strcmp(e1->name, e2->name);
 }
 
-int name_info::fix(stringcreator* sb, const char* name, int value) {
+int namei::fix(stringcreator* sb, const char* name, int value) {
 	if(sb && value) {
 		auto p = sb->get();
 		if(p > sb->begin() && p[-1] != '\"')
@@ -16,7 +16,7 @@ int name_info::fix(stringcreator* sb, const char* name, int value) {
 	return value;
 }
 
-int name_info::getnum(const void* object, const bsreq* type, const char* id) {
+int namei::getnum(const void* object, const bsreq* type, const char* id) {
 	auto pf = type->find(id);
 	if(!pf)
 		return 0;

@@ -1,16 +1,16 @@
 #include "main.h"
 
 bsreq build_type[] = {
-	BSREQ(build_info, unit, unit_type),
-	BSREQ(build_info, province, province_info::metadata),
-	BSREQ(build_info, wait, number_type),
+	BSREQ(buildi, unit, unit_type),
+	BSREQ(buildi, province, provincei::metadata),
+	BSREQ(buildi, wait, number_type),
 {}};
-adat<build_info> build_data;
+adat<buildi> build_data;
 BSMETA(build);
 
-int build_info::compare(const void* p1, const void* p2) {
-	auto e1 = *((build_info**)p1);
-	auto e2 = *((build_info**)p2);
+int buildi::compare(const void* p1, const void* p2) {
+	auto e1 = *((buildi**)p1);
+	auto e2 = *((buildi**)p2);
 	auto rs = strcmp(e1->unit->name, e2->unit->name);
 	if(rs != 0)
 		return rs;
@@ -21,11 +21,11 @@ int build_info::compare(const void* p1, const void* p2) {
 	return 0;
 }
 
-void build_info::sort(build_info** source, unsigned count) {
+void buildi::sort(buildi** source, unsigned count) {
 	qsort(source, count, sizeof(source[0]), compare);
 }
 
-void build_info::getpresent(stringcreator& sb, build_info** objects, unsigned count) {
+void buildi::getpresent(stringcreator& sb, buildi** objects, unsigned count) {
 	int count_in_row = 1;
 	for(unsigned i = 0; i < count; i++) {
 		if(i < count - 1 && compare(objects + i, objects + i + 1) == 0) {
@@ -41,7 +41,7 @@ void build_info::getpresent(stringcreator& sb, build_info** objects, unsigned co
 	}
 }
 
-unsigned build_info::select(build_info** source, unsigned maximum, const province_info* province) {
+unsigned buildi::select(buildi** source, unsigned maximum, const provincei* province) {
 	auto ps = source;
 	auto pe = ps + maximum;
 	for(auto& e : build_data) {
@@ -55,7 +55,7 @@ unsigned build_info::select(build_info** source, unsigned maximum, const provinc
 	return ps - source;
 }
 
-void build_info::build_units() {
+void buildi::build_units() {
 	for(auto& e : build_data) {
 		if(!e)
 			continue;
@@ -68,6 +68,6 @@ void build_info::build_units() {
 	}
 }
 
-void build_info::clear() {
+void buildi::clear() {
 	memset(this, 0, sizeof(*this));
 }

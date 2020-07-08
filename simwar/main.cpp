@@ -22,7 +22,7 @@ int main(int argc, char* argv[]) {
 	draw::initialize();
 	draw::create(-1, -1, 800, 600, WFResize|WFMinmax, 32);
 	draw::setcaption(msg.title);
-	menu_info::choose_block("main_menu");
+	menui::choose_block("main_menu");
 	return 0;
 }
 

@@ -1,8 +1,8 @@
 #include "main.h"
 
-adat<report_info, 2048>	report_data;
+adat<reporti, 2048>	report_data;
 
-report_info* report_info::add(const player_info* player, const province_info* province, const hero_info* hero, const char* text) {
+reporti* reporti::add(const playeri* player, const provincei* province, const heroi* hero, const char* text) {
 	auto p = report_data.add();
 	p->turn = game.turn;
 	p->hero = hero;
@@ -12,10 +12,10 @@ report_info* report_info::add(const player_info* player, const province_info* pr
 	return p;
 }
 
-bool report_info::is(const player_info* player) const {
+bool reporti::is(const playeri* player) const {
 	return this->player == player;
 }
 
-void report_info::set(player_info* player) {
+void reporti::set(playeri* player) {
 	this->player = player;
 }

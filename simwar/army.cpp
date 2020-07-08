@@ -1,9 +1,9 @@
 #include "main.h"
 
-army::army(player_info* player, province_info* province, hero_info* general, bool attack, bool raid) :
+army::army(playeri* player, provincei* province, heroi* general, bool attack, bool raid) :
 	player(player), general(general), tactic(0), attack(attack), province(province), raid(raid) {}
 
-void army::fill(const player_info* player, const province_info* province) {
+void army::fill(const playeri* player, const provincei* province) {
 	for(auto& e : troop_data) {
 		if(!e)
 			continue;
@@ -55,7 +55,7 @@ int army::get(ability_s id, stringcreator* sb) const {
 		r += general->fix(sb, value);
 		if(province) {
 			if(general->getorigin() == province->getlandscape())
-				r += name_info::fix(sb, msg.battle_magic, general->get(Magic));
+				r += namei::fix(sb, msg.battle_magic, general->get(Magic));
 		}
 		if(!attack) {
 			auto action = general->getaction();
@@ -73,14 +73,14 @@ int army::get(ability_s id, stringcreator* sb) const {
 			r += province->fix(sb, province->getdefend());
 			if(game.support_defend) {
 				auto value = province->getsupport(player) / game.support_defend;
-				char temp[256]; zprint(temp, "%1 %2", name_info::getname(Support), province->getname());
-				r += name_info::fix(sb, temp, value);
+				char temp[256]; zprint(temp, "%1 %2", namei::getname(Support), province->getname());
+				r += namei::fix(sb, temp, value);
 			}
 		} else {
 			if(game.support_attack) {
 				auto value = province->getsupport(player) / game.support_attack;
-				char temp[256]; zprint(temp, "%1 %2", name_info::getname(Support), province->getname());
-				r += name_info::fix(sb, temp, value);
+				char temp[256]; zprint(temp, "%1 %2", namei::getname(Support), province->getname());
+				r += namei::fix(sb, temp, value);
 			}
 		}
 	}

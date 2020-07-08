@@ -2,15 +2,15 @@
 
 const int ideal_safety = 2;
 
-void player_info::computer_move() {
-	hero_info* source[hero_max];
-	auto hero_count = hero_info::select(source, lenghtof(source), this);
+void playeri::computer_move() {
+	heroi* source[hero_max];
+	auto hero_count = heroi::select(source, lenghtof(source), this);
 	for(unsigned i = 0; i < hero_count; i++)
 		source[i]->make_move();
 }
 
-bool hero_info::choose_units_computer(const action_info* action, const province_info* province, unit_set& s1, unit_set& s2, cost_info& cost) const {
-	cost_info total = cost;
+bool heroi::choose_units_computer(const actioni* action, const provincei* province, unit_set& s1, unit_set& s2, costi& cost) const {
+	costi total = cost;
 	zshuffle(s1.data, s1.getcount());
 	for(unsigned i = 0; i < s1.count; i++) {
 		total += s1.data[i]->cost;
@@ -22,9 +22,9 @@ bool hero_info::choose_units_computer(const action_info* action, const province_
 	return s2.getcount() > 0;
 }
 
-bool hero_info::choose_troops_computer(const action_info* action, const province_info* province, army& s1, army& s2, army& a3, int minimal_count, cost_info& cost, int safety) const {
+bool heroi::choose_troops_computer(const actioni* action, const provincei* province, army& s1, army& s2, army& a3, int minimal_count, costi& cost, int safety) const {
 	auto defend = a3.getstrenght(0);
-	cost_info total = cost;
+	costi total = cost;
 	zshuffle(s1.data, s1.getcount());
 	for(unsigned i = 0; i < s1.count; i++) {
 		auto attack = s2.get(Attack, 0);
@@ -40,9 +40,9 @@ bool hero_info::choose_troops_computer(const action_info* action, const province
 	return attack >= defend;
 }
 
-static int getminimaldefence(const player_info* player) {
-	adat<province_info*> provincies;
-	provincies.count = province_info::select(provincies.data, provincies.getmaximum());
+static int getminimaldefence(const playeri* player) {
+	adat<provincei*> provincies;
+	provincies.count = provincei::select(provincies.data, provincies.getmaximum());
 	auto minimal_defence = -1;
 	for(auto p : provincies) {
 		if(p->getstatus(player) == NoFriendlyProvince)
@@ -54,7 +54,7 @@ static int getminimaldefence(const player_info* player) {
 	return minimal_defence;
 }
 
-static int getweight(const hero_info* hero, const action_info* action) {
+static int getweight(const heroi* hero, const actioni* action) {
 	const int ideal_provincies = 10;
 	const int ideal_gold = 30;
 	const int ideal_income = 5;
@@ -93,13 +93,13 @@ static int getweight(const hero_info* hero, const action_info* action) {
 	return result;
 }
 
-bool hero_info::choose_troops(const action_info* action, const province_info* province, army& a1, army& a2, army& a3, int minimal_count, cost_info& cost) const {
+bool heroi::choose_troops(const actioni* action, const provincei* province, army& a1, army& a2, army& a3, int minimal_count, costi& cost) const {
 	if(player->iscomputer())
 		return choose_troops_computer(action, province, a1, a2, a3, minimal_count, cost, ideal_safety);
 	return choose_troops_human(action, province, a1, a2, a3, minimal_count, cost);
 }
 
-const action_info* hero_info::choose_action() const {
+const actioni* heroi::choose_action() const {
 	choiseset ai;
 	for(auto& e : action_data) {
 		if(!e)
@@ -119,5 +119,5 @@ const action_info* hero_info::choose_action() const {
 	}
 	ai.sort();
 	auto interactive = player && !player->iscomputer();
-	return (action_info*)ai.choose(interactive, this, true, 0);
+	return (actioni*)ai.choose(interactive, this, true, 0);
 }

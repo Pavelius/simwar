@@ -3,8 +3,8 @@
 
 struct game_header_parser : bsdata::parser {
 
-	game_info		game;
-	player_info		players[player_max];
+	gamei		game;
+	playeri		players[player_max];
 	unsigned		players_count;
 	bsdata			bases[2];
 
@@ -27,7 +27,7 @@ struct game_header_parser : bsdata::parser {
 	}
 
 	game_header_parser() : bases{{"game", game_type, &game, sizeof(game), 1},
-	{"player", player_info::metadata, players, sizeof(players[0]), lenghtof(players), players_count}},
+	{"player", playeri::metadata, players, sizeof(players[0]), lenghtof(players), players_count}},
 	players_count(0) {
 		game.initialize();
 		memset(players, 0, sizeof(players));

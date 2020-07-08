@@ -31,9 +31,9 @@ static string_id_proc change_proc[] = {{"cost", &string::addcost},
 };
 bsreq string::metadata[] = {
 	BSREQ(string, cost, cost_type),
-	BSREQ(string, hero, hero_info::metadata),
-	BSREQ(string, player, player_info::metadata),
-	BSREQ(string, province, province_info::metadata),
+	BSREQ(string, hero, heroi::metadata),
+	BSREQ(string, player, playeri::metadata),
+	BSREQ(string, province, provincei::metadata),
 {}};
 
 string::string() : stringcreator(buffer, buffer + sizeof(buffer) / sizeof(buffer[0])),

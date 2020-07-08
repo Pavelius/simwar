@@ -1,21 +1,5 @@
-﻿In file script/msg_ru.txt you need add next lines
-attacking_force:
-casualties:
-defending_force:
-winner:
-lead:
-attack:
-defence:
-raid:
-income:
-cost:
-squads:
-title:
-exit:
-loadgame:
-newgame:
-savegame:
-accept:
-cancel:
-yes:
-no:
+﻿File 'text/ru/ability.txt' not found
+File 'text/ru/gender.txt' not found
+File 'text/ru/menu.txt' not found
+File 'text/ru/msg.txt' not found
+File 'text/ru/player_ai.txt' not found

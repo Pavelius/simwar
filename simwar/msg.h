@@ -1,6 +1,6 @@
 #pragma once
 
-struct msg_info {
+struct msgi {
 	const char*	attacking_force;
 	const char*	defending_force;
 	const char*	neutral_army, *neutral_army_of;

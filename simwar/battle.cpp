@@ -17,7 +17,7 @@ struct combatside : public army {
 	int wounds;
 	bool tactic_changed;
 
-	combatside(province_info* province, player_info* player, bool attack, bool raid) : army(player, province, 0, attack, raid),
+	combatside(provincei* province, playeri* player, bool attack, bool raid) : army(player, province, 0, attack, raid),
 		strenght(0), casualties(0), wounds(0), tactic_changed(false) {
 		fill(player, province);
 		general = province->gethero(player);
@@ -83,7 +83,7 @@ struct combatside : public army {
 		return msg.neutral_army_of;
 	}
 
-	player_info* getowner() {
+	playeri* getowner() {
 		return player;
 	}
 
@@ -123,7 +123,7 @@ struct combatside : public army {
 		}
 		if(general && wounds) {
 			casualtyhead(sb, result);
-			sb.add("%1 (%2i %3)", general->getname(), wounds, name_info::getnameint(Wounds, wounds));
+			sb.add("%1 (%2i %3)", general->getname(), wounds, namei::getnameint(Wounds, wounds));
 			general->setwound(general->getwound() + wounds * 2);
 		}
 		if(result[0])
@@ -137,7 +137,7 @@ struct combatside : public army {
 
 };
 
-void province_info::win(string& sb, player_info* attacker_player, player_info* defender_player, const action_info* action, bool raid, hero_info* attacker_general, hero_info* defender_general, int trophies) {
+void provincei::win(string& sb, playeri* attacker_player, playeri* defender_player, const actioni* action, bool raid, heroi* attacker_general, heroi* defender_general, int trophies) {
 	if(!raid) {
 		retreat(defender_player);
 		arrival(attacker_player);
@@ -165,7 +165,7 @@ void province_info::win(string& sb, player_info* attacker_player, player_info* d
 		defender_general->add(Loyalty, -1);
 }
 
-void province_info::loose(string& sb, player_info* attacker_player, player_info* defender_player, const action_info* action, bool raid, hero_info* attacker_general, hero_info* defender_general, int trophies) {
+void provincei::loose(string& sb, playeri* attacker_player, playeri* defender_player, const actioni* action, bool raid, heroi* attacker_general, heroi* defender_general, int trophies) {
 	retreat(attacker_player);
 	if(attacker_general)
 		attacker_general->add(Loyalty, -1);
@@ -173,7 +173,7 @@ void province_info::loose(string& sb, player_info* attacker_player, player_info*
 		defender_player->cost.fame += imax(0, defender_general->get(Nobility));
 }
 
-static bool play_battle(string& sb, province_info* province, combatside& attackers, combatside& defenders) {
+static bool play_battle(string& sb, provincei* province, combatside& attackers, combatside& defenders) {
 	attackers.setstrenght(sb, msg.attacking_force, province->getname()); sb.add(" ");
 	defenders.setstrenght(sb, msg.defending_force, province->getname());
 	attackers.setcasualty(sb, defenders);
@@ -189,7 +189,7 @@ static bool play_battle(string& sb, province_info* province, combatside& attacke
 	return (&winner == &attackers);
 }
 
-bool province_info::battle(string& sb, player_info* attacker_player, player_info* defender_player, const action_info* action, bool raid) {
+bool provincei::battle(string& sb, playeri* attacker_player, playeri* defender_player, const actioni* action, bool raid) {
 	combatside attackers(this, attacker_player, true, raid);
 	combatside defenders(this, defender_player, false, raid);
 	auto iswin = play_battle(sb, this, attackers, defenders);

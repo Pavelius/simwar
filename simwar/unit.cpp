@@ -1,26 +1,26 @@
 #include "main.h"
 
 bsreq unit_type[] = {
-	BSREQ(unit_info, id, text_type),
-	BSREQ(unit_info, name, text_type),
-	BSREQ(unit_info, text, text_type),
-	BSREQ(unit_info, nameof, text_type),
-	BSREQ(unit_info, ability, number_type),
-	BSREQ(unit_info, cost, cost_type),
-	BSREQ(unit_info, income, number_type),
-	BSREQ(unit_info, ability, number_type),
-	BSREQ(unit_info, nation, nation_type),
-	BSREQ(unit_info, mourning, number_type),
-	BSREQ(unit_info, landscape, landscape_type),
+	BSREQ(uniti, id, text_type),
+	BSREQ(uniti, name, text_type),
+	BSREQ(uniti, text, text_type),
+	BSREQ(uniti, nameof, text_type),
+	BSREQ(uniti, ability, number_type),
+	BSREQ(uniti, cost, cost_type),
+	BSREQ(uniti, income, number_type),
+	BSREQ(uniti, ability, number_type),
+	BSREQ(uniti, nation, nation_type),
+	BSREQ(uniti, mourning, number_type),
+	BSREQ(uniti, landscape, landscape_type),
 {}};
-adat<unit_info, 64> unit_data;
+adat<uniti, 64> unit_data;
 BSMETA(unit);
 
-void unit_set::fill(const player_info* player, const province_info* province, const hero_info* hero, const action_info* action) {
+void unit_set::fill(const playeri* player, const provincei* province, const heroi* hero, const actioni* action) {
 	auto player_cost = player->cost;
 	auto level = 0;
-	const landscape_info* landscape = 0;
-	nation_info* nation = 0;
+	const landscapei* landscape = 0;
+	nationi* nation = 0;
 	if(province) {
 		level = province->getlevel();
 		nation = province->getnation();
@@ -45,7 +45,7 @@ void unit_set::fill(const player_info* player, const province_info* province, co
 	}
 }
 
-bool unit_info::is(const landscape_info* landscape) const {
+bool uniti::is(const landscapei* landscape) const {
 	if(this->landscape[0] == 0 || !landscape)
 		return true;
 	for(auto p : this->landscape) {
@@ -55,7 +55,7 @@ bool unit_info::is(const landscape_info* landscape) const {
 	return false;
 }
 
-const unit_info* unit_info::getfirst(const nation_info* nation, const landscape_info* landscape, int level) {
+const uniti* uniti::getfirst(const nationi* nation, const landscapei* landscape, int level) {
 	for(auto& e : unit_data) {
 		if(!e)
 			continue;
@@ -70,8 +70,8 @@ const unit_info* unit_info::getfirst(const nation_info* nation, const landscape_
 	return 0;
 }
 
-cost_info unit_set::getcost() const {
-	cost_info result;
+costi unit_set::getcost() const {
+	costi result;
 	for(auto& e : *this)
 		result += e->cost;
 	return result;

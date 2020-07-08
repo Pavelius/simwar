@@ -1,26 +1,26 @@
 #include "main.h"
 
 bsreq game_type[] = {
-	BSREQ(game_info, income_per_level, number_type),
-	BSREQ(game_info, casualties, number_type),
-	BSREQ(game_info, support_maximum, number_type),
-	BSREQ(game_info, support_minimum, number_type),
-	BSREQ(game_info, economy_maximum, number_type),
-	BSREQ(game_info, economy_minimum, number_type),
-	BSREQ(game_info, support_attack, number_type),
-	BSREQ(game_info, support_defend, number_type),
-	BSREQ(game_info, loyalty_base, number_type),
-	BSREQ(game_info, loyalty_maximum, number_type),
-	BSREQ(game_info, loyalty_noble_modifier, number_type),
-	BSREQ(game_info, desert_base, number_type),
-	BSREQ(game_info, year, number_type),
-	BSREQ(game_info, default_action, action_type),
-	BSREQ(game_info, map, text_type),
+	BSREQ(gamei, income_per_level, number_type),
+	BSREQ(gamei, casualties, number_type),
+	BSREQ(gamei, support_maximum, number_type),
+	BSREQ(gamei, support_minimum, number_type),
+	BSREQ(gamei, economy_maximum, number_type),
+	BSREQ(gamei, economy_minimum, number_type),
+	BSREQ(gamei, support_attack, number_type),
+	BSREQ(gamei, support_defend, number_type),
+	BSREQ(gamei, loyalty_base, number_type),
+	BSREQ(gamei, loyalty_maximum, number_type),
+	BSREQ(gamei, loyalty_noble_modifier, number_type),
+	BSREQ(gamei, desert_base, number_type),
+	BSREQ(gamei, year, number_type),
+	BSREQ(gamei, default_action, action_type),
+	BSREQ(gamei, map, text_type),
 {}};
-game_info		game;
+gamei		game;
 bsdata			game_manager("game", game, game_type);
 
-void game_info::clear() {
+void gamei::clear() {
 	memset(this, 0, sizeof(*this));
 }
 
@@ -34,7 +34,7 @@ static bsdata::requisit required_reqisits[] = {{"name", true},
 {"bonus_tactic", true},
 {"loyalty_maximum", true},
 {"loyalty_base", true},
-{"nation", true, {}, province_info::metadata},
+{"nation", true, {}, provincei::metadata},
 {"home", true},
 {"origin", true},
 };
@@ -65,7 +65,7 @@ struct game_log : bslog {
 
 };
 
-bool game_info::readmap(const char* name) {
+bool gamei::readmap(const char* name) {
 	char temp[260];
 	auto result = true;
 	const auto url_errors = "errors.txt";
@@ -86,7 +86,7 @@ bool game_info::readmap(const char* name) {
 	return !io::file::exist(url_errors);
 }
 
-void game_info::initialize() {
+void gamei::initialize() {
 	if(!loyalty_noble_modifier)
 		loyalty_noble_modifier = 2;
 	if(!hire_turns)
@@ -97,7 +97,7 @@ void game_info::initialize() {
 		hire_turns_range[1] = 7;
 	if(hire_turns_range[0] > hire_turns_range[1])
 		hire_turns_range[0] = hire_turns_range[1] - 1;
-	province_info::initialize();
-	hero_info::initialize();
-	event_info::initialize();
+	provincei::initialize();
+	heroi::initialize();
+	eventi::initialize();
 }

@@ -1,30 +1,30 @@
 #include "main.h"
 
-bsreq player_info::metadata[] = {
-	BSREQ(player_info, id, text_type),
-	BSREQ(player_info, name, text_type),
-	BSREQ(player_info, nameof, text_type),
-	BSREQ(player_info, text, text_type),
-	BSREQ(player_info, type, player_ai_type),
-	BSREQ(player_info, cost, number_type),
+bsreq playeri::metadata[] = {
+	BSREQ(playeri, id, text_type),
+	BSREQ(playeri, name, text_type),
+	BSREQ(playeri, nameof, text_type),
+	BSREQ(playeri, text, text_type),
+	BSREQ(playeri, type, player_ai_type),
+	BSREQ(playeri, cost, number_type),
 {}};
-adat<player_info, player_max> player_data;
-bsdata player_manager("player", player_data, player_info::metadata);
-static adat<player_info*, player_max> players;
+adat<playeri, player_max> player_data;
+bsdata player_manager("player", player_data, playeri::metadata);
+static adat<playeri*, player_max> players;
 
-void player_info::post(const hero_info* hero, const province_info* province, const char* text) const {
-	report_info::add(this, province, hero, text);
+void playeri::post(const heroi* hero, const provincei* province, const char* text) const {
+	reporti::add(this, province, hero, text);
 }
 
 extern bsdata calendar_manager;
 
-bool player_info::isallow(const action_info* action) const {
+bool playeri::isallow(const actioni* action) const {
 	if(action->cost > cost)
 		return false;
 	return true;
 }
 
-unsigned player_info::remove_restricted(action_info** source, unsigned count) const {
+unsigned playeri::remove_restricted(actioni** source, unsigned count) const {
 	auto ps = source;
 	auto pe = source + count;
 	for(auto pb = source; pb < pe; pb++) {
@@ -36,21 +36,21 @@ unsigned player_info::remove_restricted(action_info** source, unsigned count) co
 	return ps - source;
 }
 
-void player_info::getcalendar(stringcreator& sb) {
+void playeri::getcalendar(stringcreator& sb) {
 	auto count = calendar_manager.getcount();
 	if(!count)
 		return;
 	auto calendar_index = game.turn % count;
-	auto calendar = (calendar_info*)calendar_manager.get(calendar_index);
+	auto calendar = (calendari*)calendar_manager.get(calendar_index);
 	auto year = game.year + game.turn / count;
 	sb.add("%+1 %2i года, %3", calendar->getname(), year, calendar->season->getname(), calendar->season->getnameof());
 }
 
-int	player_info::getindex() const {
+int	playeri::getindex() const {
 	return player_data.indexof(this);
 }
 
-void player_info::getinfo(stringcreator& sb) const {
+void playeri::getinfo(stringcreator& sb) const {
 	char tips[512];
 	stringcreator ti(tips, zendof(tips));
 	getcalendar(sb);
@@ -59,7 +59,7 @@ void player_info::getinfo(stringcreator& sb) const {
 	sb.adds(":flag_grey:%1i", cost.fame);
 }
 
-int player_info::getincome(stringcreator* ti) const {
+int playeri::getincome(stringcreator* ti) const {
 	auto result = 0, r = 0;
 	for(auto& e : province_data) {
 		if(!e)
@@ -88,7 +88,7 @@ int player_info::getincome(stringcreator* ti) const {
 	return result;
 }
 
-int	player_info::getstrenght() const {
+int	playeri::getstrenght() const {
 	auto result = 0;
 	for(auto& e : troop_data) {
 		if(!e)
@@ -100,7 +100,7 @@ int	player_info::getstrenght() const {
 	return result;
 }
 
-int	player_info::getsupport() const {
+int	playeri::getsupport() const {
 	auto result = 0;
 	for(auto& e : province_data) {
 		if(!e)
@@ -110,7 +110,7 @@ int	player_info::getsupport() const {
 	return result;
 }
 
-unsigned player_info::gettroops(troop_info** source, unsigned maximum_count, const province_info* province, const player_info* player, const player_info* player_move) {
+unsigned playeri::gettroops(troopi** source, unsigned maximum_count, const provincei* province, const playeri* player, const playeri* player_move) {
 	auto ps = source;
 	auto pe = ps + maximum_count;
 	for(auto& e : troop_data) {
@@ -126,15 +126,15 @@ unsigned player_info::gettroops(troop_info** source, unsigned maximum_count, con
 	return ps - source;
 }
 
-province_info* player_info::getbestprovince() const {
-	province_info* elements[player_max*2];
-	auto count = province_info::select(elements, lenghtof(elements), this);
+provincei* playeri::getbestprovince() const {
+	provincei* elements[player_max*2];
+	auto count = provincei::select(elements, lenghtof(elements), this);
 	if(!count)
 		return 0;
 	return elements[0];
 }
 
-void player_info::gain_profit() {
+void playeri::gain_profit() {
 	for(auto& e : player_data) {
 		if(!e)
 			continue;
@@ -142,7 +142,7 @@ void player_info::gain_profit() {
 	}
 }
 
-unsigned player_info::getactions(hero_info** source, unsigned maximum, int order) {
+unsigned playeri::getactions(heroi** source, unsigned maximum, int order) {
 	auto ps = source;
 	auto pe = ps + maximum;
 	for(auto& e : hero_data) {
@@ -159,9 +159,9 @@ unsigned player_info::getactions(hero_info** source, unsigned maximum, int order
 	return ps - source;
 }
 
-void player_info::resolve_actions() {
-	hero_info* heroes[hero_max];
-	build_info::build_units();
+void playeri::resolve_actions() {
+	heroi* heroes[hero_max];
+	buildi::build_units();
 	for(auto i = 1; i <= 5; i++) {
 		// Получим всех игроков
 		auto count = getactions(heroes, sizeof(heroes) / sizeof(heroes[0]), i);
@@ -190,7 +190,7 @@ static void create_province_order() {
 	zshuffle(province_order, province_data.count);
 }
 
-int player_info::getherocount() const {
+int playeri::getherocount() const {
 	auto result = 0;
 	for(auto& e : hero_data) {
 		if(!e || e.getplayer() != this)
@@ -200,7 +200,7 @@ int player_info::getherocount() const {
 	return result;
 }
 
-int player_info::gettroopscount() const {
+int playeri::gettroopscount() const {
 	auto result = 0;
 	for(auto& e : troop_data) {
 		if(!e)
@@ -211,7 +211,7 @@ int player_info::gettroopscount() const {
 	return result;
 }
 
-int player_info::getfriendlyprovinces() const {
+int playeri::getfriendlyprovinces() const {
 	auto result = 0;
 	for(auto& e : province_data) {
 		if(!e)
@@ -222,9 +222,9 @@ int player_info::getfriendlyprovinces() const {
 	return result;
 }
 
-int player_info::compare_hire_bet(const void* p1, const void* p2) {
-	auto e1 = *((player_info**)p1);
-	auto e2 = *((player_info**)p2);
+int playeri::compare_hire_bet(const void* p1, const void* p2) {
+	auto e1 = *((playeri**)p1);
+	auto e2 = *((playeri**)p2);
 	if(e2->hire_gold < e1->hire_gold)
 		return -1;
 	if(e2->hire_gold > e1->hire_gold)
@@ -240,7 +240,7 @@ int player_info::compare_hire_bet(const void* p1, const void* p2) {
 	return 0;
 }
 
-void player_info::check_heroes() {
+void playeri::check_heroes() {
 	for(auto& e : hero_data) {
 		if(!e)
 			continue;
@@ -248,25 +248,25 @@ void player_info::check_heroes() {
 	}
 }
 
-void player_info::suggest_heroes() {
+void playeri::suggest_heroes() {
 	game.hire_hero = 0;
 	if(game.hire_turns > 0) {
 		game.hire_turns--;
 		return;
 	}
 	game.hire_turns = imax(1, game.hire_turns_range[0] + (rand() % game.hire_turns_range[0]));
-	hero_info* source[hero_max];
-	auto count = hero_info::select(source, lenghtof(source), 0);
+	heroi* source[hero_max];
+	auto count = heroi::select(source, lenghtof(source), 0);
 	if(!count)
 		return;
 	game.hire_hero = source[rand() % count];
 }
 
-void player_info::hire_heroes() {
+void playeri::hire_heroes() {
 	if(!game.hire_hero)
 		return;
 	auto hero = game.hire_hero;
-	adat<player_info*, player_max> source;
+	adat<playeri*, player_max> source;
 	// Определим претендентов
 	for(auto& e : player_data) {
 		if(!e || !e.hire_gold)
@@ -285,7 +285,7 @@ void player_info::hire_heroes() {
 		if(i == 0) {
 			sb.add(msg.hero_hire_success, hero->getname(), player->getname(), player->hire_gold);
 			player->post(hero, 0, sb);
-			hero->setplayer(const_cast<player_info*>(player));
+			hero->setplayer(const_cast<playeri*>(player));
 		} else {
 			player->cost.gold += player->hire_gold;
 			sb.add(msg.hero_hire_fail, hero->getname(), source.data[0]->getname(), player->hire_gold);
@@ -295,7 +295,7 @@ void player_info::hire_heroes() {
 	}
 }
 
-void player_info::check_hire() {
+void playeri::check_hire() {
 	if(!game.hire_hero)
 		return;
 	auto base_multiplier = 10;
@@ -315,7 +315,7 @@ void player_info::check_hire() {
 	cost.gold -= hire_gold;
 }
 
-bool player_info::isallowgame() {
+bool playeri::isallowgame() {
 	for(auto& e : player_data) {
 		if(!e)
 			continue;
@@ -327,12 +327,12 @@ bool player_info::isallowgame() {
 }
 
 static void neutrals_move() {
-	hero_info::neutral_hero_actions();
+	heroi::neutral_hero_actions();
 }
 
-int player_info::compare_fame(const void* p1, const void* p2) {
-	auto e1 = *((player_info**)p1);
-	auto e2 = *((player_info**)p2);
+int playeri::compare_fame(const void* p1, const void* p2) {
+	auto e1 = *((playeri**)p1);
+	auto e2 = *((playeri**)p2);
 	auto v1 = e1->cost.fame;
 	auto v2 = e2->cost.fame;
 	if(v1 < v2)
@@ -348,7 +348,7 @@ int player_info::compare_fame(const void* p1, const void* p2) {
 	return 0;
 }
 
-void player_info::create_order() {
+void playeri::create_order() {
 	players.clear();
 	for(auto& e : player_data) {
 		if(!e)
@@ -358,7 +358,7 @@ void player_info::create_order() {
 	qsort(players.data, players.count, sizeof(players[0]), compare_fame);
 }
 
-static hero_info* getmatched(aref<hero_info*> source, const player_info* player) {
+static heroi* getmatched(aref<heroi*> source, const playeri* player) {
 	for(auto p : source) {
 		if(p->getplayer() == player)
 			return p;
@@ -366,12 +366,12 @@ static hero_info* getmatched(aref<hero_info*> source, const player_info* player)
 	return 0;
 }
 
-void player_info::random_events() {
-	adat<province_info*> provinces;
-	adat<hero_info*, hero_max> heroes;
-	provinces.count = province_info::select(provinces.data, provinces.getmaximum());
+void playeri::random_events() {
+	adat<provincei*> provinces;
+	adat<heroi*, hero_max> heroes;
+	provinces.count = provincei::select(provinces.data, provinces.getmaximum());
 	zshuffle(provinces.data, provinces.count);
-	heroes.count = hero_info::select(heroes.data, heroes.getmaximum());
+	heroes.count = heroi::select(heroes.data, heroes.getmaximum());
 	zshuffle(heroes.data, heroes.count);
 	unsigned province_index = 0;
 	for(int i = 0; i < 4; i++) {
@@ -382,20 +382,20 @@ void player_info::random_events() {
 		if(!player)
 			continue;
 		auto hero = getmatched(heroes, player);
-		event_info::random(province, hero);
+		eventi::random(province, hero);
 		if(hero)
 			heroes.remove(heroes.indexof(hero));
 	}
 }
 
-void player_info::desert_units() {
+void playeri::desert_units() {
 	if(!game.desert_base)
 		return;
 	for(auto p : players) {
 		if(p->cost.gold > -game.desert_base)
 			continue;
-		troop_info* source[32];
-		auto count = troop_info::select(source, lenghtof(source), p);
+		troopi* source[32];
+		auto count = troopi::select(source, lenghtof(source), p);
 		if(!count)
 			continue;
 		zshuffle(source, count);
@@ -420,10 +420,10 @@ void player_info::desert_units() {
 	}
 }
 
-void player_info::playgame() {
+void playeri::playgame() {
 	create_province_order();
 	while(isallowgame()) {
-		hero_info::clear_actions();
+		heroi::clear_actions();
 		for(auto& e : player_data) {
 			if(!e)
 				continue;
@@ -436,7 +436,7 @@ void player_info::playgame() {
 		}
 		game.turn++;
 		neutrals_move();
-		hero_info::refresh_heroes();
+		heroi::refresh_heroes();
 		create_order();
 		resolve_actions();
 		random_events();
@@ -445,6 +445,6 @@ void player_info::playgame() {
 		check_heroes();
 		hire_heroes();
 		suggest_heroes();
-		province_info::change_support();
+		provincei::change_support();
 	}
 }

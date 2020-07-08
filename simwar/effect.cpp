@@ -1,19 +1,19 @@
 #include "main.h"
 
 bsreq effect_type[] = {
-	BSREQ(effect_info, test, ability_type),
-	BSREQ(effect_info, text, text_type),
-	BSREQ(effect_info, ability, number_type),
-	BSREQ(effect_info, units, unit_type),
+	BSREQ(effecti, test, ability_type),
+	BSREQ(effecti, text, text_type),
+	BSREQ(effecti, ability, number_type),
+	BSREQ(effecti, units, unit_type),
 {}};
 
-bool effect_info::isvalid(const hero_info& e) const {
+bool effecti::isvalid(const heroi& e) const {
 	if(e.get(test) < 1)
 		return false;
 	return true;
 }
 
-void effect_info::operator+=(const effect_info& e) {
+void effecti::operator+=(const effecti& e) {
 	for(auto i = Good; i <= LastAbility; i = (ability_s)(i + 1))
 		set(i, e.get(i));
 	for(auto v : e.units) {
@@ -26,7 +26,7 @@ void effect_info::operator+=(const effect_info& e) {
 	}
 }
 
-void effect_info::apply(string& sb, player_info* player, province_info* province, hero_info* hero) const {
+void effecti::apply(string& sb, playeri* player, provincei* province, heroi* hero) const {
 	if(player) {
 		player->cost.gold += get(Gold);
 		player->cost.fame += get(Fame);
@@ -35,7 +35,7 @@ void effect_info::apply(string& sb, player_info* player, province_info* province
 		province->addeconomy(get(Gold));
 		province->addsupport(province->getplayer(), get(Support));
 		if(get(Attack)) {
-			province->addinvader((unit_info**)units, sizeof(units) / sizeof(units[0]), 0);
+			province->addinvader((uniti**)units, sizeof(units) / sizeof(units[0]), 0);
 			province->battle(sb, 0, player, 0, false);
 		}
 		if(get(Recruit)) {

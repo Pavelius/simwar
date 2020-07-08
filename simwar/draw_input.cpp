@@ -36,7 +36,7 @@ static sprite*			sprite_shields;
 static rect				hilite_rect;
 const int				map_normal = 1000;
 static int				map_scale = map_normal;
-static const province_info*	current_province;
+static const provincei*	current_province;
 static control*			current_hilite;
 static control*			current_focus_control;
 static control*			current_execute_control;
@@ -45,24 +45,24 @@ int						distance(point p1, point p2);
 static amap<const char*, surface> bitmap_previews;
 
 static bsreq gui_type[] = {
-	BSREQ(gui_info, opacity, number_type),
-	BSREQ(gui_info, opacity_disabled, number_type),
-	BSREQ(gui_info, opacity_hilighted, number_type),
-	BSREQ(gui_info, opacity_hilighted_province, number_type),
-	BSREQ(gui_info, border, number_type),
-	BSREQ(gui_info, control_border, number_type),
-	BSREQ(gui_info, button_width, number_type),
-	BSREQ(gui_info, button_border, number_type),
-	BSREQ(gui_info, window_width, number_type),
-	BSREQ(gui_info, hero_window_width, number_type),
-	BSREQ(gui_info, tips_width, number_type),
-	BSREQ(gui_info, hero_width, number_type),
-	BSREQ(gui_info, padding, number_type),
+	BSREQ(guii, opacity, number_type),
+	BSREQ(guii, opacity_disabled, number_type),
+	BSREQ(guii, opacity_hilighted, number_type),
+	BSREQ(guii, opacity_hilighted_province, number_type),
+	BSREQ(guii, border, number_type),
+	BSREQ(guii, control_border, number_type),
+	BSREQ(guii, button_width, number_type),
+	BSREQ(guii, button_border, number_type),
+	BSREQ(guii, window_width, number_type),
+	BSREQ(guii, hero_window_width, number_type),
+	BSREQ(guii, tips_width, number_type),
+	BSREQ(guii, hero_width, number_type),
+	BSREQ(guii, padding, number_type),
 {}};
-gui_info gui;
+guii gui;
 bsdata gui_manger("gui", gui, gui_type);
 
-void gui_info::initialize() {
+void guii::initialize() {
 	memset(this, 0, sizeof(*this));
 	opacity = 220;
 	opacity_disabled = 50;
@@ -391,7 +391,7 @@ static void avatar(int x, int y, const char* id) {
 	rectb({x, y, x + gui.hero_width, y + gui.hero_width}, colors::border);
 }
 
-static int windowh(const hero_info* hero, const char* format, const char* format_param) {
+static int windowh(const heroi* hero, const char* format, const char* format_param) {
 	string sb;
 	draw::state push;
 	draw::font = metrics::font;
@@ -431,7 +431,7 @@ static int windowh(const hero_info* hero, const char* format, const char* format
 	return y + h + gui.border * 2;
 }
 
-static int render_player(int x, int y, const player_info* player) {
+static int render_player(int x, int y, const playeri* player) {
 	if(!player)
 		return 0;
 	string sb;
@@ -441,7 +441,7 @@ static int render_player(int x, int y, const player_info* player) {
 }
 
 static void choose_current_province() {
-	current_province = (province_info*)hot.param;
+	current_province = (provincei*)hot.param;
 }
 
 static point getscreen(const rect& rc, point pt) {
@@ -456,7 +456,7 @@ static point getmappos(const rect& rc, point pt) {
 	return {(short)x, (short)y};
 }
 
-void province_info::render_neighbors(const rect& rc) const {
+void provincei::render_neighbors(const rect& rc) const {
 	draw::state push;
 	draw::fore = colors::red;
 	point center = getscreen(rc, getposition());
@@ -468,7 +468,7 @@ void province_info::render_neighbors(const rect& rc) const {
 	}
 }
 
-static void render_shield(int x, int y, const province_info* province, const player_info* player) {
+static void render_shield(int x, int y, const provincei* province, const playeri* player) {
 	auto province_player = province->getplayer();
 	if(!province_player)
 		return;
@@ -485,7 +485,7 @@ static void render_shield(int x, int y, const province_info* province, const pla
 	fore = old_stroke;
 }
 
-static void render_province(rect rc, point mouse, const player_info* player, callback_proc proc, aref<province_info*> visible, aref<province_info*> selection, color selection_color, bool set_current_province) {
+static void render_province(rect rc, point mouse, const playeri* player, callback_proc proc, aref<provincei*> visible, aref<provincei*> selection, color selection_color, bool set_current_province) {
 	if(!draw::font)
 		return;
 	draw::state push;
@@ -503,7 +503,7 @@ static void render_province(rect rc, point mouse, const player_info* player, cal
 		auto text_width = draw::textw(province->getname());
 		army defenders;
 		defenders.province = province;
-		defenders.count = troop_info::select(defenders.data, defenders.getmaximum(), province);
+		defenders.count = troopi::select(defenders.data, defenders.getmaximum(), province);
 		rect rc = {pt.x - text_width / 2, pt.y - draw::texth() / 2, pt.x + text_width / 2, pt.y + draw::texth() / 2};
 		auto status = province->getstatus(player);
 		auto inlist = selection.is(province);
@@ -542,8 +542,8 @@ static void render_province(rect rc, point mouse, const player_info* player, cal
 		pt.y += texth();
 		if(defenders) {
 			sb.clear();
-			troop_info::sort(defenders.data, defenders.getcount());
-			troop_info::getpresent(sb, defenders.data, defenders.getcount(), 0);
+			troopi::sort(defenders.data, defenders.getcount());
+			troopi::getpresent(sb, defenders.data, defenders.getcount(), 0);
 			rect rc = {0, 0, 200, 0}; draw::textw(rc, sb);
 			pt.y += draw::text({pt.x - rc.width() / 2, pt.y, pt.x + rc.width() / 2 + 1, pt.y + rc.height()}, sb, AlignCenter);
 		}
@@ -557,22 +557,22 @@ static void render_province(rect rc, point mouse, const player_info* player, cal
 			text(pt.x - textw(sb) / 2, pt.y, sb);
 			pt.y += texth();
 		}
-		defenders.count = troop_info::select_move(defenders.data, defenders.getmaximum(), province, player);
+		defenders.count = troopi::select_move(defenders.data, defenders.getmaximum(), province, player);
 		if(defenders) {
 			sb.clear();
-			troop_info::sort(defenders.data, defenders.getcount());
-			troop_info::getpresent(sb, defenders.data, defenders.count, msg.moved);
+			troopi::sort(defenders.data, defenders.getcount());
+			troopi::getpresent(sb, defenders.data, defenders.count, msg.moved);
 			rect rc = {0, 0, 200, 0}; draw::textw(rc, sb);
 			pt.y += draw::text({pt.x - rc.width() / 2, pt.y, pt.x + rc.width() / 2 + 1, pt.y + rc.height()}, sb, AlignCenter);
 		}
 		if(status == FriendlyProvince) {
 			sb.clear();
 			fore = fore.mix(colors::blue);
-			build_info* build_array[16];
-			auto count = build_info::select(build_array, lenghtof(build_array), province);
+			buildi* build_array[16];
+			auto count = buildi::select(build_array, lenghtof(build_array), province);
 			if(count) {
-				build_info::sort(build_array, count);
-				build_info::getpresent(sb, build_array, count);
+				buildi::sort(build_array, count);
+				buildi::getpresent(sb, build_array, count);
 				rect rc = {0, 0, 200, 0}; draw::textw(rc, sb);
 				pt.y += draw::text({pt.x - rc.width() / 2, pt.y, pt.x + rc.width() / 2 + 1, pt.y + rc.height()}, sb, AlignCenter);
 			}
@@ -580,7 +580,7 @@ static void render_province(rect rc, point mouse, const player_info* player, cal
 	}
 }
 
-static void render_board(const rect& rco, const player_info* player, callback_proc proc, aref<province_info*> visible, aref<province_info*> selection, color selection_color, bool set_current_province, bool show_lines) {
+static void render_board(const rect& rco, const playeri* player, callback_proc proc, aref<provincei*> visible, aref<provincei*> selection, color selection_color, bool set_current_province, bool show_lines) {
 	auto rc = rco;
 	draw::state push;
 	draw::area(rc); // Drag and drop analize this result
@@ -620,7 +620,7 @@ static void render_board(const rect& rco, const player_info* player, callback_pr
 		render_province(last_board, last_mouse, player, proc, visible, selection, selection_color, set_current_province);
 }
 
-static int render_hero(int x, int y, int width, const hero_info* hero, callback_proc proc = 0, bool show_state = true) {
+static int render_hero(int x, int y, int width, const heroi* hero, callback_proc proc = 0, bool show_state = true) {
 	if(!hero)
 		return 0;
 	draw::state push;
@@ -651,11 +651,11 @@ static int render_hero(int x, int y, int width, const hero_info* hero, callback_
 	return height + gui.border * 2;
 }
 
-static int render_hero(int x, int y, const hero_info* e) {
+static int render_hero(int x, int y, const heroi* e) {
 	return render_hero(x, y, gui.hero_window_width, e, 0, 0);
 }
 
-static int render_province(int x, int y, const province_info* province) {
+static int render_province(int x, int y, const provincei* province) {
 	if(!province)
 		return 0;
 	string sb;
@@ -669,14 +669,14 @@ static int render_province(int x, int y, const province_info* province) {
 	return window(x, y, gui.window_width, sb) + gui.border * 2 + gui.padding;
 }
 
-static void render_board(const player_info* player, callback_proc proc, aref<province_info*> selection, color selection_color, bool set_current_province, bool show_lines) {
+static void render_board(const playeri* player, callback_proc proc, aref<provincei*> selection, color selection_color, bool set_current_province, bool show_lines) {
 	rect rc = {0, 0, draw::getwidth(), draw::getheight()};
-	province_info* source[province_max];
-	auto count = province_info::select(source, lenghtof(source), player);
+	provincei* source[province_max];
+	auto count = provincei::select(source, lenghtof(source), player);
 	render_board(rc, player, proc, {source, count}, selection, selection_color, set_current_province, show_lines);
 }
 
-static void render_left_side(const player_info* player, const province_info* province, bool set_current_province = false) {
+static void render_left_side(const playeri* player, const provincei* province, bool set_current_province = false) {
 	render_board(player, 0, {}, colors::blue, set_current_province, province != 0);
 	auto x = gui.border + gui.border;
 	auto y = gui.padding + gui.border;
@@ -695,7 +695,7 @@ static void keyparam() {
 	hot.param = 0;
 }
 
-static void mouse_map_info();
+static void mouse_mapi();
 
 static bool control_board() {
 	const int step = 32;
@@ -713,7 +713,7 @@ static bool control_board() {
 		} else
 			return false;
 		break;
-	case Ctrl + Alpha + 'M': mouse_map_info(); break;
+	case Ctrl + Alpha + 'M': mouse_mapi(); break;
 	default:
 		if(draw::drag::active(last_board)) {
 			hot.cursor = CursorAll;
@@ -733,14 +733,14 @@ void control_standart() {
 		return;
 }
 
-static void setcamera(const province_info* province) {
+static void setcamera(const provincei* province) {
 	if(!province)
 		return;
 	current_province = province;
 	camera = province->getposition();
 }
 
-static int choose_answer(const player_info* player, const province_info* province, const hero_info* hero, choiseset& source, const char* format, const char* format_param) {
+static int choose_answer(const playeri* player, const provincei* province, const heroi* hero, choiseset& source, const char* format, const char* format_param) {
 	if(province)
 		setcamera(province);
 	while(ismodal()) {
@@ -757,12 +757,12 @@ static int choose_answer(const player_info* player, const province_info* provinc
 	return draw::getresult();
 }
 
-static void show_report(const player_info* player, const province_info* province, const hero_info* hero, const char* format, ...) {
+static void show_report(const playeri* player, const provincei* province, const heroi* hero, const char* format, ...) {
 	choiseset source; source.add(0, msg.accept);
 	choose_answer(player, province, hero, source, format, xva_start(format));
 }
 
-static void mouse_map_info() {
+static void mouse_mapi() {
 	auto pt = getmappos(last_board, hot.mouse);
 	char temp[512]; zprint(temp, "Координаты карты: %1i, %2i.", pt.x, pt.y);
 	show_report(0, 0, 0, temp);
@@ -860,7 +860,7 @@ static bool read_sprite(sprite** result, const char* name) {
 	return (*result) != 0;
 }
 
-bool game_info::initializemap() {
+bool gamei::initializemap() {
 	if(!map || !map[0])
 		return false;
 	char temp[260];
@@ -900,7 +900,7 @@ struct unit_list : list {
 		return source.getcount();
 	}
 
-	unit_info* getcurrent() {
+	uniti* getcurrent() {
 		if(current < source.getcount())
 			return source.data[current];
 		return 0;
@@ -942,7 +942,7 @@ struct army_list : list {
 		return source.getcount();
 	}
 
-	troop_info* getcurrent() {
+	troopi* getcurrent() {
 		if(current < source.getcount())
 			return source.data[current];
 		return 0;
@@ -969,7 +969,7 @@ static color get_mode_color(province_flag_s id) {
 	}
 }
 
-const province_info* hero_info::choose_province(const action_info* action, aref<province_info*> source, province_flag_s mode) const {
+const provincei* heroi::choose_province(const actioni* action, aref<provincei*> source, province_flag_s mode) const {
 	while(ismodal()) {
 		render_board(player, breakparam, source, get_mode_color(mode), false, false);
 		auto x = gui.border + gui.border;
@@ -984,7 +984,7 @@ const province_info* hero_info::choose_province(const action_info* action, aref<
 		domodal();
 		control_standart();
 	}
-	auto p = (province_info*)getresult();
+	auto p = (provincei*)getresult();
 	if(p)
 		current_province = p;
 	return p;
@@ -1087,7 +1087,7 @@ game_header* game_header::choose(game_header* source, unsigned count) {
 	return (game_header*)getresult();
 }
 
-static void render_two_window(const player_info* player, const hero_info* hero, const action_info* action, list& u1, list& u2, const char* error_text, string& sb, const cost_info& cost) {
+static void render_two_window(const playeri* player, const heroi* hero, const actioni* action, list& u1, list& u2, const char* error_text, string& sb, const costi& cost) {
 	if(cost) {
 		sb.set(cost);
 		sb.adds("%1: %cost", msg.total);
@@ -1121,7 +1121,7 @@ static void render_two_window(const player_info* player, const hero_info* hero, 
 	control_standart();
 }
 
-bool hero_info::choose_units_human(const action_info* action, const province_info* province, unit_set& s1, unit_set& s2, cost_info& cost) const {
+bool heroi::choose_units_human(const actioni* action, const provincei* province, unit_set& s1, unit_set& s2, costi& cost) const {
 	unit_list u1(s1); u1.id = 10;
 	unit_list u2(s2); u2.id = 11;
 	auto player_cost = player->cost;
@@ -1129,13 +1129,13 @@ bool hero_info::choose_units_human(const action_info* action, const province_inf
 	while(ismodal()) {
 		cost = s2.getcost();
 		cost += start_cost;
-		const char* error_info = 0;
+		const char* errori = 0;
 		if(s2.getcount() == 0)
-			error_info = msg.not_choose_units;
+			errori = msg.not_choose_units;
 		else if(cost > player_cost)
-			error_info = msg.not_enought_gold;
+			errori = msg.not_enought_gold;
 		string sb;
-		render_two_window(player, this, action, u1, u2, error_info, sb, cost);
+		render_two_window(player, this, action, u1, u2, errori, sb, cost);
 		if(hot.key == u1.id) {
 			auto p1 = u1.getcurrent();
 			if(p1) {
@@ -1153,7 +1153,7 @@ bool hero_info::choose_units_human(const action_info* action, const province_inf
 	return getresult() != 0;
 }
 
-bool hero_info::choose_troops_human(const action_info* action, const province_info* province, army& s1, army& s2, army& a3, int minimal_count, cost_info& cost) const {
+bool heroi::choose_troops_human(const actioni* action, const provincei* province, army& s1, army& s2, army& a3, int minimal_count, costi& cost) const {
 	if(!s1.getcount() && minimal_count == 0)
 		return true;
 	army_list u1(s1); u1.id = 10;
@@ -1164,7 +1164,7 @@ bool hero_info::choose_troops_human(const action_info* action, const province_in
 	auto player_cost = player->cost;
 	auto start_cost = cost;
 	while(ismodal()) {
-		const char* error_info = 0;
+		const char* errori = 0;
 		string sb;
 		if(s1.attack) {
 			string tia;
@@ -1180,10 +1180,10 @@ bool hero_info::choose_troops_human(const action_info* action, const province_in
 		cost = start_cost;
 		cost.gold += action->cost_per_unit * s2.getcount();
 		if(minimal_count && s2.getcount() < minimal_count)
-			error_info = msg.not_choose_units;
+			errori = msg.not_choose_units;
 		else if(cost > player_cost)
-			error_info = msg.not_enought_gold;
-		render_two_window(player, this, action, u1, u2, error_info, sb, cost);
+			errori = msg.not_enought_gold;
+		render_two_window(player, this, action, u1, u2, errori, sb, cost);
 		if(hot.key == u1.id) {
 			auto p1 = u1.getcurrent();
 			if(p1) {
@@ -1207,7 +1207,7 @@ static void end_turn() {
 	breakmodal(0);
 }
 
-int choiseset::choose(bool interactive, const hero_info* hero, bool cancel_button, choiseset::tips_type getinfo) const {
+int choiseset::choose(bool interactive, const heroi* hero, bool cancel_button, choiseset::tips_type getinfo) const {
 	if(!interactive)
 		return getrandomparam();
 	while(ismodal()) {
@@ -1249,7 +1249,7 @@ int choiseset::choose(bool interactive, bool cancel_button) const {
 	return getresult();
 }
 
-const tactic_info* hero_info::choose_tactic() const {
+const tactici* heroi::choose_tactic() const {
 	choiseset ai;
 	for(auto& e : tactic_data) {
 		if(!e)
@@ -1257,16 +1257,16 @@ const tactic_info* hero_info::choose_tactic() const {
 		ai.add((int)&e, e.getname());
 	}
 	ai.sort();
-	return (tactic_info*)ai.choose(!player->iscomputer(), this, true, 0);
+	return (tactici*)ai.choose(!player->iscomputer(), this, true, 0);
 }
 
-int	player_info::choose(const hero_info* hero, choiseset& source, const char* format, ...) const {
+int	playeri::choose(const heroi* hero, choiseset& source, const char* format, ...) const {
 	if(type == PlayerComputer)
 		return source.elements.data[rand() % source.elements.count].param;
 	return choose_answer(this, 0, hero, source, format, xva_start(format));
 }
 
-void player_info::show_reports() const {
+void playeri::show_reports() const {
 	if(type == PlayerComputer)
 		return;
 	for(auto& e : report_data) {
@@ -1281,12 +1281,12 @@ void player_info::show_reports() const {
 }
 
 static void choose_move() {
-	auto hero = (hero_info*)hot.param;
+	auto hero = (heroi*)hot.param;
 	if(hero)
 		hero->make_move();
 }
 
-void player_info::make_move() {
+void playeri::make_move() {
 	setcamera(getbestprovince());
 	while(ismodal()) {
 		render_left_side(this, current_province, true);

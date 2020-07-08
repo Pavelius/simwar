@@ -4,26 +4,26 @@ bsreq point_type[] = {
 	BSREQ(point, x, number_type),
 	BSREQ(point, y, number_type),
 {}};
-bsreq province_info::metadata[] = {
-	BSREQ(province_info, id, text_type),
-	BSREQ(province_info, name, text_type),
-	BSREQ(province_info, text, text_type),
-	BSREQ(province_info, player, player_info::metadata),
-	BSREQ(province_info, landscape, landscape_type),
-	BSREQ(province_info, ability, number_type),
-	BSREQ(province_info, position, point_type),
-	BSREQ(province_info, neighbors, metadata),
-	BSREQ(province_info, nation, nation_type),
+bsreq provincei::metadata[] = {
+	BSREQ(provincei, id, text_type),
+	BSREQ(provincei, name, text_type),
+	BSREQ(provincei, text, text_type),
+	BSREQ(provincei, player, playeri::metadata),
+	BSREQ(provincei, landscape, landscape_type),
+	BSREQ(provincei, ability, number_type),
+	BSREQ(provincei, position, point_type),
+	BSREQ(provincei, neighbors, metadata),
+	BSREQ(provincei, nation, nation_type),
 {}};
-adat<province_info, province_max> province_data;
+adat<provincei, province_max> province_data;
 unsigned char			province_order[province_max];
-bsdata					province_manager("province", province_data, province_info::metadata);
+bsdata					province_manager("province", province_data, provincei::metadata);
 static unsigned short	path_cost[province_max];
 static unsigned char	path_stack[province_max * 4];
 static unsigned short	path_push;
 static unsigned short	path_pop;
 
-province_flag_s province_info::getstatus(const player_info* player) const {
+province_flag_s provincei::getstatus(const playeri* player) const {
 	if(this->player == player)
 		return FriendlyProvince;
 	if(!this->player)
@@ -31,17 +31,17 @@ province_flag_s province_info::getstatus(const player_info* player) const {
 	return NoFriendlyProvince;
 }
 
-int province_info::getdefend() const {
+int provincei::getdefend() const {
 	return landscape->get(Defend) + get(Level);
 }
 
-int province_info::getstrenght() const {
-	army defenders(0, const_cast<province_info*>(this), 0, false, false);
-	defenders.count = troop_info::select(defenders.data, defenders.getmaximum(), this);
+int provincei::getstrenght() const {
+	army defenders(0, const_cast<provincei*>(this), 0, false, false);
+	defenders.count = troopi::select(defenders.data, defenders.getmaximum(), this);
 	return defenders.get(Defend, 0);
 }
 
-int province_info::getincome(stringcreator* ti) const {
+int provincei::getincome(stringcreator* ti) const {
 	auto result = 0;
 	if(landscape)
 		result += landscape->getincome(ti);
@@ -54,18 +54,18 @@ static void clear_movement() {
 	memset(path_cost, 0, sizeof(path_cost));
 }
 
-int	province_info::getindex() const {
+int	provincei::getindex() const {
 	return province_data.data - this;
 }
 
-int	province_info::getmovecost() const {
+int	provincei::getmovecost() const {
 	auto result = getindex();
 	if(result == -1)
 		return -1;
 	return path_cost[result];
 }
 
-static bool has(province_info** source, province_info** source_end, const province_info* province) {
+static bool has(provincei** source, provincei** source_end, const provincei* province) {
 	for(auto p = source; p < source_end; p++) {
 		if(*p == province)
 			return true;
@@ -73,7 +73,7 @@ static bool has(province_info** source, province_info** source_end, const provin
 	return false;
 }
 
-unsigned province_info::select_friendly(province_info** source, unsigned maximum, const player_info* player) {
+unsigned provincei::select_friendly(provincei** source, unsigned maximum, const playeri* player) {
 	auto ps = source;
 	auto pe = ps + maximum;
 	for(auto& e : province_data) {
@@ -87,7 +87,7 @@ unsigned province_info::select_friendly(province_info** source, unsigned maximum
 	return ps - source;
 }
 
-unsigned province_info::select(province_info** source, unsigned maximum) {
+unsigned provincei::select(provincei** source, unsigned maximum) {
 	auto ps = source;
 	auto pe = ps + maximum;
 	for(auto& e : province_data) {
@@ -99,7 +99,7 @@ unsigned province_info::select(province_info** source, unsigned maximum) {
 	return ps - source;
 }
 
-unsigned province_info::select(province_info** source, unsigned maximum, const player_info* player) {
+unsigned provincei::select(provincei** source, unsigned maximum, const playeri* player) {
 	auto count = select_friendly(source, maximum, player);
 	if(!count)
 		return 0;
@@ -118,7 +118,7 @@ unsigned province_info::select(province_info** source, unsigned maximum, const p
 	return ps - source;
 }
 
-void province_info::createwave() {
+void provincei::createwave() {
 	clear_movement();
 	path_stack[path_push++] = getindex();
 	path_cost[getindex()] = 1;
@@ -140,7 +140,7 @@ void province_info::createwave() {
 	}
 }
 
-hero_info* province_info::gethero(const player_info* player) const {
+heroi* provincei::gethero(const playeri* player) const {
 	for(auto& e : hero_data) {
 		if(!e)
 			continue;
@@ -153,7 +153,7 @@ hero_info* province_info::gethero(const player_info* player) const {
 	return 0;
 }
 
-unsigned province_info::remove_mode(aref<province_info*> source, const player_info* player, province_flag_s state) {
+unsigned provincei::remove_mode(aref<provincei*> source, const playeri* player, province_flag_s state) {
 	auto ps = source.data;
 	for(auto p : source) {
 		switch(state) {
@@ -177,7 +177,7 @@ unsigned province_info::remove_mode(aref<province_info*> source, const player_in
 	return ps - source.data;
 }
 
-unsigned province_info::remove_hero_present(aref<province_info*> source, const player_info* player) {
+unsigned provincei::remove_hero_present(aref<provincei*> source, const playeri* player) {
 	auto ps = source.data;
 	for(auto p : source) {
 		if(p->gethero(player))
@@ -187,7 +187,7 @@ unsigned province_info::remove_hero_present(aref<province_info*> source, const p
 	return ps - source.data;
 }
 
-void province_info::getinfo(stringcreator& sb, bool show_landscape, const army* defenders) const {
+void provincei::getinfo(stringcreator& sb, bool show_landscape, const army* defenders) const {
 	if(show_landscape)
 		sb.adds(landscape->name);
 	sb.adds(":gold:%1i", getincome());
@@ -198,7 +198,7 @@ void province_info::getinfo(stringcreator& sb, bool show_landscape, const army* 
 	sb.adds(":shield_grey:%1i", value);
 }
 
-void province_info::getsupport(stringcreator& sb) const {
+void provincei::getsupport(stringcreator& sb) const {
 	for(auto& e : player_data) {
 		if(!e)
 			continue;
@@ -209,7 +209,7 @@ void province_info::getsupport(stringcreator& sb) const {
 	}
 }
 
-void province_info::build(unit_info* unit, int turns) {
+void provincei::build(uniti* unit, int turns) {
 	if(turns < 1)
 		turns = 1;
 	auto p = build_data.add();
@@ -218,17 +218,17 @@ void province_info::build(unit_info* unit, int turns) {
 	p->wait = turns;
 }
 
-void province_info::add(const unit_info* unit) {
-	troop_info::add(this, unit);
+void provincei::add(const uniti* unit) {
+	troopi::add(this, unit);
 }
 
-troop_info* province_info::addinvader(unit_info* type, player_info* player) {
-	auto p = troop_info::add(0, type);
+troopi* provincei::addinvader(uniti* type, playeri* player) {
+	auto p = troopi::add(0, type);
 	p->setmove(this);
 	return p;
 }
 
-void province_info::addinvader(unit_info** units, unsigned count, player_info* player) {
+void provincei::addinvader(uniti** units, unsigned count, playeri* player) {
 	for(unsigned i = 0; i < count; i++) {
 		if(!units[i])
 			continue;
@@ -236,7 +236,7 @@ void province_info::addinvader(unit_info** units, unsigned count, player_info* p
 	}
 }
 
-void province_info::change_support() {
+void provincei::change_support() {
 	auto support_maximum = game.support_maximum;
 	auto support_minimum = game.support_minimum;
 	for(auto& e : province_data) {
@@ -260,14 +260,14 @@ void province_info::change_support() {
 	}
 }
 
-int	province_info::getsupport(const player_info* player) const {
+int	provincei::getsupport(const playeri* player) const {
 	auto player_index = player->getindex();
 	if(player_index == -1)
 		return 0;
 	return support[player_index];
 }
 
-void province_info::setsupport(const player_info* player, int value) {
+void provincei::setsupport(const playeri* player, int value) {
 	auto player_index = player->getindex();
 	if(player_index == -1)
 		return;
@@ -278,7 +278,7 @@ void province_info::setsupport(const player_info* player, int value) {
 	support[player_index] = value;
 }
 
-void province_info::addsupportex(const player_info* player, int value, int minimal_value, int maximal_value) {
+void provincei::addsupportex(const playeri* player, int value, int minimal_value, int maximal_value) {
 	auto player_index = player->getindex();
 	for(unsigned i = 0; i < sizeof(support) / sizeof(support[0]); i++) {
 		if(i == player_index)
@@ -295,7 +295,7 @@ void province_info::addsupportex(const player_info* player, int value, int minim
 	}
 }
 
-void province_info::seteconomy(int value) {
+void provincei::seteconomy(int value) {
 	ability[Economy] += value;
 	if(ability[Economy] > game.economy_maximum)
 		ability[Economy] = game.economy_maximum;
@@ -303,8 +303,8 @@ void province_info::seteconomy(int value) {
 		ability[Economy] = game.economy_minimum;
 }
 
-province_info* province_info::getneighbors(const player_info* player) const {
-	province_info* province_array[sizeof(neighbors) / sizeof(neighbors[0])];
+provincei* provincei::getneighbors(const playeri* player) const {
+	provincei* province_array[sizeof(neighbors) / sizeof(neighbors[0])];
 	auto ps = province_array;
 	for(auto p : neighbors) {
 		if(!p)
@@ -320,19 +320,19 @@ province_info* province_info::getneighbors(const player_info* player) const {
 	return province_array[rand() % count];
 }
 
-void province_info::arrival(const player_info* player) {
-	troop_info::arrival(this, player);
+void provincei::arrival(const playeri* player) {
+	troopi::arrival(this, player);
 }
 
-void province_info::retreat(const player_info* player) {
-	troop_info* source[64];
+void provincei::retreat(const playeri* player) {
+	troopi* source[64];
 	if(getplayer() != player) {
 		// ≈сли игрок атаковал, оступают все нападающие.
 		// ≈ли в этот момент захватили их провинцию, они сдаютс€ победителю.
-		troop_info::retreat(this, player);
+		troopi::retreat(this, player);
 		return;
 	}
-	auto count = troop_info::select(source, sizeof(source) / sizeof(source[0]), this);
+	auto count = troopi::select(source, sizeof(source) / sizeof(source[0]), this);
 	if(!count)
 		return;
 	// ѕотом, остатки отступают на соседнюю свою
@@ -350,7 +350,7 @@ void province_info::retreat(const player_info* player) {
 	}
 }
 
-void province_info::initialize() {
+void provincei::initialize() {
 	for(auto& e : province_data) {
 		if(!e)
 			continue;
@@ -362,7 +362,7 @@ void province_info::initialize() {
 			if(a1.getcount())
 				continue;
 			for(auto i = 0; i <= e.getlevel(); i++) {
-				auto pu = unit_info::getfirst(e.nation, e.landscape, 0);
+				auto pu = uniti::getfirst(e.nation, e.landscape, 0);
 				if(!pu)
 					continue;
 				e.add(pu);

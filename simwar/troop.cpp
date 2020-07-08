@@ -1,23 +1,23 @@
 #include "main.h"
 
-bsreq troop_info::metadata[] = {
-	BSREQ(troop_info, type, unit_type),
-	BSREQ(troop_info, province, province_info::metadata),
-	BSREQ(troop_info, move, province_info::metadata),
-	BSREQ(troop_info, home, province_info::metadata),
+bsreq troopi::metadata[] = {
+	BSREQ(troopi, type, unit_type),
+	BSREQ(troopi, province, provincei::metadata),
+	BSREQ(troopi, move, provincei::metadata),
+	BSREQ(troopi, home, provincei::metadata),
 {}};
-adat<troop_info, 256> troop_data;
-bsdata troop_manager("troop", troop_data, troop_info::metadata);
+adat<troopi, 256> troop_data;
+bsdata troop_manager("troop", troop_data, troopi::metadata);
 
-player_info* troop_info::getplayer() const {
+playeri* troopi::getplayer() const {
 	if(!province)
 		return 0;
 	return province->getplayer();
 }
 
-int troop_info::compare(const void* p1, const void* p2) {
-	auto e1 = *((troop_info**)p1);
-	auto e2 = *((troop_info**)p2);
+int troopi::compare(const void* p1, const void* p2) {
+	auto e1 = *((troopi**)p1);
+	auto e2 = *((troopi**)p2);
 	auto s1 = e1->getsort();
 	auto s2 = e2->getsort();
 	if(s1 < s2)
@@ -27,11 +27,11 @@ int troop_info::compare(const void* p1, const void* p2) {
 	return strcmp(e1->type->name, e2->type->name);
 }
 
-void troop_info::sort(troop_info** source, unsigned count) {
+void troopi::sort(troopi** source, unsigned count) {
 	qsort(source, count, sizeof(source[0]), compare);
 }
 
-void troop_info::getpresent(stringcreator& sb, troop_info** objects, unsigned count, const char* addition_text) {
+void troopi::getpresent(stringcreator& sb, troopi** objects, unsigned count, const char* addition_text) {
 	int count_in_row = 1;
 	for(unsigned i = 0; i < count; i++) {
 		if(i < count - 1 && compare(objects + i, objects + i + 1) == 0) {
@@ -48,13 +48,13 @@ void troop_info::getpresent(stringcreator& sb, troop_info** objects, unsigned co
 	}
 }
 
-province_info* troop_info::getprovince(const player_info* player) const {
+provincei* troopi::getprovince(const playeri* player) const {
 	if(move && getplayer() == player)
 		return move;
 	return province;
 }
 
-unsigned troop_info::remove_moved(troop_info** source, unsigned count) {
+unsigned troopi::remove_moved(troopi** source, unsigned count) {
 	auto ps = source;
 	auto pe = source + count;
 	for(auto pb = source; pb < pe; pb++) {
@@ -66,7 +66,7 @@ unsigned troop_info::remove_moved(troop_info** source, unsigned count) {
 	return ps - source;
 }
 
-unsigned troop_info::remove_restricted(troop_info** source, unsigned count, const province_info* province) {
+unsigned troopi::remove_restricted(troopi** source, unsigned count, const provincei* province) {
 	auto ps = source;
 	auto pe = source + count;
 	if(!province)
@@ -81,7 +81,7 @@ unsigned troop_info::remove_restricted(troop_info** source, unsigned count, cons
 	return ps - source;
 }
 
-unsigned troop_info::remove(troop_info** source, unsigned count, const province_info* province) {
+unsigned troopi::remove(troopi** source, unsigned count, const provincei* province) {
 	auto ps = source;
 	auto pe = source + count;
 	for(auto pb = source; pb < pe; pb++) {
@@ -93,7 +93,7 @@ unsigned troop_info::remove(troop_info** source, unsigned count, const province_
 	return ps - source;
 }
 
-troop_info* troop_info::add(province_info* province, const unit_info* type) {
+troopi* troopi::add(provincei* province, const uniti* type) {
 	auto p = troop_data.add();
 	memset(p, 0, sizeof(*p));
 	p->province = province;
@@ -102,11 +102,11 @@ troop_info* troop_info::add(province_info* province, const unit_info* type) {
 	return p;
 }
 
-void troop_info::clear() {
+void troopi::clear() {
 	memset(this, 0, sizeof(*this));
 }
 
-unsigned troop_info::select(troop_info** result, unsigned result_maximum, const player_info* player) {
+unsigned troopi::select(troopi** result, unsigned result_maximum, const playeri* player) {
 	auto ps = result;
 	auto pe = ps + result_maximum;
 	for(auto& e : troop_data) {
@@ -120,7 +120,7 @@ unsigned troop_info::select(troop_info** result, unsigned result_maximum, const 
 	return ps - result;
 }
 
-unsigned troop_info::select(troop_info** result, unsigned result_maximum, const province_info* province) {
+unsigned troopi::select(troopi** result, unsigned result_maximum, const provincei* province) {
 	auto ps = result;
 	auto pe = ps + result_maximum;
 	for(auto& e : troop_data) {
@@ -134,7 +134,7 @@ unsigned troop_info::select(troop_info** result, unsigned result_maximum, const 
 	return ps - result;
 }
 
-unsigned troop_info::select_move(troop_info** result, unsigned result_maximum, const province_info* province, const player_info* player) {
+unsigned troopi::select_move(troopi** result, unsigned result_maximum, const provincei* province, const playeri* player) {
 	auto ps = result;
 	auto pe = ps + result_maximum;
 	for(auto& e : troop_data) {
@@ -150,13 +150,13 @@ unsigned troop_info::select_move(troop_info** result, unsigned result_maximum, c
 	return ps - result;
 }
 
-void troop_info::kill(player_info* player) {
+void troopi::kill(playeri* player) {
 	if(home)
 		home->addsupport(getplayer(), -type->mourning);
 	clear();
 }
 
-void troop_info::retreat(const province_info* province, const player_info* player) {
+void troopi::retreat(const provincei* province, const playeri* player) {
 	for(auto& e : troop_data) {
 		if(!e)
 			continue;
@@ -168,7 +168,7 @@ void troop_info::retreat(const province_info* province, const player_info* playe
 	}
 }
 
-void troop_info::arrival(const province_info* province, const player_info* player) {
+void troopi::arrival(const provincei* province, const playeri* player) {
 	for(auto& e : troop_data) {
 		if(!e)
 			continue;

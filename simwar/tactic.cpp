@@ -1,10 +1,10 @@
 #include "main.h"
 
-adat<tactic_info, 16> tactic_data;
+adat<tactici, 16> tactic_data;
 bsreq tactic_type[] = {
-	BSREQ(tactic_info, id, text_type),
-	BSREQ(tactic_info, name, text_type),
-	BSREQ(tactic_info, text, text_type),
-	BSREQ(tactic_info, ability, number_type),
+	BSREQ(tactici, id, text_type),
+	BSREQ(tactici, name, text_type),
+	BSREQ(tactici, text, text_type),
+	BSREQ(tactici, ability, number_type),
 {}};
 BSMETA(tactic);
